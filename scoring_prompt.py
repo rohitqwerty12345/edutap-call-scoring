@@ -280,7 +280,6 @@ Also decide whether the call converted or not. Mark "Converted" only if the stud
   "guardrails": {
     "result": "PASS or FAIL",
     "reason": "One specific thing that earned this result. If FAIL, quote the exact line that caused it.",
-    "false_information_flagged": "Yes or No",
     "false_information_detail": "Describe exactly what was said and what is wrong, or null if no false information was flagged"
   },
   "opening": {
