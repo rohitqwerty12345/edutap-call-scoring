@@ -345,8 +345,8 @@ Also decide whether the call converted or not. Mark "Converted" only if the stud
     "guardrails_review_flag": "Yes — requires manager review, or No"
   },
   "top_strength": "One specific thing the agent did genuinely well. Must include the exact quote that proves it. Not generic praise.",
-  "biggest_improvement_area": "One specific thing to fix. Must include the exact quote that shows the problem. One concrete sentence on what to do differently next time.",
-  "coaching_note": "Two to three sentences written directly to the agent. Honest but not harsh. Specific and actionable."
+  "biggest_improvement_area": "All things to fix. Must include the exact quote that shows the problem. Concrete sentences on what to do differently next time.",
+  "coaching_note": "Honest. Specific and actionable."
 }
 
 IMPORTANT RULES:
