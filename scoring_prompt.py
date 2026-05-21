@@ -272,8 +272,6 @@ If the call is too short or not analysis-worthy, return only this exact text and
 not_worthy
 
 If the call is analysis-worthy, return only valid JSON in this exact structure.
-Do not include CALL ID, mobile number, student name, agent name, call outcome, or call length estimate.
-Do not skip any key. Do not add keys not listed here.
 Every score must have a supporting quote from the transcript.
 Also decide whether the call converted or not. Mark "Converted" only if the student clearly paid, agreed to pay immediately, or the agent confirmed payment/access. If the student only asked for details, said they will think/check, requested a follow-up, or outcome is unclear, mark "Not converted".
 
