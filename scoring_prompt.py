@@ -6,7 +6,7 @@ You will be given in this prompt:
 1. Scoring parameters and what each one means
 2. Trial course information (the course the student has already enrolled in)
 3. Master course information (the course the agent is trying to sell)
-4. The full call transcript with Speaker A (agent) and Speaker B (student) labeled
+4. The full call transcript with Voice separation of agent and student
 
 CRITICAL RULES:
 - Before scoring, first decide whether the transcript is analysis-worthy. If the call is too short, contains no meaningful course/exam/student discussion, the student immediately refused and ended the call, or there is not enough real conversation to evaluate, return only: not_worthy
