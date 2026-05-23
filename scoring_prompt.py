@@ -204,12 +204,27 @@ Score 10: Every major pain point from Discovery had its own specific evidence. T
 
 One-line definition: Did urgency come from the student's own situation, or was it manufactured by the student partner?
 
-Fake urgency is obvious and students ignore it. Real urgency is already in what the student told you — exam in 4 months, two attempts already gone, family waiting on this, this is my last attempt. You do not need to add drama. Just show them their own gap using their own words.
+Fake urgency is obvious and students ignore it. Real urgency is already in what the student told you. You do not need to add drama. Just show them their own gap using their own words.
+
+CRITICAL DISTINCTION — Surface situation vs Revealed fear:
+This is the most important distinction in Resonance scoring.
+
+Surface situation = facts that apply to most EPFO students: exam timeline, syllabus is wide, need to start soon.
+Example: "aapke paas 5-6 months hain, syllabus easy nahi hai" — this could be said to any EPFO student. It uses the student's timeline but not their specific fear.
+
+Revealed fear = something this specific student said about themselves that most students do not say.
+Example: "aapne khud kaha yeh last attempt hai, aur aap first time bhi attempt kar rahe ho — toh yeh 5-6 months sirf preparation ka time nahi hai, yeh aapka ek hi chance hai sahi direction mein chalne ka." This uses the student's own words and their specific emotional stakes.
+
+A student partner who uses only surface situation facts (timeline, syllabus difficulty) scores 4-6.
+A student partner who reflects the student's specific revealed fear back at them using their own words scores 7-9.
+A student partner who makes the student feel the weight of their own gap — so strongly that the urgency comes from the student themselves — scores 10.
+
+If the student said "this is my last attempt" and the partner only used the timeline ("you have 5-6 months") without ever reflecting back the last-attempt fear — that is surface situation only. Score 4-6.
 
 Score 1–3: No resonance attempted, OR fake urgency used ("offer valid only till tomorrow", "your competition is preparing every single day").
-Score 4–6: Some emotional connection but generic. Could have been said to any student.
-Score 7–9: Used the student's own situation — their exam date, their attempts, their time constraint, their struggle — to create real urgency.
-Score 10: Student's own words were reflected back at them. They felt the weight of their own gap without being pressured. The urgency came from them, not from the student partner.
+Score 4–6: Used surface situation facts (timeline, exam date, syllabus difficulty) — relevant but generic. Could have been said to any EPFO student preparing for the same exam.
+Score 7–9: Reflected the student's specific revealed fear back at them using their own words or closely paraphrased. The urgency came from something unique to this student's situation, not from generic exam facts.
+Score 10: Student's own exact words or fears were reflected back so clearly that the student felt the weight of their own gap without any pressure. The urgency came entirely from them, not from the student partner.
 
 GROUP 3: CONDITIONAL
 Scored only if an objection occurs in this call.
