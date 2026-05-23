@@ -167,22 +167,38 @@ Student pain points fall into three categories. A thorough discovery will touch 
 
 --- EVIDENCE (Scored 1–10) ---
 
-One-line definition: For each pain point the student revealed, did the student partner connect it to a specific course feature or proof — with accuracy?
+One-line definition: For each pain point the student revealed in Discovery, did the student partner connect it to a specific course feature, story, or proof?
+
+CRITICAL DISTINCTION — Pain points vs Product questions:
+A pain point is something the student revealed about themselves — their fear, their gap, their situation.
+Examples: "this is my last attempt", "I teach full time and have only 2 hours a day", "first time attempting, no idea where to start", "accounts bilkul nahi aata", "koi direction nahi hai."
+
+A product question is something the student asked about the course.
+Examples: "is your course comprehensive?", "how many videos do you have?", "what is the price?", "what is included?"
+
+Evidence is scored ONLY on whether the student partner connected the course to the student's PAIN POINTS — not on whether they answered the student's product questions.
+
+Answering a product question is pitch delivery. It is necessary but it is not Evidence.
+If the student asked "is your course comprehensive?" and the agent explained everything that is in the course — that is answering a product question. It does not score as Evidence unless it was directly tied to a specific pain point the student revealed.
+
+If the student revealed "I teach full time and have 2 hours a day" and the agent said "our Quant videos are 15 minutes each, designed specifically for people with limited daily time" — THAT is Evidence. The specific pain was connected to a specific solution.
 
 What counts as Evidence:
-- Connecting a specific student problem to a specific course feature with detail
-- A success story of a student in a similar situation (same background, city, time constraint, first-time attempt)
-- Referencing actual course result data ("66 out of 85 theoretical questions in the 2025 paper could be solved using our course content")
+- Connecting a specific student PAIN POINT (something they revealed about themselves) to a specific course feature with detail
+- A success story of a student in a similar situation — same background, city, time constraint, first-time attempt
+- Referencing actual course result data when tied to a student's fear ("66 out of 85 theoretical questions in the 2025 paper could be solved using our course content" — especially powerful when the student revealed they are worried about whether the course is enough)
 
 What does NOT count as Evidence:
-- Generic feature lists: "we have 22 courses", "we have 700+ hours of content", "lakhs of students have benefited"
-- Course features not connected to anything the student said
-- Factually wrong claims (handled under Guardrails — not penalised again here)
+- Answering the student's product questions with a feature list — even if the answer is accurate and detailed
+- Generic frameworks like "learn evaluate connect" without connecting each element to the student's specific revealed pain
+- Generic claims: "we have 22 courses", "700+ hours of content", "lakhs of students have benefited"
+- Course features not connected to any pain point the student revealed
+- Factually wrong claims — those are handled under Guardrails only, not penalised again here
 
-Score 1–3: Generic feature list. No connection to what the student said.
-Score 4–6: Some attempt to connect but vague or only partially linked to what was discovered.
-Score 7–9: Clear and specific connection between what the student revealed and what the Master Course offers — using real features, success stories, or result data.
-Score 10: Every major pain point from Discovery had its own specific evidence. Pitch felt built for this student alone. Would not have made sense for any other student that day.
+Score 1–3: Answered product questions with a generic feature list. No connection to the student's revealed pain points at all.
+Score 4–6: Partially connected — answered product questions specifically, OR connected to some pain points but missed the most important ones that came out in Discovery.
+Score 7–9: Clear and specific connection between the student's actual revealed pain points and what the Master Course offers — using real features, success stories, or result data tied to those pains.
+Score 10: Every major pain point from Discovery had its own specific evidence. The pitch would not have made sense for any other student that day.
 
 --- RESONANCE (Scored 1–10) ---
 
