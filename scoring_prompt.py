@@ -43,7 +43,7 @@ RULE 6 — EVIDENCE DEPENDS ON DISCOVERY:
 If Discovery score is below 5, Evidence score cannot exceed 6. Note this dependency in your reason if it applies.
 
 RULE 7 — GUARDRAILS AND EVIDENCE ARE SEPARATE:
-If the student partner said something factually wrong, flag it under Guardrails only. Do not penalise the same mistake twice by also lowering the Evidence score for it. In the Evidence section, evaluate only the quality of connection between what the student said and what the course offers.
+If the student partner said something factually wrong, flag it under Guardrails only. Do not penalise the same mistake twice by also lowering the Evidence score for it. In the Evidence section, evaluate only the quality of connection between what the student said and what the course offers. Assume facts are correct for Evidence scoring purposes.
 
 RULE 8 — CONVERTED STATUS:
 Mark "Converted" only if the student clearly paid, agreed to pay immediately, or the student partner confirmed payment and access. If the student said they will think about it, check it out, requested a follow-up, or outcome is unclear — mark "Not converted".
@@ -111,12 +111,13 @@ Score 1–3: Generic opener. Could have been said to anyone. No reference to the
 Score 4–6: Some personalisation but weak or surface-level. ("I saw you enrolled in our trial course.") Student knows the call is about the course, not about them specifically.
 Score 7–9: Specific reference to one thing from their trial — a section name, time spent, a quiz attempted, something that shows the student partner actually looked before calling. Student feels acknowledged.
 Score 10: Opening immediately made the student feel the call was about their journey, not about being pitched. Student partner referenced a specific trial activity AND created a bridge showing the conversation would be about understanding them before talking about the product. At 10, the student does not feel the pitch coming. At 7–9, they know it is coming but feel acknowledged first.
-	
+
 --- DISCOVERY (Scored 1–10) ---
 
 One-line definition: Did the student say their own problem out loud, in their own words, because of how the student partner asked?
 
 SCORING FORMULA: Discovery score = Quality of what was revealed × Credit for who revealed it.
+Neither count alone nor process alone. Both together.
 
 QUALITY — What came out:
 Surface fact = something bahar se dikhne wali — exam date, subject name, attempt number. Any question reveals this.
@@ -124,19 +125,37 @@ Real fear = something andar ki — "yeh mera last attempt hai", "darr lagta hai 
 Quality is HIGH when real fears came out. Quality is LOW when only surface facts came out.
 
 CREDIT — Who pulled it out:
-Full credit: student partner actively asked questions that drew it out.
-Partial credit: student partner received what the student volunteered and followed up meaningfully.
-Low credit: student partner just listened while the student talked — did not ask anything that drew it out.
-Zero credit: student partner received the information and moved straight to pitch without using it.
+Full credit: student partner actively asked questions that drew out the fear or problem.
+Partial credit — HIGH: student partner received what the student volunteered and followed up on the FEAR ITSELF, going deeper into the emotion or stakes underneath.
+Partial credit — LOW: student partner received what the student volunteered and followed up only on the FACTUAL PART, not on the fear or emotion underneath.
+Zero credit: student partner received the information and moved to pitch or answered a question without using it to go deeper.
+
+CRITICAL DISTINCTION — Following up on the fact vs following up on the fear:
+This is the most important distinction in Discovery scoring.
+
+Example: Student says "this is my last attempt."
+This contains both a FACT (age limit situation) and a FEAR (what happens if I miss this).
+
+Following up on the FACT: "aapka kab 30 complete hoga?" — clarifying the age date. This is NOT credit toward discovery. This is exam information handling.
+Following up on the FEAR: "aapne kaha last attempt — kya specifically worry hai? Kya iske baare mein thoda aur batao?" — this IS credit toward discovery.
+
+If the student volunteered a fear and the student partner followed up only on the factual component, NOT on the emotional/fear component — that is LOW partial credit, not HIGH partial credit.
+
+CRITICAL — Answering student questions is NOT discovery:
+If the student asks a question and the student partner answers it, that is information delivery — not discovery. Discovery is only what the student partner actively extracted through their own questions. Time spent answering the student's questions does not count toward discovery, regardless of how much useful information came up during that exchange.
 
 CRITICAL — Active vs Passive:
 Do NOT count information the student volunteered on their own without being asked. A student who volunteers 7 pain points while the student partner asks one vague question gets the student partner a low score — because the student did the work. Measure what the student partner pulled out, not what the student chose to offer.
 
+CRITICAL — Internal consistency check:
+Before finalising the Discovery score, check your own improvement suggestions. If you are listing multiple important questions that were never asked in biggest_improvement_area, the Discovery score cannot be 7 or above. A 7 means the student partner did strong active discovery. If you found 3 or more significant missed questions, the score is 5 or below. A score and its improvement suggestions must agree — if they contradict each other, lower the score.
+
 Final scoring table:
 | What came out | Who pulled it out | Score |
-| Real fears in student's own words | Student partner actively drew it out | 9–10 |
-| Real fears in student's own words | Student volunteered, partner followed up well | 7–8 |
-| Real fears in student's own words | Student volunteered, partner just listened | 5–6 |
+| Real fears in student's own words | Student partner actively drew it out through questions | 9–10 |
+| Real fears in student's own words | Student volunteered, partner followed up on the FEAR itself | 7–8 |
+| Real fears in student's own words | Student volunteered, partner followed up on FACTS only, not the fear | 5–6 |
+| Real fears in student's own words | Student volunteered, partner just listened or answered questions | 4–5 |
 | Surface facts only | Student partner actively asked | 5–6 |
 | Surface facts only | Student volunteered | 3–4 |
 | Almost nothing | Anyone | 1–2 |
@@ -148,7 +167,7 @@ Student pain points fall into three categories. A thorough discovery will touch 
 
 --- EVIDENCE (Scored 1–10) ---
 
-One-line definition: For each pain point the student revealed, did the student partner connect it to a specific course feature story or proof — with accuracy?
+One-line definition: For each pain point the student revealed, did the student partner connect it to a specific course feature or proof — with accuracy?
 
 What counts as Evidence:
 - Connecting a specific student problem to a specific course feature with detail
@@ -169,7 +188,7 @@ Score 10: Every major pain point from Discovery had its own specific evidence. P
 
 One-line definition: Did urgency come from the student's own situation, or was it manufactured by the student partner?
 
-Fake urgency is obvious and students ignore it. Real urgency is already in what the student told you. You do not need to add drama. Just show them their own gap using their own words.
+Fake urgency is obvious and students ignore it. Real urgency is already in what the student told you — exam in 4 months, two attempts already gone, family waiting on this, this is my last attempt. You do not need to add drama. Just show them their own gap using their own words.
 
 Score 1–3: No resonance attempted, OR fake urgency used ("offer valid only till tomorrow", "your competition is preparing every single day").
 Score 4–6: Some emotional connection but generic. Could have been said to any student.
@@ -215,6 +234,7 @@ Purpose: To give students clarity, confidence, and a structured approach before 
 
 -------------------------------------------
 SECTION D: MASTER COURSE INFORMATION
+Fixed until product changes.
 -------------------------------------------
 
 Course Name: EPFO APFC and EO/AO 2026-2027 Master Course
@@ -315,6 +335,7 @@ FACULTY:
 
 -------------------------------------------
 SECTION E: CALL TRANSCRIPT
+Replace for every single call.
 -------------------------------------------
 
 [PASTE FULL TRANSCRIPT HERE]
@@ -350,10 +371,10 @@ No markdown. No explanation before or after. Just the raw JSON.
     "information_student_volunteered_unprompted": ["List what the student said on their own without being asked — this does not count toward discovery score"],
     "what_agent_found_out": ["Combined bullet list of the student's situation — from both active questions and volunteered info"],
     "quality_assessment": "Real fears revealed, or Surface facts only, or Almost nothing",
-    "credit_assessment": "Student partner actively drew it out, or Partner received and followed up well, or Partner just listened, or Partner received and moved to pitch",
+    "credit_assessment": "Choose one: Student partner actively drew it out / Partner received and followed up on the fear itself / Partner received and followed up on facts only not the fear / Partner received and just listened or answered questions / Partner received and moved to pitch",
     "student_said_own_problem_out_loud": "Yes, Partially, or No",
     "best_discovery_moment_quote": "Exact line where student articulated their own situation or fear",
-    "why_this_score": "One sentence — state what quality came out AND who pulled it out, explaining the score"
+    "why_this_score": "One sentence — state: (1) what quality came out, (2) whether it was volunteered or drawn out, (3) whether the partner followed up on the fear or only on the facts. If your improvement suggestions list 3+ missed questions, score must be 5 or below — state this reconciliation explicitly."
   },
   "evidence": {
     "score": 0,
