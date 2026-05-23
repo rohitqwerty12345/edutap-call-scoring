@@ -43,7 +43,7 @@ RULE 6 — EVIDENCE DEPENDS ON DISCOVERY:
 If Discovery score is below 5, Evidence score cannot exceed 6. Note this dependency in your reason if it applies.
 
 RULE 7 — GUARDRAILS AND EVIDENCE ARE SEPARATE:
-If the student partner said something factually wrong, flag it under Guardrails only. Do not penalise the same mistake twice by also lowering the Evidence score for it. In the Evidence section, evaluate only the quality of connection between what the student said and what the course offers. Assume facts are correct for Evidence scoring purposes.
+If the student partner said something factually wrong, flag it under Guardrails only. Do not penalise the same mistake twice by also lowering the Evidence score for it. In the Evidence section, evaluate only the quality of connection between what the student said and what the course offers.
 
 RULE 8 — CONVERTED STATUS:
 Mark "Converted" only if the student clearly paid, agreed to pay immediately, or the student partner confirmed payment and access. If the student said they will think about it, check it out, requested a follow-up, or outcome is unclear — mark "Not converted".
@@ -111,13 +111,12 @@ Score 1–3: Generic opener. Could have been said to anyone. No reference to the
 Score 4–6: Some personalisation but weak or surface-level. ("I saw you enrolled in our trial course.") Student knows the call is about the course, not about them specifically.
 Score 7–9: Specific reference to one thing from their trial — a section name, time spent, a quiz attempted, something that shows the student partner actually looked before calling. Student feels acknowledged.
 Score 10: Opening immediately made the student feel the call was about their journey, not about being pitched. Student partner referenced a specific trial activity AND created a bridge showing the conversation would be about understanding them before talking about the product. At 10, the student does not feel the pitch coming. At 7–9, they know it is coming but feel acknowledged first.
-
+	
 --- DISCOVERY (Scored 1–10) ---
 
 One-line definition: Did the student say their own problem out loud, in their own words, because of how the student partner asked?
 
 SCORING FORMULA: Discovery score = Quality of what was revealed × Credit for who revealed it.
-Neither count alone nor process alone. Both together.
 
 QUALITY — What came out:
 Surface fact = something bahar se dikhne wali — exam date, subject name, attempt number. Any question reveals this.
@@ -149,7 +148,7 @@ Student pain points fall into three categories. A thorough discovery will touch 
 
 --- EVIDENCE (Scored 1–10) ---
 
-One-line definition: For each pain point the student revealed, did the student partner connect it to a specific course feature or proof — with accuracy?
+One-line definition: For each pain point the student revealed, did the student partner connect it to a specific course feature story or proof — with accuracy?
 
 What counts as Evidence:
 - Connecting a specific student problem to a specific course feature with detail
@@ -170,7 +169,7 @@ Score 10: Every major pain point from Discovery had its own specific evidence. P
 
 One-line definition: Did urgency come from the student's own situation, or was it manufactured by the student partner?
 
-Fake urgency is obvious and students ignore it. Real urgency is already in what the student told you — exam in 4 months, two attempts already gone, family waiting on this, this is my last attempt. You do not need to add drama. Just show them their own gap using their own words.
+Fake urgency is obvious and students ignore it. Real urgency is already in what the student told you. You do not need to add drama. Just show them their own gap using their own words.
 
 Score 1–3: No resonance attempted, OR fake urgency used ("offer valid only till tomorrow", "your competition is preparing every single day").
 Score 4–6: Some emotional connection but generic. Could have been said to any student.
@@ -216,7 +215,6 @@ Purpose: To give students clarity, confidence, and a structured approach before 
 
 -------------------------------------------
 SECTION D: MASTER COURSE INFORMATION
-Fixed until product changes.
 -------------------------------------------
 
 Course Name: EPFO APFC and EO/AO 2026-2027 Master Course
@@ -317,7 +315,6 @@ FACULTY:
 
 -------------------------------------------
 SECTION E: CALL TRANSCRIPT
-Replace for every single call.
 -------------------------------------------
 
 [PASTE FULL TRANSCRIPT HERE]
