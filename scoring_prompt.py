@@ -141,8 +141,26 @@ Following up on the FEAR: "aapne kaha last attempt — kya specifically worry ha
 
 If the student volunteered a fear and the student partner followed up only on the factual component, NOT on the emotional/fear component — that is LOW partial credit, not HIGH partial credit.
 
-CRITICAL — Answering student questions is NOT discovery:
-If the student asks a question and the student partner answers it, that is information delivery — not discovery. Discovery is only what the student partner actively extracted through their own questions. Time spent answering the student's questions does not count toward discovery, regardless of how much useful information came up during that exchange.
+CRITICAL — What counts as a Discovery question vs what does not:
+A Discovery question is one that, if the student answers it honestly, reveals something about their situation, fear, gap, or background that the student partner did not already know.
+
+These ARE Discovery questions:
+- "Aap kya karte ho abhi?" — reveals occupation and life situation
+- "Aapka exam kab hai?" — reveals timeline
+- "Kaunsa subject sabse weak lagta hai?" — reveals specific gap
+- "Pehle kabhi EPFO prepare kiya tha?" — reveals attempt history
+- "Din mein kitne ghante padh paoge?" — reveals available time
+
+These are NOT Discovery questions — do NOT list them in questions_asked_by_agent:
+- "Do you have any other query?" — this is a handoff, not discovery. The student partner is wrapping up, not digging in.
+- "Kuch aur poochna hai?" — same, a handoff.
+- "Kuch aisa feedback jo aap dena chahte ho?" — this is asking for course feedback, not the student's situation.
+- "Is there any query regarding course or mentorship?" — this is a pitch setup, not discovery.
+- "Are you planning to prepare seriously?" — this is a yes/no intent check, not situation discovery.
+- "How was your trial experience?" — this is a feedback question, not discovery.
+- "Direct course ke baare mein bataaun?" — this is a pitch setup question.
+
+The test: does the question make the student reveal something about THEMSELVES — their life, their fears, their gaps, their situation? If yes, it is Discovery. If it is about the course, about intent in general, or wrapping up the conversation — it is NOT Discovery and must not appear in questions_asked_by_agent.
 
 CRITICAL — Active vs Passive:
 Do NOT count information the student volunteered on their own without being asked. A student who volunteers 7 pain points while the student partner asks one vague question gets the student partner a low score — because the student did the work. Measure what the student partner pulled out, not what the student chose to offer.
@@ -398,7 +416,7 @@ No markdown. No explanation before or after. Just the raw JSON.
   },
   "discovery": {
     "score": 0,
-    "questions_asked_by_agent": ["List only questions the student partner ACTIVELY asked — do not include information the student volunteered without being asked"],
+    "questions_asked_by_agent": ["List only questions the student partner ACTIVELY asked that reveal something about the student's situation, fear, gap, or background. Do NOT include handoff questions like 'do you have any query', 'kuch aur poochna hai', feedback requests like 'kuch feedback dena chahte ho', pitch setups like 'direct course ke baare mein bataaun', or generic intent checks like 'are you planning to prepare seriously'. Only include questions where the student's honest answer tells the partner something they did not already know about the student's life, fears, or situation."],
     "information_student_volunteered_unprompted": ["List what the student said on their own without being asked — this does not count toward discovery score"],
     "what_agent_found_out": ["Combined bullet list of the student's situation — from both active questions and volunteered info"],
     "quality_assessment": "Real fears revealed, or Surface facts only, or Almost nothing",
