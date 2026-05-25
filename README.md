@@ -1,15 +1,43 @@
 # EduTap EPFO Call Scoring System
 
-This Streamlit app processes EduTap EPFO sales/support call recordings and produces call-quality scores.
+This Streamlit app processes EduTap EPFO call recordings and produces AI-based call-quality scores.
 
-## What it does
+## Final scoring parameters
 
-1. Upload MP3/WAV/M4A call recordings in Streamlit.
-2. Send each call to Deepgram for Hindi/Hinglish transcription with diarization.
-3. Send each transcript to OpenAI `gpt-5.5` with `xhigh` reasoning for scoring.
-4. Save results in Supabase.
-5. Show a password-protected dashboard in Streamlit.
-6. Email an Excel report after the batch finishes.
+The final dashboard/report names are:
+
+1. Guardrails
+2. Opening
+3. Discovery
+4. Evidence
+5. Personal Urgency
+6. Real Hesitation Reason
+7. Clear Next Step
+
+## Final call types
+
+The AI now classifies every call into one of these types:
+
+| Call type | Meaning | Output |
+|---|---|---|
+| `full_analysis` | Real conversation happened about exam, course, student situation, preparation, objection, or buying decision. | Scores all applicable parameters. |
+| `follow_up_only` | Student was busy/could not talk, but student partner handled follow-up enough to judge the ending. | Scores only Guardrails and Clear Next Step. |
+| `not_worthy` | No real conversation and no meaningful follow-up handling. | Saves row as not worthy. |
+
+## Guardrails hard-stop rule
+
+If Guardrails fails, the call receives zero score. The AI does not analyze the remaining parameters. This is intentional because honesty and student respect are the floor of the call.
+
+## What the app does
+
+1. Support team uploads MP3/WAV/M4A call recordings in Streamlit.
+2. The app extracts the student mobile number from the file name.
+3. The audio goes to Deepgram Nova-3 Hindi with diarization enabled.
+4. The transcript goes to OpenAI using the final scoring prompt.
+5. The JSON result is saved in Supabase.
+6. Audio and transcript are uploaded to Supabase Storage.
+7. A password-protected dashboard shows results.
+8. An Excel report is emailed after the batch finishes.
 
 ## File structure
 
@@ -23,37 +51,58 @@ edutap-call-scoring/
 ├── email_sender.py
 ├── scoring_prompt.py
 ├── requirements.txt
+├── supabase_migration.sql
 ├── .env.example
 └── README.md
 ```
 
-## 1. Create Supabase table
+## 1. Supabase setup
 
-Run this SQL in your Supabase SQL editor:
+Open Supabase SQL Editor and run:
 
-```sql
-create table call_scores (
-  id uuid default gen_random_uuid() primary key,
-  created_at timestamptz default now(),
-  student_number text,
-  call_audio_link text,
-  call_transcript text,
-  guardrails text,
-  opening_score text,
-  discovery_score text,
-  evidence_score text,
-  resonance_score text,
-  diagnosis_score text,
-  closure_score text,
-  overall_score text,
-  top_strength text,
-  biggest_improvement_area text,
-  coaching_note text,
-  analysis_worthy boolean default true
-);
+```text
+supabase_migration.sql
 ```
 
-For quick testing, either disable Row Level Security on this table or use a Supabase service-role key in `SUPABASE_KEY`.
+This creates/updates:
+
+- `call_scores` table
+- final database columns using the final parameter names
+- public `call-recordings` storage bucket
+- public `call-transcripts` storage bucket
+- useful indexes for dashboard loading
+
+For quick testing, either disable Row Level Security on `call_scores` or use a Supabase service-role key as `SUPABASE_KEY`.
+
+## Final important database columns
+
+Main identifiers:
+
+```text
+student_number
+call_type
+call_audio_link
+call_transcript
+call_transcript_link
+analysis_worthy
+converted_status
+ai_output_json
+```
+
+Parameter score columns:
+
+```text
+guardrails
+opening_score
+discovery_score
+evidence_score
+personal_urgency_score
+real_hesitation_reason_score
+clear_next_step_score
+overall_score
+```
+
+Detailed columns are also created for quotes, reasons, and explanations for every parameter.
 
 ## 2. Install locally
 
@@ -80,9 +129,10 @@ SENDER_EMAIL=creativedits123@gmail.com
 SENDER_PASSWORD=
 RECIPIENT_EMAILS=extrastuff0980@gmail.com
 DASHBOARD_PASSWORD=show123
+MAX_PARALLEL_CALLS=5
 ```
 
-For Gmail, `SENDER_PASSWORD` must be a Gmail App Password, not the normal Gmail login password.
+For Gmail, `SENDER_PASSWORD` must be a Gmail App Password, not the normal Gmail password.
 
 ## 4. Run locally
 
@@ -104,7 +154,7 @@ It also has a fallback that extracts any 10-digit number from the filename.
 
 ## 6. Deploy to Streamlit Cloud
 
-1. Push these files to GitHub.
+1. Push all files to GitHub.
 2. Open Streamlit Cloud.
 3. Create a new app from the GitHub repo.
 4. Add secrets in Streamlit Cloud settings.
@@ -122,39 +172,32 @@ SENDER_EMAIL = "creativedits123@gmail.com"
 SENDER_PASSWORD = "your_gmail_app_password_here"
 RECIPIENT_EMAILS = "extrastuff0980@gmail.com"
 DASHBOARD_PASSWORD = "show123"
+MAX_PARALLEL_CALLS = "5"
 ```
 
 ## Important test checklist
 
-Before giving the app to the support team, test one real call and verify:
+Before giving the app to the support team, test 3 real calls:
 
-- Transcript is correctly generated.
-- Speaker mapping is correct:
-  - Speaker A = Agent
-  - Speaker B = Student
-- OpenAI returns valid JSON.
+- one full conversation
+- one busy/call-later conversation
+- one not-worthy call
+
+Verify:
+
+- Transcript is generated.
+- Speaker mapping is correct.
+- OpenAI returns valid JSON or exact `not_worthy`.
 - Supabase row is created.
-- Dashboard shows the row.
-- Email report arrives with an Excel attachment.
+- Audio link opens.
+- Transcript link opens.
+- Dashboard shows final parameter names.
+- Excel report uses final parameter names.
+- Guardrails fail gives zero score.
+- Follow-up-only call scores only Clear Next Step.
 
 ## Speaker mapping warning
 
-Deepgram assigns `Speaker 0` to whoever speaks first. This code assumes the agent speaks first.
+Deepgram assigns `Speaker 0` to whoever speaks first. This code assumes the student partner speaks first.
 
 If test recordings show the student is labeled as Speaker A, swap the labels in `_speaker_label()` inside `deepgram_client.py`.
-
-
-## Required Supabase migration for expanded dashboard
-
-Before testing this version, open Supabase SQL Editor and run the contents of:
-
-```text
-supabase_migration.sql
-```
-
-This adds:
-- call transcript link
-- converted status
-- detailed GPT output columns
-- raw AI JSON storage
-- public Storage buckets for call recordings and transcripts

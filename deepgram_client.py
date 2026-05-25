@@ -59,7 +59,7 @@ def transcribe_audio(file_bytes: bytes, filename: str) -> str:
     Returns a diarized transcript.
 
     Speaker mapping assumption:
-    - Speaker 0 = Agent
+    - Speaker 0 = Student Partner
     - Speaker 1 = Student
 
     Verify this with a few real recordings. If the student speaks first in your audio,
@@ -120,7 +120,7 @@ def transcribe_audio(file_bytes: bytes, filename: str) -> str:
 
 def _speaker_label(speaker: int | None) -> str:
     if speaker == 0:
-        return "Speaker A (Agent)"
+        return "Speaker A (Student Partner)"
     if speaker == 1:
         return "Speaker B (Student)"
     return f"Speaker {speaker}"

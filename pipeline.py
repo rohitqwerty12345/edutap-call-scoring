@@ -43,9 +43,12 @@ def process_single_file(file_bytes: bytes, filename: str) -> Dict[str, Any]:
         audio_bytes=file_bytes,
     )
 
+    call_type = "not_worthy" if is_not_worthy_result(result) else result.get("call_type", "full_analysis") if isinstance(result, dict) else "full_analysis"
+
     return {
         "filename": filename,
         "student_number": student_number,
+        "call_type": call_type,
         "worthy": not is_not_worthy_result(result),
         "transcript": transcript,
         "result": result,

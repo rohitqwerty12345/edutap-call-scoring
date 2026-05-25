@@ -97,9 +97,9 @@ def _readable_text(value):
                 "opening",
                 "discovery",
                 "evidence",
-                "resonance",
-                "diagnosis",
-                "closure",
+                "personal_urgency",
+                "real_hesitation_reason",
+                "clear_next_step",
             ]
 
             used = set()
@@ -145,16 +145,25 @@ def _display_value(row, key, default=""):
 
 def _score_parameter_wise(row):
     if not row.get("analysis_worthy"):
-        return "Not Analysis Worthy"
+        return "Not Worthy"
+
+    call_type = row.get("call_type", "full_analysis")
+
+    if call_type == "follow_up_only":
+        parts = [
+            f"Guardrails: {row.get('guardrails', '')}",
+            f"Clear Next Step: {row.get('clear_next_step_score', '')}/10" if row.get("clear_next_step_score") else "Clear Next Step: ",
+        ]
+        return "\n".join(parts)
 
     parts = [
         f"Guardrails: {row.get('guardrails', '')}",
         f"Opening: {row.get('opening_score', '')}/10" if row.get("opening_score") else "Opening: ",
         f"Discovery: {row.get('discovery_score', '')}/10" if row.get("discovery_score") else "Discovery: ",
         f"Evidence: {row.get('evidence_score', '')}/10" if row.get("evidence_score") else "Evidence: ",
-        f"Resonance: {row.get('resonance_score', '')}/10" if row.get("resonance_score") else "Resonance: ",
-        f"Diagnosis: {row.get('diagnosis_score', '')}",
-        f"Closure: {row.get('closure_score', '')}/10" if row.get("closure_score") else "Closure: ",
+        f"Personal Urgency: {row.get('personal_urgency_score', '')}/10" if row.get("personal_urgency_score") else "Personal Urgency: ",
+        f"Real Hesitation Reason: {row.get('real_hesitation_reason_score', '')}",
+        f"Clear Next Step: {row.get('clear_next_step_score', '')}/10" if row.get("clear_next_step_score") else "Clear Next Step: ",
     ]
     return "\n".join(parts)
 
@@ -166,6 +175,7 @@ def _make_display_rows(rows):
         base_cols = {
             "Date": str(r.get("created_at", ""))[:10],
             "Student Number": _display_value(r, "student_number"),
+            "Call Type": _display_value(r, "call_type", "full_analysis"),
             "Call Recording Link": _display_value(r, "call_audio_link"),
             "Converted Status": _display_value(r, "converted_status", "Not converted"),
             "Overall Score": _display_value(r, "overall_score"),
@@ -189,12 +199,12 @@ def _make_display_rows(rows):
                     "Discovery Found Out": "—",
                     "Evidence Score": "—",
                     "Evidence Detail": "—",
-                    "Resonance Score": "—",
-                    "Resonance Detail": "—",
-                    "Diagnosis Score": "—",
-                    "Diagnosis Detail": "—",
-                    "Closure Score": "—",
-                    "Closure Detail": "—",
+                    "Personal Urgency Score": "—",
+                    "Personal Urgency Detail": "—",
+                    "Real Hesitation Reason Score": "—",
+                    "Real Hesitation Reason Detail": "—",
+                    "Clear Next Step Score": "—",
+                    "Clear Next Step Detail": "—",
                 }
             )
         else:
@@ -207,16 +217,16 @@ def _make_display_rows(rows):
                     "Opening Score": _display_value(r, "opening_score"),
                     "Opening Quote": _display_value(r, "opening_quote"),
                     "Discovery Score": _display_value(r, "discovery_score"),
-                    "Discovery Questions": _display_value(r, "discovery_questions_asked_by_agent"),
-                    "Discovery Found Out": _display_value(r, "discovery_what_agent_found_out"),
+                    "Discovery Questions": _display_value(r, "discovery_questions_asked_by_student_partner"),
+                    "Discovery Found Out": _display_value(r, "discovery_what_student_partner_found_out"),
                     "Evidence Score": _display_value(r, "evidence_score"),
                     "Evidence Detail": _display_value(r, "evidence_why_this_score"),
-                    "Resonance Score": _display_value(r, "resonance_score"),
-                    "Resonance Detail": _display_value(r, "resonance_why_this_score"),
-                    "Diagnosis Score": _display_value(r, "diagnosis_score"),
-                    "Diagnosis Detail": _display_value(r, "diagnosis_why_this_score"),
-                    "Closure Score": _display_value(r, "closure_score"),
-                    "Closure Detail": _display_value(r, "closure_why_this_score"),
+                    "Personal Urgency Score": _display_value(r, "personal_urgency_score"),
+                    "Personal Urgency Detail": _display_value(r, "personal_urgency_why_this_score"),
+                    "Real Hesitation Reason Score": _display_value(r, "real_hesitation_reason_score"),
+                    "Real Hesitation Reason Detail": _display_value(r, "real_hesitation_reason_why_this_score"),
+                    "Clear Next Step Score": _display_value(r, "clear_next_step_score"),
+                    "Clear Next Step Detail": _display_value(r, "clear_next_step_why_this_score"),
                 }
             )
 
@@ -283,16 +293,17 @@ with tab1:
                             {
                                 "filename": result["filename"],
                                 "student_number": result["student_number"],
+                                "call_type": result.get("call_type"),
                                 "worthy": result["worthy"],
                                 **result["debug"],
                             }
                         )
 
                         if result["worthy"]:
-                            status_area.success(f"Scored successfully: {filename}")
+                            status_area.success(f"Processed successfully ({result.get('call_type')}): {filename}")
                         else:
                             status_area.warning(
-                                f"Not analysis worthy, saved with tag: {filename}"
+                                f"Not worthy, saved with tag: {filename}"
                             )
 
                     except Exception as exc:
@@ -359,15 +370,17 @@ with tab2:
         if not rows:
             st.info("No results yet.")
         else:
-            worthy_rows = [r for r in rows if r.get("analysis_worthy")]
-            converted_count = sum(1 for r in worthy_rows if r.get("converted_status") == "Converted")
-            not_converted_count = len(worthy_rows) - converted_count
+            full_analysis_rows = [r for r in rows if r.get("call_type") == "full_analysis"]
+            follow_up_only_rows = [r for r in rows if r.get("call_type") == "follow_up_only"]
+            not_worthy_rows = [r for r in rows if not r.get("analysis_worthy")]
+            converted_count = sum(1 for r in full_analysis_rows if r.get("converted_status") == "Converted")
 
-            col1, col2, col3, col4 = st.columns(4)
+            col1, col2, col3, col4, col5 = st.columns(5)
             col1.metric("Total Calls", len(rows))
-            col2.metric("Analysis Worthy", len(worthy_rows))
-            col3.metric("Converted", converted_count)
-            col4.metric("Not Converted", not_converted_count)
+            col2.metric("Full Analysis", len(full_analysis_rows))
+            col3.metric("Follow-up Only", len(follow_up_only_rows))
+            col4.metric("Not Worthy", len(not_worthy_rows))
+            col5.metric("Converted", converted_count)
 
             df = pd.DataFrame(_make_display_rows(rows))
 
@@ -406,7 +419,8 @@ with tab2:
                 title = (
                     f"Student {r.get('student_number', 'unknown')} - "
                     f"{str(r.get('created_at', ''))[:10]} - "
-                    f"{r.get('converted_status', 'Not converted')}"
+                    f"{r.get('converted_status', 'Not converted')} - "
+                    f"{r.get('call_type', '')}"
                 )
 
                 with st.expander(title):
@@ -415,7 +429,7 @@ with tab2:
                     st.write(f"Transcript link: {r.get('call_transcript_link', '')}")
 
                     if not r.get("analysis_worthy"):
-                        st.warning("Not analysis worthy")
+                        st.warning("Not worthy")
                         with st.expander("Transcript"):
                             st.text(r.get("call_transcript", ""))
                         continue
@@ -434,7 +448,7 @@ with tab2:
                     st.write(
                         {
                             "score": r.get("opening_score"),
-                            "what_agent_said_right_after_intro": r.get("opening_what_agent_said_right_after_intro"),
+                            "what_student_partner_said_right_after_intro": r.get("opening_what_student_partner_said_right_after_intro"),
                             "quote": r.get("opening_quote"),
                             "specific_to_student_trial_activity": r.get("opening_specific_to_student_trial_activity"),
                             "why_this_score": r.get("opening_why_this_score"),
@@ -445,8 +459,8 @@ with tab2:
                     st.write(
                         {
                             "score": r.get("discovery_score"),
-                            "questions_asked_by_agent": r.get("discovery_questions_asked_by_agent"),
-                            "what_agent_found_out": r.get("discovery_what_agent_found_out"),
+                            "questions_asked_by_student_partner": r.get("discovery_questions_asked_by_student_partner"),
+                            "what_student_partner_found_out": r.get("discovery_what_student_partner_found_out"),
                             "student_said_own_problem_out_loud": r.get("discovery_student_said_own_problem_out_loud"),
                             "best_discovery_moment_quote": r.get("discovery_best_discovery_moment_quote"),
                             "why_this_score": r.get("discovery_why_this_score"),
@@ -466,40 +480,40 @@ with tab2:
                         }
                     )
 
-                    st.markdown("### Resonance")
+                    st.markdown("### Personal Urgency")
                     st.write(
                         {
-                            "score": r.get("resonance_score"),
-                            "source_of_urgency": r.get("resonance_source_of_urgency"),
-                            "student_situation_used": r.get("resonance_student_situation_used"),
-                            "quote": r.get("resonance_quote"),
-                            "why_this_score": r.get("resonance_why_this_score"),
+                            "score": r.get("personal_urgency_score"),
+                            "source_of_urgency": r.get("personal_urgency_source_of_urgency"),
+                            "student_situation_used": r.get("personal_urgency_student_situation_used"),
+                            "quote": r.get("personal_urgency_quote"),
+                            "why_this_score": r.get("personal_urgency_why_this_score"),
                         }
                     )
 
-                    st.markdown("### Diagnosis")
+                    st.markdown("### Real Hesitation Reason")
                     st.write(
                         {
-                            "score": r.get("diagnosis_score"),
-                            "na": r.get("diagnosis_na"),
-                            "objection_raised_by_student": r.get("diagnosis_objection_raised_by_student"),
-                            "surface_reason_stated": r.get("diagnosis_surface_reason_stated"),
-                            "real_reason_found": r.get("diagnosis_real_reason_found"),
-                            "quote_of_diagnosis_attempt": r.get("diagnosis_quote_of_diagnosis_attempt"),
-                            "why_this_score": r.get("diagnosis_why_this_score"),
+                            "score": r.get("real_hesitation_reason_score"),
+                            "na": r.get("real_hesitation_reason_na"),
+                            "objection_raised_by_student": r.get("real_hesitation_reason_objection_raised_by_student"),
+                            "surface_reason_stated": r.get("real_hesitation_reason_surface_reason_stated"),
+                            "real_reason_found": r.get("real_hesitation_reason_real_reason_found"),
+                            "quote_of_real_hesitation_reason_attempt": r.get("real_hesitation_reason_quote_of_attempt"),
+                            "why_this_score": r.get("real_hesitation_reason_why_this_score"),
                         }
                     )
 
-                    st.markdown("### Closure")
+                    st.markdown("### Clear Next Step")
                     st.write(
                         {
-                            "score": r.get("closure_score"),
-                            "what_happened_at_end": r.get("closure_what_happened_at_end"),
-                            "payment_link_sent": r.get("closure_payment_link_sent"),
-                            "followup_date_and_time_agreed": r.get("closure_followup_date_and_time_agreed"),
-                            "course_details_sent_on_whatsapp": r.get("closure_course_details_sent_on_whatsapp"),
-                            "quote_of_closing_line": r.get("closure_quote_of_closing_line"),
-                            "why_this_score": r.get("closure_why_this_score"),
+                            "score": r.get("clear_next_step_score"),
+                            "what_happened_at_end": r.get("clear_next_step_what_happened_at_end"),
+                            "payment_link_sent": r.get("clear_next_step_payment_link_sent"),
+                            "followup_date_and_time_agreed": r.get("clear_next_step_followup_date_and_time_agreed"),
+                            "course_details_sent_on_whatsapp": r.get("clear_next_step_course_details_sent_on_whatsapp"),
+                            "quote_of_closing_line": r.get("clear_next_step_quote_of_closing_line"),
+                            "why_this_score": r.get("clear_next_step_why_this_score"),
                         }
                     )
 
@@ -558,6 +572,7 @@ with tab3:
                         {
                             "filename": item.get("filename"),
                             "student_number": item.get("student_number"),
+                            "call_type": item.get("call_type"),
                             "worthy": item.get("worthy"),
                             "openai_model": item.get("openai_model"),
                             "openai_reasoning_effort": item.get("openai_reasoning_effort"),

@@ -15,6 +15,30 @@ load_dotenv()
 AUDIO_BUCKET = "call-recordings"
 TRANSCRIPT_BUCKET = "call-transcripts"
 
+PARAMETER_LABELS = {
+    "guardrails": "Guardrails",
+    "opening": "Opening",
+    "discovery": "Discovery",
+    "evidence": "Evidence",
+    "personal_urgency": "Personal Urgency",
+    "real_hesitation_reason": "Real Hesitation Reason",
+    "clear_next_step": "Clear Next Step",
+    # Backward-compatible labels for old AI JSON, if any old row is viewed later.
+    "resonance": "Personal Urgency",
+    "diagnosis": "Real Hesitation Reason",
+    "closure": "Clear Next Step",
+}
+
+PARAMETER_ORDER = [
+    "guardrails",
+    "opening",
+    "discovery",
+    "evidence",
+    "personal_urgency",
+    "real_hesitation_reason",
+    "clear_next_step",
+]
+
 
 def get_setting(name: str, default: str | None = None) -> str | None:
     """Read from environment first, then Streamlit secrets if available."""
@@ -50,7 +74,8 @@ def is_not_worthy_result(result: Any) -> bool:
         return result.strip() == "not_worthy"
 
     if isinstance(result, dict):
-        return result.get("status") == "not_worthy" or result.get("worthy") is False
+        call_type = result.get("call_type") or result.get("status")
+        return call_type == "not_worthy" or result.get("worthy") is False or result.get("analysis_worthy") is False
 
     return False
 
@@ -63,23 +88,13 @@ def _safe_text(value: Any) -> str | None:
     return str(value)
 
 
-def _plain_summary_text(value):
-    """
-    Convert GPT JSON/dict values into complete readable text.
-
-    For fields like top_strength and biggest_improvement_area, GPT may return:
-    {
-      "summary": "...",
-      "by_parameter": {"guardrails": "...", "opening": "..."}
-    }
-
-    This function shows BOTH summary and all parameter-wise details.
-    """
+def _plain_summary_text(value: Any) -> str:
+    """Convert GPT JSON/dict values into complete readable text."""
     if value is None:
         return ""
 
     if isinstance(value, dict):
-        lines = []
+        lines: list[str] = []
 
         summary = value.get("summary")
         if summary:
@@ -91,27 +106,30 @@ def _plain_summary_text(value):
                 lines.append("")
             lines.append("Parameter-wise details:")
 
-            preferred_order = [
-                "guardrails",
-                "opening",
-                "discovery",
-                "evidence",
-                "resonance",
-                "diagnosis",
-                "closure",
-            ]
-
             used = set()
-            for key in preferred_order:
+            for key in PARAMETER_ORDER:
                 if key in by_parameter:
-                    label = key.replace("_", " ").title()
-                    detail = str(by_parameter[key]).strip()
-                    lines.append(f"- {label}: {detail}")
+                    detail = by_parameter[key]
+                    if detail is not None and str(detail).strip() not in {"", "null", "None"}:
+                        lines.append(f"- {PARAMETER_LABELS[key]}: {str(detail).strip()}")
                     used.add(key)
 
+            # Backward-compatible old keys.
+            old_to_new = {
+                "resonance": "personal_urgency",
+                "diagnosis": "real_hesitation_reason",
+                "closure": "clear_next_step",
+            }
+            for old_key, new_key in old_to_new.items():
+                if old_key in by_parameter and new_key not in by_parameter:
+                    detail = by_parameter[old_key]
+                    if detail is not None and str(detail).strip() not in {"", "null", "None"}:
+                        lines.append(f"- {PARAMETER_LABELS[old_key]}: {str(detail).strip()}")
+                    used.add(old_key)
+
             for key, detail in by_parameter.items():
-                if key not in used:
-                    label = str(key).replace("_", " ").title()
+                if key not in used and detail is not None:
+                    label = PARAMETER_LABELS.get(str(key), str(key).replace("_", " ").title())
                     lines.append(f"- {label}: {str(detail).strip()}")
 
         if lines:
@@ -135,9 +153,26 @@ def _plain_summary_text(value):
     return str(value)
 
 
+def _section(result: Dict[str, Any], final_key: str, old_key: str | None = None) -> Dict[str, Any]:
+    value = result.get(final_key)
+    if isinstance(value, dict):
+        return value
+    if old_key:
+        old_value = result.get(old_key)
+        if isinstance(old_value, dict):
+            return old_value
+    return {}
+
+
 def _score_value(section: Dict[str, Any]) -> str | None:
     score = (section or {}).get("score")
     return None if score is None else str(score)
+
+
+def _na_score(section: Dict[str, Any]) -> str | None:
+    if (section or {}).get("na") is True:
+        return "N/A"
+    return _score_value(section)
 
 
 def _overall_total(overall: Dict[str, Any]) -> str | None:
@@ -174,16 +209,11 @@ def _overall_percentage(overall: Dict[str, Any]) -> str | None:
 def _slug_filename(filename: str) -> str:
     name = Path(filename).name
     name = re.sub(r"[^A-Za-z0-9_.-]+", "_", name)
-    if not name:
-        name = "call_recording"
-    return name
+    return name or "call_recording"
 
 
 def _ensure_bucket(client: Client, bucket_name: str) -> None:
-    """
-    Best-effort bucket creation.
-    If it fails because the bucket exists or storage permissions differ, upload may still work.
-    """
+    """Best-effort public bucket creation."""
     try:
         client.storage.create_bucket(bucket_name, options={"public": True})
     except TypeError:
@@ -245,9 +275,7 @@ def upload_call_files(
     audio_bytes: bytes | None,
     transcript: str,
 ) -> tuple[str | None, str | None]:
-    """
-    Upload recording and transcript to Supabase Storage and return public URLs.
-    """
+    """Upload recording and transcript to Supabase Storage and return public URLs."""
     timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
     unique_id = uuid4().hex[:8]
     safe_audio_name = _slug_filename(audio_filename)
@@ -285,25 +313,22 @@ def build_db_row(
     call_audio_link: str | None = None,
     call_transcript_link: str | None = None,
 ) -> Dict[str, Any]:
-    """
-    Convert one scoring result into the Supabase row format.
-    """
+    """Convert one scoring result into the final Supabase row format."""
+    base = {
+        "student_number": student_number,
+        "call_audio_link": call_audio_link or audio_filename,
+        "call_transcript": transcript,
+        "call_transcript_link": call_transcript_link,
+    }
+
     if is_not_worthy_result(result):
         return {
-            "student_number": student_number,
-            "call_audio_link": call_audio_link or audio_filename,
-            "call_transcript": transcript,
-            "call_transcript_link": call_transcript_link,
+            **base,
+            "call_type": "not_worthy",
             "analysis_worthy": False,
             "converted_status": "Not converted",
             "ai_output_json": {"status": "not_worthy"},
             "guardrails": None,
-            "opening_score": None,
-            "discovery_score": None,
-            "evidence_score": None,
-            "resonance_score": None,
-            "diagnosis_score": None,
-            "closure_score": None,
             "overall_score": None,
             "top_strength": None,
             "biggest_improvement_area": None,
@@ -313,42 +338,46 @@ def build_db_row(
     if not isinstance(result, dict):
         raise RuntimeError("OpenAI returned an unsupported response format.")
 
-    guardrails = result.get("guardrails", {}) or {}
-    opening = result.get("opening", {}) or {}
-    discovery = result.get("discovery", {}) or {}
-    evidence = result.get("evidence", {}) or {}
-    resonance = result.get("resonance", {}) or {}
-    diagnosis = result.get("diagnosis", {}) or {}
-    closure = result.get("closure", {}) or {}
+    guardrails = _section(result, "guardrails")
+    opening = _section(result, "opening")
+    discovery = _section(result, "discovery")
+    evidence = _section(result, "evidence")
+    personal_urgency = _section(result, "personal_urgency", "resonance")
+    real_hesitation_reason = _section(result, "real_hesitation_reason", "diagnosis")
+    clear_next_step = _section(result, "clear_next_step", "closure")
     overall = result.get("overall_score", {}) or result.get("overall", {}) or {}
+
+    call_type = result.get("call_type") or "full_analysis"
+    if call_type not in {"full_analysis", "follow_up_only", "guardrails_failed"}:
+        call_type = "full_analysis"
 
     converted_status = result.get("converted_status")
     if converted_status not in {"Converted", "Not converted"}:
         converted_status = "Not converted"
 
     return {
-        "student_number": student_number,
-        "call_audio_link": call_audio_link or audio_filename,
-        "call_transcript": transcript,
-        "call_transcript_link": call_transcript_link,
+        **base,
+        "call_type": call_type,
         "analysis_worthy": True,
         "converted_status": converted_status,
         "ai_output_json": result,
 
         "guardrails": guardrails.get("result"),
         "guardrails_reason": guardrails.get("reason"),
-        "guardrails_false_information_flagged": guardrails.get("false_information_flagged"),
         "guardrails_false_information_detail": guardrails.get("false_information_detail"),
 
         "opening_score": _score_value(opening),
-        "opening_what_agent_said_right_after_intro": opening.get("what_agent_said_right_after_intro"),
+        "opening_what_student_partner_said_right_after_intro": opening.get("what_student_partner_said_right_after_intro") or opening.get("what_agent_said_right_after_intro"),
         "opening_quote": opening.get("quote"),
         "opening_specific_to_student_trial_activity": opening.get("specific_to_student_trial_activity"),
         "opening_why_this_score": opening.get("why_this_score"),
 
         "discovery_score": _score_value(discovery),
-        "discovery_questions_asked_by_agent": _safe_text(discovery.get("questions_asked_by_agent")),
-        "discovery_what_agent_found_out": _safe_text(discovery.get("what_agent_found_out")),
+        "discovery_questions_asked_by_student_partner": _safe_text(discovery.get("questions_asked_by_student_partner") or discovery.get("questions_asked_by_agent")),
+        "discovery_information_student_volunteered_unprompted": _safe_text(discovery.get("information_student_volunteered_unprompted")),
+        "discovery_what_student_partner_found_out": _safe_text(discovery.get("what_student_partner_found_out") or discovery.get("what_agent_found_out")),
+        "discovery_quality_assessment": discovery.get("quality_assessment"),
+        "discovery_credit_assessment": discovery.get("credit_assessment"),
         "discovery_student_said_own_problem_out_loud": discovery.get("student_said_own_problem_out_loud"),
         "discovery_best_discovery_moment_quote": discovery.get("best_discovery_moment_quote"),
         "discovery_why_this_score": discovery.get("why_this_score"),
@@ -361,36 +390,36 @@ def build_db_row(
         "evidence_quote": evidence.get("quote"),
         "evidence_why_this_score": evidence.get("why_this_score"),
 
-        "resonance_score": _score_value(resonance),
-        "resonance_source_of_urgency": resonance.get("source_of_urgency"),
-        "resonance_student_situation_used": resonance.get("student_situation_used"),
-        "resonance_quote": resonance.get("quote"),
-        "resonance_why_this_score": resonance.get("why_this_score"),
+        "personal_urgency_score": _score_value(personal_urgency),
+        "personal_urgency_source_of_urgency": personal_urgency.get("source_of_urgency"),
+        "personal_urgency_student_situation_used": personal_urgency.get("student_situation_used"),
+        "personal_urgency_quote": personal_urgency.get("quote"),
+        "personal_urgency_why_this_score": personal_urgency.get("why_this_score"),
 
-        "diagnosis_score": "N/A" if diagnosis.get("na") else _score_value(diagnosis),
-        "diagnosis_na": bool(diagnosis.get("na")) if diagnosis.get("na") is not None else False,
-        "diagnosis_objection_raised_by_student": diagnosis.get("objection_raised_by_student"),
-        "diagnosis_surface_reason_stated": diagnosis.get("surface_reason_stated"),
-        "diagnosis_real_reason_found": diagnosis.get("real_reason_found"),
-        "diagnosis_quote_of_diagnosis_attempt": diagnosis.get("quote_of_diagnosis_attempt"),
-        "diagnosis_why_this_score": diagnosis.get("why_this_score"),
+        "real_hesitation_reason_score": _na_score(real_hesitation_reason),
+        "real_hesitation_reason_na": bool(real_hesitation_reason.get("na")) if real_hesitation_reason.get("na") is not None else False,
+        "real_hesitation_reason_objection_raised_by_student": real_hesitation_reason.get("objection_raised_by_student"),
+        "real_hesitation_reason_surface_reason_stated": real_hesitation_reason.get("surface_reason_stated"),
+        "real_hesitation_reason_real_reason_found": real_hesitation_reason.get("real_reason_found"),
+        "real_hesitation_reason_quote_of_attempt": real_hesitation_reason.get("quote_of_real_hesitation_reason_attempt") or real_hesitation_reason.get("quote_of_diagnosis_attempt"),
+        "real_hesitation_reason_why_this_score": real_hesitation_reason.get("why_this_score"),
 
-        "closure_score": _score_value(closure),
-        "closure_what_happened_at_end": closure.get("what_happened_at_end"),
-        "closure_payment_link_sent": closure.get("payment_link_sent"),
-        "closure_followup_date_and_time_agreed": closure.get("followup_date_and_time_agreed"),
-        "closure_course_details_sent_on_whatsapp": closure.get("course_details_sent_on_whatsapp"),
-        "closure_quote_of_closing_line": closure.get("quote_of_closing_line"),
-        "closure_why_this_score": closure.get("why_this_score"),
+        "clear_next_step_score": _score_value(clear_next_step),
+        "clear_next_step_what_happened_at_end": clear_next_step.get("what_happened_at_end"),
+        "clear_next_step_payment_link_sent": clear_next_step.get("payment_link_sent"),
+        "clear_next_step_followup_date_and_time_agreed": clear_next_step.get("followup_date_and_time_agreed"),
+        "clear_next_step_course_details_sent_on_whatsapp": clear_next_step.get("course_details_sent_on_whatsapp"),
+        "clear_next_step_quote_of_closing_line": clear_next_step.get("quote_of_closing_line"),
+        "clear_next_step_why_this_score": clear_next_step.get("why_this_score"),
 
         "overall_score": _overall_total(overall),
         "overall_guardrails": overall.get("guardrails"),
         "overall_opening": overall.get("opening"),
         "overall_discovery": overall.get("discovery"),
         "overall_evidence": overall.get("evidence"),
-        "overall_resonance": overall.get("resonance"),
-        "overall_diagnosis": overall.get("diagnosis"),
-        "overall_closure": overall.get("closure"),
+        "overall_personal_urgency": overall.get("personal_urgency") or overall.get("resonance"),
+        "overall_real_hesitation_reason": overall.get("real_hesitation_reason") or overall.get("diagnosis"),
+        "overall_clear_next_step": overall.get("clear_next_step") or overall.get("closure"),
         "overall_total": _overall_total(overall),
         "overall_percentage": _overall_percentage(overall),
         "guardrails_review_flag": overall.get("guardrails_review_flag"),
@@ -408,9 +437,7 @@ def save_result(
     result: dict | str,
     audio_bytes: bytes | None = None,
 ) -> Dict[str, Any]:
-    """
-    Save one call's results to Supabase and return the inserted row.
-    """
+    """Save one call's results to Supabase and return the inserted row."""
     client = get_client()
 
     audio_url, transcript_url = upload_call_files(

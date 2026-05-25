@@ -76,9 +76,9 @@ def _readable_text(value):
                 "opening",
                 "discovery",
                 "evidence",
-                "resonance",
-                "diagnosis",
-                "closure",
+                "personal_urgency",
+                "real_hesitation_reason",
+                "clear_next_step",
             ]
 
             used = set()
@@ -117,14 +117,15 @@ def _readable_text(value):
 
 def _batch_summary(results: List[Dict]) -> Dict[str, float | int | str]:
     total = len(results)
-    worthy = [r for r in results if r.get("analysis_worthy")]
-    not_worthy_count = total - len(worthy)
+    full_analysis = [r for r in results if r.get("call_type") == "full_analysis"]
+    follow_up_only = [r for r in results if r.get("call_type") == "follow_up_only"]
+    not_worthy = [r for r in results if not r.get("analysis_worthy")]
 
-    converted_count = sum(1 for r in worthy if r.get("converted_status") == "Converted")
-    not_converted_count = len(worthy) - converted_count
+    converted_count = sum(1 for r in full_analysis if r.get("converted_status") == "Converted")
+    not_converted_count = len(full_analysis) - converted_count
 
     percentages = []
-    for r in worthy:
+    for r in full_analysis + follow_up_only:
         pct = _percent_to_float(r.get("overall_percentage"))
         if pct is not None:
             percentages.append(pct)
@@ -133,8 +134,9 @@ def _batch_summary(results: List[Dict]) -> Dict[str, float | int | str]:
 
     return {
         "total": total,
-        "analysis_worthy": len(worthy),
-        "not_analysis_worthy": not_worthy_count,
+        "full_analysis": len(full_analysis),
+        "follow_up_only": len(follow_up_only),
+        "not_worthy": len(not_worthy),
         "converted": converted_count,
         "not_converted": not_converted_count,
         "average_score": avg_score,
@@ -143,31 +145,30 @@ def _batch_summary(results: List[Dict]) -> Dict[str, float | int | str]:
 
 def _score_parameter_wise(row: Dict) -> str:
     if not row.get("analysis_worthy"):
-        return "Not Analysis Worthy"
+        return "Not Worthy"
 
     parts = [
         f"Guardrails: {row.get('guardrails', '')}",
         f"Opening: {row.get('opening_score', '')}/10" if row.get("opening_score") else "Opening: ",
         f"Discovery: {row.get('discovery_score', '')}/10" if row.get("discovery_score") else "Discovery: ",
         f"Evidence: {row.get('evidence_score', '')}/10" if row.get("evidence_score") else "Evidence: ",
-        f"Resonance: {row.get('resonance_score', '')}/10" if row.get("resonance_score") else "Resonance: ",
-        f"Diagnosis: {row.get('diagnosis_score', '')}",
-        f"Closure: {row.get('closure_score', '')}/10" if row.get("closure_score") else "Closure: ",
+        f"Personal Urgency: {row.get('personal_urgency_score', '')}/10" if row.get("personal_urgency_score") else "Personal Urgency: ",
+        f"Real Hesitation Reason: {row.get('real_hesitation_reason_score', '')}",
+        f"Clear Next Step: {row.get('clear_next_step_score', '')}/10" if row.get("clear_next_step_score") else "Clear Next Step: ",
     ]
     return "\n".join(parts)
 
 
 def build_excel(results: List[Dict]) -> bytes:
-    """
-    Build an Excel file from expanded result rows.
-    Email sheet order intentionally excludes Student Number.
-    """
+    """Build an Excel file from expanded result rows."""
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = "Call Scores"
 
     headers = [
         "Date",
+        "Student Number",
+        "Call Type",
         "Call Recording Link",
         "Converted Status",
         "Overall Score",
@@ -177,7 +178,7 @@ def build_excel(results: List[Dict]) -> bytes:
         "Coaching Note",
 
         "Transcript Link",
-        "Analysis Worthy",
+        "Analysis Status",
 
         "Guardrails",
         "Guardrails Reason",
@@ -185,14 +186,14 @@ def build_excel(results: List[Dict]) -> bytes:
         "False Information Detail",
 
         "Opening Score",
-        "Opening - What Agent Said Right After Intro",
+        "Opening - What Student Partner Said Right After Intro",
         "Opening Quote",
         "Opening Specific To Trial Activity",
         "Opening Why This Score",
 
         "Discovery Score",
         "Discovery Questions Asked",
-        "Discovery What Agent Found Out",
+        "Discovery What Student Partner Found Out",
         "Discovery Student Said Own Problem",
         "Discovery Best Moment Quote",
         "Discovery Why This Score",
@@ -205,31 +206,33 @@ def build_excel(results: List[Dict]) -> bytes:
         "Evidence Quote",
         "Evidence Why This Score",
 
-        "Resonance Score",
-        "Resonance Source Of Urgency",
-        "Resonance Student Situation Used",
-        "Resonance Quote",
-        "Resonance Why This Score",
+        "Personal Urgency Score",
+        "Personal Urgency Source Of Urgency",
+        "Personal Urgency Student Situation Used",
+        "Personal Urgency Quote",
+        "Personal Urgency Why This Score",
 
-        "Diagnosis Score",
-        "Diagnosis N/A",
-        "Diagnosis Objection Raised",
-        "Diagnosis Surface Reason",
-        "Diagnosis Real Reason Found",
-        "Diagnosis Quote",
-        "Diagnosis Why This Score",
+        "Real Hesitation Reason Score",
+        "Real Hesitation Reason N/A",
+        "Real Hesitation Reason Objection Raised",
+        "Real Hesitation Reason Surface Reason",
+        "Real Hesitation Reason Real Reason Found",
+        "Real Hesitation Reason Quote",
+        "Real Hesitation Reason Why This Score",
 
-        "Closure Score",
-        "Closure What Happened At End",
-        "Closure Payment Link Sent",
-        "Closure Follow-up Date/Time Agreed",
-        "Closure WhatsApp Details Sent",
-        "Closure Quote",
-        "Closure Why This Score",
+        "Clear Next Step Score",
+        "Clear Next Step What Happened At End",
+        "Clear Next Step Payment Link Sent",
+        "Clear Next Step Follow-up Date/Time Agreed",
+        "Clear Next Step WhatsApp Details Sent",
+        "Clear Next Step Quote",
+        "Clear Next Step Why This Score",
     ]
 
     keys = [
         "created_at",
+        "student_number",
+        "call_type",
         "call_audio_link",
         "converted_status",
         "overall_score",
@@ -247,14 +250,14 @@ def build_excel(results: List[Dict]) -> bytes:
         "guardrails_false_information_detail",
 
         "opening_score",
-        "opening_what_agent_said_right_after_intro",
+        "opening_what_student_partner_said_right_after_intro",
         "opening_quote",
         "opening_specific_to_student_trial_activity",
         "opening_why_this_score",
 
         "discovery_score",
-        "discovery_questions_asked_by_agent",
-        "discovery_what_agent_found_out",
+        "discovery_questions_asked_by_student_partner",
+        "discovery_what_student_partner_found_out",
         "discovery_student_said_own_problem_out_loud",
         "discovery_best_discovery_moment_quote",
         "discovery_why_this_score",
@@ -267,27 +270,27 @@ def build_excel(results: List[Dict]) -> bytes:
         "evidence_quote",
         "evidence_why_this_score",
 
-        "resonance_score",
-        "resonance_source_of_urgency",
-        "resonance_student_situation_used",
-        "resonance_quote",
-        "resonance_why_this_score",
+        "personal_urgency_score",
+        "personal_urgency_source_of_urgency",
+        "personal_urgency_student_situation_used",
+        "personal_urgency_quote",
+        "personal_urgency_why_this_score",
 
-        "diagnosis_score",
-        "diagnosis_na",
-        "diagnosis_objection_raised_by_student",
-        "diagnosis_surface_reason_stated",
-        "diagnosis_real_reason_found",
-        "diagnosis_quote_of_diagnosis_attempt",
-        "diagnosis_why_this_score",
+        "real_hesitation_reason_score",
+        "real_hesitation_reason_na",
+        "real_hesitation_reason_objection_raised_by_student",
+        "real_hesitation_reason_surface_reason_stated",
+        "real_hesitation_reason_real_reason_found",
+        "real_hesitation_reason_quote_of_attempt",
+        "real_hesitation_reason_why_this_score",
 
-        "closure_score",
-        "closure_what_happened_at_end",
-        "closure_payment_link_sent",
-        "closure_followup_date_and_time_agreed",
-        "closure_course_details_sent_on_whatsapp",
-        "closure_quote_of_closing_line",
-        "closure_why_this_score",
+        "clear_next_step_score",
+        "clear_next_step_what_happened_at_end",
+        "clear_next_step_payment_link_sent",
+        "clear_next_step_followup_date_and_time_agreed",
+        "clear_next_step_course_details_sent_on_whatsapp",
+        "clear_next_step_quote_of_closing_line",
+        "clear_next_step_why_this_score",
     ]
 
     header_fill = PatternFill("solid", fgColor="E24B4A")
@@ -309,7 +312,7 @@ def build_excel(results: List[Dict]) -> bytes:
             if key == "created_at":
                 value = str(value)[:10]
             elif key == "analysis_worthy":
-                value = "Yes" if value else "Not Analysis Worthy"
+                value = "Yes" if value else "Not Worthy"
             elif key not in {"call_audio_link", "call_transcript_link"}:
                 value = _readable_text(value)
 
@@ -359,8 +362,9 @@ Please find attached the EduTap EPFO call scoring report for {batch_label}.
 
 Summary:
 - Total calls processed: {summary['total']}
-- Analysis worthy calls: {summary['analysis_worthy']}
-- Not analysis worthy calls: {summary['not_analysis_worthy']}
+- Full analysis calls: {summary['full_analysis']}
+- Follow-up only calls: {summary['follow_up_only']}
+- Not worthy calls: {summary['not_worthy']}
 - Converted calls: {summary['converted']}
 - Not converted calls: {summary['not_converted']}
 - Average score: {avg_text}
