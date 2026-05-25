@@ -449,7 +449,7 @@ IMPORTANT ABOUT IMPROVEMENT AREAS:
 The field name must be improvement_areas. Mention all important improvement areas in detail. Do not create separate database columns for parameters. Put the parameter-wise details inside this field.
 
 IMPORTANT ABOUT LEARNINGS:
-The field name must be learnings. These should be practical hacks/tips for the student partner to improve future conversions. They should not only describe this call. Write general next-time learning points based on what happened in this call.
+The field name must be learnings. These should be practical hacks/tips for the student partner to improve future conversions. They should not only describe this call. Try to avoid parameters related learnings here , because that they already know, this must like hack trick or Psychology tricks.
 
 CASE 1: If Guardrails FAIL, return this JSON structure and do not analyze anything else.
 
