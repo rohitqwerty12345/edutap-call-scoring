@@ -192,7 +192,7 @@ CRITICAL — Active vs Passive:
 Do NOT count information the student volunteered on their own without being asked. A student who volunteers 7 pain points while the student partner asks one vague question gets the student partner a low score — because the student did the work. Measure what the student partner pulled out, not what the student chose to offer.
 
 CRITICAL — Internal consistency check:
-Before finalising the Discovery score, check your own improvement suggestions. If you are listing multiple important questions that were never asked in biggest_improvement_area, the Discovery score cannot be 7 or above. A 7 means the student partner did strong active discovery. If you found 3 or more significant missed questions, the score is 5 or below. A score and its improvement suggestions must agree — if they contradict each other, lower the score.
+Before finalising the Discovery score, check your own improvement suggestions. If you are listing multiple important questions that were never asked in improvement_areas, the Discovery score cannot be 7 or above. A 7 means the student partner did strong active discovery. If you found 3 or more significant missed questions, the score is 5 or below. A score and its improvement suggestions must agree — if they contradict each other, lower the score.
 
 Final scoring table:
 | What came out | Who pulled it out | Score |
@@ -426,8 +426,8 @@ not_worthy
 If the call is full_analysis or follow_up_only, return only valid JSON.
 No markdown. No explanation before or after. Just the raw JSON.
 
-IMPORTANT ABOUT PARAMETER NAMES:
-Use these final parameter names everywhere in JSON values, reports, and coaching text:
+IMPORTANT ABOUT FINAL OUTPUT NAMES:
+Use these final names everywhere in JSON values, reports, strengths, improvement areas, and learnings:
 - Guardrails
 - Opening
 - Discovery
@@ -435,6 +435,21 @@ Use these final parameter names everywhere in JSON values, reports, and coaching
 - Personal Urgency
 - Real Hesitation Reason
 - Clear Next Step
+
+IMPORTANT ABOUT AVERAGE SCORE:
+Do not give a sum as the main score. Give an average score out of 10.
+For full_analysis, calculate Average Score from all scored numeric parameters except Guardrails. If Real Hesitation Reason is N/A, exclude it from the average.
+For follow_up_only, Average Score is the Clear Next Step score out of 10.
+If Guardrails FAIL, Average Score is 0/10.
+
+IMPORTANT ABOUT STRENGTHS:
+The field name must be strengths. Mention all meaningful strengths in detail, not only the single biggest strength. If a parameter had no strength, do not invent one.
+
+IMPORTANT ABOUT IMPROVEMENT AREAS:
+The field name must be improvement_areas. Mention all important improvement areas in detail. Do not create separate database columns for parameters. Put the parameter-wise details inside this field.
+
+IMPORTANT ABOUT LEARNINGS:
+The field name must be learnings. These should be practical hacks/tips for the student partner to improve future conversions. They should not only describe this call. Write general next-time learning points based on what happened in this call.
 
 CASE 1: If Guardrails FAIL, return this JSON structure and do not analyze anything else.
 
@@ -447,47 +462,19 @@ CASE 1: If Guardrails FAIL, return this JSON structure and do not analyze anythi
     "reason": "Quote the exact line or describe the exact behaviour that caused failure.",
     "false_information_detail": "Describe exactly what was said and what is wrong, or null if the failure was behaviour/tone."
   },
-  "opening": {
-    "score": 0,
-    "why_this_score": "Not evaluated because Guardrails failed."
-  },
-  "discovery": {
-    "score": 0,
-    "why_this_score": "Not evaluated because Guardrails failed."
-  },
-  "evidence": {
-    "score": 0,
-    "why_this_score": "Not evaluated because Guardrails failed."
-  },
-  "personal_urgency": {
-    "parameter_name": "Personal Urgency",
-    "score": 0,
-    "why_this_score": "Not evaluated because Guardrails failed."
-  },
-  "real_hesitation_reason": {
-    "parameter_name": "Real Hesitation Reason",
-    "score": 0,
-    "na": true,
-    "why_this_score": "Not evaluated because Guardrails failed."
-  },
-  "clear_next_step": {
-    "parameter_name": "Clear Next Step",
-    "score": 0,
-    "why_this_score": "Not evaluated because Guardrails failed."
-  },
+  "opening": {"score": 0, "why_this_score": "Not evaluated because Guardrails failed."},
+  "discovery": {"score": 0, "why_this_score": "Not evaluated because Guardrails failed."},
+  "evidence": {"score": 0, "why_this_score": "Not evaluated because Guardrails failed."},
+  "personal_urgency": {"parameter_name": "Personal Urgency", "score": 0, "why_this_score": "Not evaluated because Guardrails failed."},
+  "real_hesitation_reason": {"parameter_name": "Real Hesitation Reason", "score": 0, "na": true, "why_this_score": "Not evaluated because Guardrails failed."},
+  "clear_next_step": {"parameter_name": "Clear Next Step", "score": 0, "why_this_score": "Not evaluated because Guardrails failed."},
   "overall_score": {
-    "guardrails": "FAIL",
-    "opening": "0/10",
-    "discovery": "0/10",
-    "evidence": "0/10",
-    "personal_urgency": "0/10",
-    "real_hesitation_reason": "0/10",
-    "clear_next_step": "0/10",
-    "total": "0/60 for full_analysis or 0/10 for follow_up_only",
+    "average_score": "0/10",
     "percentage": "0%",
+    "score_parameter_wise": "Guardrails: FAIL\nOpening: 0/10\nDiscovery: 0/10\nEvidence: 0/10\nPersonal Urgency: 0/10\nReal Hesitation Reason: 0/10\nClear Next Step: 0/10",
     "guardrails_review_flag": "Yes — requires manager review"
   },
-  "top_strength": {
+  "strengths": {
     "summary": null,
     "by_parameter": {
       "guardrails": null,
@@ -499,7 +486,7 @@ CASE 1: If Guardrails FAIL, return this JSON structure and do not analyze anythi
       "clear_next_step": null
     }
   },
-  "biggest_improvement_area": {
+  "improvement_areas": {
     "summary": "Guardrails failed, so the call receives zero score. Fix the Guardrails issue before judging sales skill.",
     "by_parameter": {
       "guardrails": "Exactly what was said or done, why it failed, and what should have been said instead.",
@@ -511,7 +498,7 @@ CASE 1: If Guardrails FAIL, return this JSON structure and do not analyze anythi
       "clear_next_step": null
     }
   },
-  "coaching_note": "Two to three sentences written directly to the student partner. Focus only on the Guardrails issue because no further scoring is done after Guardrails fail."
+  "learnings": "Two to five practical next-time learnings for the student partner. Focus on future conversion improvement and Guardrails safety."
 }
 
 CASE 2: If call_type is follow_up_only and Guardrails PASS, return this JSON structure. Score only Clear Next Step.
@@ -525,29 +512,11 @@ CASE 2: If call_type is follow_up_only and Guardrails PASS, return this JSON str
     "reason": "One specific thing showing the student partner stayed respectful and honest.",
     "false_information_detail": null
   },
-  "opening": {
-    "score": null,
-    "why_this_score": "Not applicable because this was a follow-up-only short call, not a full sales conversation."
-  },
-  "discovery": {
-    "score": null,
-    "why_this_score": "Not applicable because this was a follow-up-only short call, not a full sales conversation."
-  },
-  "evidence": {
-    "score": null,
-    "why_this_score": "Not applicable because this was a follow-up-only short call, not a full sales conversation."
-  },
-  "personal_urgency": {
-    "parameter_name": "Personal Urgency",
-    "score": null,
-    "why_this_score": "Not applicable because this was a follow-up-only short call, not a full sales conversation."
-  },
-  "real_hesitation_reason": {
-    "parameter_name": "Real Hesitation Reason",
-    "score": null,
-    "na": true,
-    "why_this_score": "Not applicable because this was a follow-up-only short call, not a full sales conversation."
-  },
+  "opening": {"score": null, "why_this_score": "Not applicable because this was a follow-up-only short call, not a full sales conversation."},
+  "discovery": {"score": null, "why_this_score": "Not applicable because this was a follow-up-only short call, not a full sales conversation."},
+  "evidence": {"score": null, "why_this_score": "Not applicable because this was a follow-up-only short call, not a full sales conversation."},
+  "personal_urgency": {"parameter_name": "Personal Urgency", "score": null, "why_this_score": "Not applicable because this was a follow-up-only short call, not a full sales conversation."},
+  "real_hesitation_reason": {"parameter_name": "Real Hesitation Reason", "score": null, "na": true, "why_this_score": "Not applicable because this was a follow-up-only short call, not a full sales conversation."},
   "clear_next_step": {
     "parameter_name": "Clear Next Step",
     "score": 0,
@@ -559,42 +528,25 @@ CASE 2: If call_type is follow_up_only and Guardrails PASS, return this JSON str
     "why_this_score": "One sentence explaining whether the follow-up felt caring and clear or vague and random."
   },
   "overall_score": {
-    "guardrails": "PASS",
-    "opening": "N/A",
-    "discovery": "N/A",
-    "evidence": "N/A",
-    "personal_urgency": "N/A",
-    "real_hesitation_reason": "N/A",
-    "clear_next_step": "X/10",
-    "total": "X/10",
+    "average_score": "X/10",
     "percentage": "X%",
+    "score_parameter_wise": "Guardrails: PASS\nClear Next Step: X/10",
     "guardrails_review_flag": "No"
   },
-  "top_strength": {
-    "summary": "Two to three sentences summarising what was good in the follow-up handling, or null if nothing was good.",
+  "strengths": {
+    "summary": "Mention all meaningful strengths in the follow-up handling, or null if nothing was good.",
     "by_parameter": {
       "guardrails": "What the student partner did well here with exact quote, or null if nothing noteworthy",
-      "opening": null,
-      "discovery": null,
-      "evidence": null,
-      "personal_urgency": null,
-      "real_hesitation_reason": null,
       "clear_next_step": "What the student partner did well in fixing the next step with exact quote, or null if nothing noteworthy"
     }
   },
-  "biggest_improvement_area": {
-    "summary": "Two to three sentences explaining how the student partner should handle a busy student better next time.",
+  "improvement_areas": {
+    "summary": "Explain all important ways the student partner should handle a busy student better next time.",
     "by_parameter": {
-      "guardrails": null,
-      "opening": null,
-      "discovery": null,
-      "evidence": null,
-      "personal_urgency": null,
-      "real_hesitation_reason": null,
-      "clear_next_step": "If incomplete: exactly what was missing, what was said (quote), and what a complete caring follow-up line would have looked like. Example: 'I understand you are busy. I am calling because I want to help you with your preparation direction. Can I call you tomorrow at 5 PM? I will send the details on WhatsApp so you can check when free.'"
+      "clear_next_step": "If incomplete: exactly what was missing, what was said (quote), and what a complete caring follow-up line would have looked like."
     }
   },
-  "coaching_note": "Two to three sentences written directly to the student partner. Focus only on how they handled the short follow-up moment."
+  "learnings": "Two to five practical next-time learnings for handling busy/call-later students better and improving future conversions."
 }
 
 CASE 3: If call_type is full_analysis and Guardrails PASS, return this JSON structure.
@@ -617,14 +569,14 @@ CASE 3: If call_type is full_analysis and Guardrails PASS, return this JSON stru
   },
   "discovery": {
     "score": 0,
-    "questions_asked_by_student_partner": ["List only questions the student partner ACTIVELY asked that reveal something about the student's situation, fear, gap, or background. Do NOT include handoff questions like 'do you have any query', 'kuch aur poochna hai', feedback requests like 'kuch feedback dena chahte ho', pitch setups like 'direct course ke baare mein bataaun', or generic intent checks like 'are you planning to prepare seriously'. Only include questions where the student's honest answer tells the partner something they did not already know about the student's life, fears, or situation."],
+    "questions_asked_by_student_partner": ["List only questions the student partner ACTIVELY asked that reveal something about the student's situation, fear, gap, or background."],
     "information_student_volunteered_unprompted": ["List what the student said on their own without being asked — this does not count toward discovery score"],
     "what_student_partner_found_out": ["Combined bullet list of the student's situation — from both active questions and volunteered info"],
     "quality_assessment": "Real fears revealed, or Surface facts only, or Almost nothing",
     "credit_assessment": "Choose one: Student partner actively drew it out / Partner received and followed up on the fear itself / Partner received and followed up on facts only not the fear / Partner received and just listened or answered questions / Partner received and moved to pitch",
     "student_said_own_problem_out_loud": "Yes, Partially, or No",
     "best_discovery_moment_quote": "Exact line where student articulated their own situation or fear",
-    "why_this_score": "One sentence — state: (1) what quality came out, (2) whether it was volunteered or drawn out, (3) whether the partner followed up on the fear or only on the facts. If your improvement suggestions list 3+ missed questions, score must be 5 or below — state this reconciliation explicitly."
+    "why_this_score": "One sentence — state: (1) what quality came out, (2) whether it was volunteered or drawn out, (3) whether the partner followed up on the fear or only on the facts."
   },
   "evidence": {
     "score": 0,
@@ -664,19 +616,13 @@ CASE 3: If call_type is full_analysis and Guardrails PASS, return this JSON stru
     "why_this_score": "One sentence"
   },
   "overall_score": {
-    "guardrails": "PASS",
-    "opening": "X/10",
-    "discovery": "X/10",
-    "evidence": "X/10",
-    "personal_urgency": "X/10",
-    "real_hesitation_reason": "X/10 or N/A",
-    "clear_next_step": "X/10",
-    "total": "X/60 or X/50 if Real Hesitation Reason is N/A",
+    "average_score": "X/10",
     "percentage": "X%",
+    "score_parameter_wise": "Guardrails: PASS\nOpening: X/10\nDiscovery: X/10\nEvidence: X/10\nPersonal Urgency: X/10\nReal Hesitation Reason: X/10 or N/A\nClear Next Step: X/10",
     "guardrails_review_flag": "No"
   },
-  "top_strength": {
-    "summary": "Two to three sentences summarising the strongest thing the student partner did across the entire call.",
+  "strengths": {
+    "summary": "Mention all meaningful strengths the student partner showed across the call. Do not limit to only one top strength.",
     "by_parameter": {
       "guardrails": "What the student partner did well here with exact quote, or null if nothing noteworthy",
       "opening": "What the student partner did well here with exact quote, or null if nothing noteworthy",
@@ -687,8 +633,8 @@ CASE 3: If call_type is full_analysis and Guardrails PASS, return this JSON stru
       "clear_next_step": "What the student partner did well here with exact quote, or null if nothing noteworthy"
     }
   },
-  "biggest_improvement_area": {
-    "summary": "Two to three sentences summarising the most critical things to fix across the call.",
+  "improvement_areas": {
+    "summary": "Mention all important areas to improve across the call. Be detailed, specific, and actionable.",
     "by_parameter": {
       "guardrails": "If failed or mistake: exactly what was said (quote), exactly what was wrong, and exactly what should have been said instead. Null if no issue.",
       "opening": "If could have opened better: exactly what was said (quote), what was missing, and what a better opening would have sounded like with an example line. Null if no issue.",
@@ -699,6 +645,6 @@ CASE 3: If call_type is full_analysis and Guardrails PASS, return this JSON stru
       "clear_next_step": "If incomplete: exactly what was missing, what was said (quote), and what complete Clear Next Step would have looked like for this specific call. Null if no issue."
     }
   },
-  "coaching_note": "Two to three sentences written directly to the student partner — not about them. Honest but not harsh. Specific and actionable. Written as if a senior colleague is giving real feedback after sitting with them on this call. Address the student partner as you and use their name if mentioned in the transcript."
+  "learnings": "Three to five practical next-time hacks/tips for better conversion. These should be general learnings the student partner can use in future calls, based on this call."
 }
 """

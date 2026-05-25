@@ -1,165 +1,77 @@
 # EduTap EPFO Call Scoring System
 
-This Streamlit app processes EduTap EPFO call recordings and produces AI-based call-quality scores.
+Final simplified version.
 
-## Final scoring parameters
+## Final database/dashboard columns
 
-The final dashboard/report names are:
+The `call_scores` table should have only these columns:
 
-1. Guardrails
-2. Opening
-3. Discovery
-4. Evidence
-5. Personal Urgency
-6. Real Hesitation Reason
-7. Clear Next Step
+1. Date
+2. Student Number
+3. Call Type
+4. Call Recording Link
+5. Converted Status
+6. Average Score
+7. Score Parameter Wise
+8. Strengths
+9. Improvement Areas
+10. Learnings
+11. Transcript Link
 
-## Final call types
+## Email report columns
 
-The AI now classifies every call into one of these types:
+The CSV sent on email has only these columns:
 
-| Call type | Meaning | Output |
-|---|---|---|
-| `full_analysis` | Real conversation happened about exam, course, student situation, preparation, objection, or buying decision. | Scores all applicable parameters. |
-| `follow_up_only` | Student was busy/could not talk, but student partner handled follow-up enough to judge the ending. | Scores only Guardrails and Clear Next Step. |
-| `not_worthy` | No real conversation and no meaningful follow-up handling. | Saves row as not worthy. |
+1. Call Recording Link
+2. Average Score
+3. Score Parameter Wise
+4. Strengths
+5. Improvement Areas
+6. Learnings
 
-## Guardrails hard-stop rule
+## Model switching from Streamlit Secrets
 
-If Guardrails fails, the call receives zero score. The AI does not analyze the remaining parameters. This is intentional because honesty and student respect are the floor of the call.
+No code edit is needed to change the GPT model. Change this line in Streamlit Secrets:
 
-## What the app does
-
-1. Support team uploads MP3/WAV/M4A call recordings in Streamlit.
-2. The app extracts the student mobile number from the file name.
-3. The audio goes to Deepgram Nova-3 Hindi with diarization enabled.
-4. The transcript goes to OpenAI using the final scoring prompt.
-5. The JSON result is saved in Supabase.
-6. Audio and transcript are uploaded to Supabase Storage.
-7. A password-protected dashboard shows results.
-8. An Excel report is emailed after the batch finishes.
-
-## File structure
-
-```text
-edutap-call-scoring/
-├── app.py
-├── pipeline.py
-├── deepgram_client.py
-├── openai_client.py
-├── supabase_client.py
-├── email_sender.py
-├── scoring_prompt.py
-├── requirements.txt
-├── supabase_migration.sql
-├── .env.example
-└── README.md
+```toml
+OPENAI_MODEL = "gpt-5.5"
 ```
 
-## 1. Supabase setup
+When you want a lower-cost model, change only the value, for example:
 
-Open Supabase SQL Editor and run:
+```toml
+OPENAI_MODEL = "gpt-5.4"
+```
+
+Then reboot/redeploy the Streamlit app.
+
+## Required files to replace
+
+Replace these files in GitHub:
+
+```text
+app.py
+supabase_client.py
+email_sender.py
+scoring_prompt.py
+supabase_migration.sql
+README.md
+.env.example
+```
+
+Other files can stay as they are.
+
+## Supabase setup
+
+After replacing files in GitHub, open Supabase SQL Editor and run:
 
 ```text
 supabase_migration.sql
 ```
 
-This creates/updates:
+This will simplify the `call_scores` table so only the final requested columns remain.
 
-- `call_scores` table
-- final database columns using the final parameter names
-- public `call-recordings` storage bucket
-- public `call-transcripts` storage bucket
-- useful indexes for dashboard loading
-
-For quick testing, either disable Row Level Security on `call_scores` or use a Supabase service-role key as `SUPABASE_KEY`.
-
-## Final important database columns
-
-Main identifiers:
-
-```text
-student_number
-call_type
-call_audio_link
-call_transcript
-call_transcript_link
-analysis_worthy
-converted_status
-ai_output_json
-```
-
-Parameter score columns:
-
-```text
-guardrails
-opening_score
-discovery_score
-evidence_score
-personal_urgency_score
-real_hesitation_reason_score
-clear_next_step_score
-overall_score
-```
-
-Detailed columns are also created for quotes, reasons, and explanations for every parameter.
-
-## 2. Install locally
-
-```bash
-pip install -r requirements.txt
-```
-
-## 3. Create `.env`
-
-```bash
-cp .env.example .env
-```
-
-Fill in:
-
-```text
-DEEPGRAM_API_KEY=
-OPENAI_API_KEY=
-OPENAI_MODEL=gpt-5.5
-OPENAI_REASONING_EFFORT=xhigh
-SUPABASE_URL=
-SUPABASE_KEY=
-SENDER_EMAIL=creativedits123@gmail.com
-SENDER_PASSWORD=
-RECIPIENT_EMAILS=extrastuff0980@gmail.com
-DASHBOARD_PASSWORD=show123
-MAX_PARALLEL_CALLS=5
-```
-
-For Gmail, `SENDER_PASSWORD` must be a Gmail App Password, not the normal Gmail password.
-
-## 4. Run locally
-
-```bash
-streamlit run app.py
-```
-
-## 5. Upload file naming format
-
-Recommended format:
-
-```text
-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx_7974141508.mp3
-```
-
-The app extracts the student mobile number from the digits after the final underscore.
-
-It also has a fallback that extracts any 10-digit number from the filename.
-
-## 6. Deploy to Streamlit Cloud
-
-1. Push all files to GitHub.
-2. Open Streamlit Cloud.
-3. Create a new app from the GitHub repo.
-4. Add secrets in Streamlit Cloud settings.
-
-Use this format in Streamlit Secrets:
+## Streamlit Secrets
 
 ```toml
 DEEPGRAM_API_KEY = "your_deepgram_key_here"
@@ -174,30 +86,3 @@ RECIPIENT_EMAILS = "extrastuff0980@gmail.com"
 DASHBOARD_PASSWORD = "show123"
 MAX_PARALLEL_CALLS = "5"
 ```
-
-## Important test checklist
-
-Before giving the app to the support team, test 3 real calls:
-
-- one full conversation
-- one busy/call-later conversation
-- one not-worthy call
-
-Verify:
-
-- Transcript is generated.
-- Speaker mapping is correct.
-- OpenAI returns valid JSON or exact `not_worthy`.
-- Supabase row is created.
-- Audio link opens.
-- Transcript link opens.
-- Dashboard shows final parameter names.
-- Excel report uses final parameter names.
-- Guardrails fail gives zero score.
-- Follow-up-only call scores only Clear Next Step.
-
-## Speaker mapping warning
-
-Deepgram assigns `Speaker 0` to whoever speaks first. This code assumes the student partner speaks first.
-
-If test recordings show the student is labeled as Speaker A, swap the labels in `_speaker_label()` inside `deepgram_client.py`.
