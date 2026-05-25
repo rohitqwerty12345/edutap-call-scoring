@@ -453,7 +453,7 @@ The field name must be improvement_areas. Mention all important improvement area
 IMPORTANT ABOUT LEARNINGS:
 The field name must be learnings. Return it as a JSON array of separate points, not as one paragraph.
 Each item should be one practical hack/tip for the student partner to improve future conversions.
-These should not only describe this call. Write general next-time learning points based on what happened in this call.
+These should not only describe this call. Try to avoid parameter trick here because student parnter already knows this, it must be kind ot hack trick or Psychology tricks.
 Correct format: "learnings": ["Point 1", "Point 2", "Point 3"]
 Wrong format: "learnings": "1. Point 1 2. Point 2 3. Point 3"
 
