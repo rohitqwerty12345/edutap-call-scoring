@@ -437,10 +437,12 @@ Use these final names everywhere in JSON values, reports, strengths, improvement
 - Clear Next Step
 
 IMPORTANT ABOUT AVERAGE SCORE:
-Do not give a sum as the main score. Give an average score out of 10.
+Do not give a sum as the main score. Give only the average score as a plain number out of 10.
+Correct format: "3.0", "6.5", "8.0".
+Wrong format: "3.0/10", "3.0/10 (30%)", "18/60", "30%".
 For full_analysis, calculate Average Score from all scored numeric parameters except Guardrails. If Real Hesitation Reason is N/A, exclude it from the average.
-For follow_up_only, Average Score is the Clear Next Step score out of 10.
-If Guardrails FAIL, Average Score is 0/10.
+For follow_up_only, Average Score is the Clear Next Step score as a plain number.
+If Guardrails FAIL, Average Score is "0.0".
 
 IMPORTANT ABOUT STRENGTHS:
 The field name must be strengths. Mention all meaningful strengths in detail, not only the single biggest strength. If a parameter had no strength, do not invent one.
@@ -449,7 +451,11 @@ IMPORTANT ABOUT IMPROVEMENT AREAS:
 The field name must be improvement_areas. Mention all important improvement areas in detail. Do not create separate database columns for parameters. Put the parameter-wise details inside this field.
 
 IMPORTANT ABOUT LEARNINGS:
-The field name must be learnings. These should be practical hacks/tips for the student partner to improve future conversions. They should not only describe this call. Try to avoid parameters related learnings here , because that they already know, this must like hack trick or Psychology tricks.
+The field name must be learnings. Return it as a JSON array of separate points, not as one paragraph.
+Each item should be one practical hack/tip for the student partner to improve future conversions.
+These should not only describe this call. Write general next-time learning points based on what happened in this call.
+Correct format: "learnings": ["Point 1", "Point 2", "Point 3"]
+Wrong format: "learnings": "1. Point 1 2. Point 2 3. Point 3"
 
 CASE 1: If Guardrails FAIL, return this JSON structure and do not analyze anything else.
 
@@ -469,7 +475,7 @@ CASE 1: If Guardrails FAIL, return this JSON structure and do not analyze anythi
   "real_hesitation_reason": {"parameter_name": "Real Hesitation Reason", "score": 0, "na": true, "why_this_score": "Not evaluated because Guardrails failed."},
   "clear_next_step": {"parameter_name": "Clear Next Step", "score": 0, "why_this_score": "Not evaluated because Guardrails failed."},
   "overall_score": {
-    "average_score": "0/10",
+    "average_score": "0.0",
     "percentage": "0%",
     "score_parameter_wise": "Guardrails: FAIL\nOpening: 0/10\nDiscovery: 0/10\nEvidence: 0/10\nPersonal Urgency: 0/10\nReal Hesitation Reason: 0/10\nClear Next Step: 0/10",
     "guardrails_review_flag": "Yes — requires manager review"
@@ -498,7 +504,7 @@ CASE 1: If Guardrails FAIL, return this JSON structure and do not analyze anythi
       "clear_next_step": null
     }
   },
-  "learnings": "Two to five practical next-time learnings for the student partner. Focus on future conversion improvement and Guardrails safety."
+  "learnings": ["Two to five practical next-time learnings for the student partner. Focus on future conversion improvement and Guardrails safety. Return each learning as a separate array item."]
 }
 
 CASE 2: If call_type is follow_up_only and Guardrails PASS, return this JSON structure. Score only Clear Next Step.
@@ -528,7 +534,7 @@ CASE 2: If call_type is follow_up_only and Guardrails PASS, return this JSON str
     "why_this_score": "One sentence explaining whether the follow-up felt caring and clear or vague and random."
   },
   "overall_score": {
-    "average_score": "X/10",
+    "average_score": "X.X",
     "percentage": "X%",
     "score_parameter_wise": "Guardrails: PASS\nClear Next Step: X/10",
     "guardrails_review_flag": "No"
@@ -546,7 +552,7 @@ CASE 2: If call_type is follow_up_only and Guardrails PASS, return this JSON str
       "clear_next_step": "If incomplete: exactly what was missing, what was said (quote), and what a complete caring follow-up line would have looked like."
     }
   },
-  "learnings": "Two to five practical next-time learnings for handling busy/call-later students better and improving future conversions."
+  "learnings": ["Two to five practical next-time learnings for handling busy/call-later students better and improving future conversions. Return each learning as a separate array item."]
 }
 
 CASE 3: If call_type is full_analysis and Guardrails PASS, return this JSON structure.
@@ -616,7 +622,7 @@ CASE 3: If call_type is full_analysis and Guardrails PASS, return this JSON stru
     "why_this_score": "One sentence"
   },
   "overall_score": {
-    "average_score": "X/10",
+    "average_score": "X.X",
     "percentage": "X%",
     "score_parameter_wise": "Guardrails: PASS\nOpening: X/10\nDiscovery: X/10\nEvidence: X/10\nPersonal Urgency: X/10\nReal Hesitation Reason: X/10 or N/A\nClear Next Step: X/10",
     "guardrails_review_flag": "No"
@@ -645,6 +651,6 @@ CASE 3: If call_type is full_analysis and Guardrails PASS, return this JSON stru
       "clear_next_step": "If incomplete: exactly what was missing, what was said (quote), and what complete Clear Next Step would have looked like for this specific call. Null if no issue."
     }
   },
-  "learnings": "Three to five practical next-time hacks/tips for better conversion. These should be general learnings the student partner can use in future calls, based on this call."
+  "learnings": ["Three to five practical next-time hacks/tips for better conversion. These should be general learnings the student partner can use in future calls, based on this call. Return each learning as a separate array item."]
 }
 """

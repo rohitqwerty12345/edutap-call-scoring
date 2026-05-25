@@ -114,7 +114,18 @@ def _plain_summary_text(value: Any) -> str:
             return "\n".join(lines)
         return json.dumps(value, ensure_ascii=False)
     if isinstance(value, list):
-        return "\n".join(_plain_summary_text(item) for item in value if item is not None)
+        lines = []
+        for item in value:
+            if item is None:
+                continue
+            text = _plain_summary_text(item).strip()
+            if not text:
+                continue
+            if re.match(r"^[-•\d]", text):
+                lines.append(text)
+            else:
+                lines.append(f"- {text}")
+        return "\n".join(lines)
     if isinstance(value, str):
         text = value.strip()
         if text.startswith("{") or text.startswith("["):
@@ -122,7 +133,9 @@ def _plain_summary_text(value: Any) -> str:
                 return _plain_summary_text(json.loads(text))
             except Exception:
                 return value
-        return value
+        # Make numbered learning paragraphs readable: "1. ... 2. ..." -> separate lines.
+        text = re.sub(r"\s+(?=\d+[.)]\s+)", "\n", text)
+        return text
     return str(value)
 
 
@@ -159,6 +172,35 @@ def _format_score(score: float | None) -> str:
     return f"{score:.1f}".rstrip("0").rstrip(".")
 
 
+def _format_average(score: float | None) -> str:
+    """Average Score must be shown as a plain number only, e.g. 3.0."""
+    if score is None:
+        return ""
+    return f"{score:.1f}"
+
+
+def _average_from_text(value: Any) -> str | None:
+    """Convert strings like '3.0/10 (30%)' or '19/60' to plain average score like '3.0' or '3.2'."""
+    if value is None:
+        return None
+    text = str(value).strip()
+    if not text:
+        return None
+
+    ratio = re.search(r"(\d+(?:\.\d+)?)\s*/\s*(\d+(?:\.\d+)?)", text)
+    if ratio:
+        numerator = float(ratio.group(1))
+        denominator = float(ratio.group(2))
+        if denominator > 0:
+            return _format_average((numerator / denominator) * 10)
+
+    number = re.search(r"\d+(?:\.\d+)?", text)
+    if number:
+        return _format_average(float(number.group(0)))
+
+    return None
+
+
 def _score_label(section: Dict[str, Any], include_suffix: bool = True) -> str:
     if isinstance(section, dict) and section.get("na") is True:
         return "N/A"
@@ -171,17 +213,14 @@ def _score_label(section: Dict[str, Any], include_suffix: bool = True) -> str:
 def _average_score(result: Dict[str, Any], call_type: str) -> str:
     guardrails = _section(result, "guardrails")
     if str(guardrails.get("result", "")).upper() == "FAIL":
-        return "0/10 (0%)"
+        return "0.0"
 
     overall = result.get("overall_score") or {}
     if isinstance(overall, dict):
         direct = overall.get("average_score")
-        percentage = overall.get("percentage")
-        if direct:
-            direct_text = str(direct)
-            if percentage and str(percentage) not in direct_text:
-                return f"{direct_text} ({percentage})"
-            return direct_text
+        normalized = _average_from_text(direct)
+        if normalized is not None:
+            return normalized
 
     if call_type == "follow_up_only":
         scores = [_score_number(_section(result, "clear_next_step", "closure"))]
@@ -198,8 +237,7 @@ def _average_score(result: Dict[str, Any], call_type: str) -> str:
     if not valid:
         return ""
     avg = sum(valid) / len(valid)
-    pct = avg * 10
-    return f"{_format_score(avg)}/10 ({_format_score(pct)}%)"
+    return _format_average(avg)
 
 
 def _score_parameter_wise_from_result(result: Dict[str, Any], call_type: str) -> str:
@@ -349,8 +387,20 @@ def save_result(student_number: str, audio_filename: str, transcript: str, resul
     return row
 
 
+def _normalize_display_row(row: Dict[str, Any]) -> Dict[str, Any]:
+    # Old rows may still contain values like '3.0/10 (30%)' or '19/60'. Show only the average number.
+    normalized_average = _average_from_text(row.get("Average Score"))
+    if normalized_average is not None:
+        row["Average Score"] = normalized_average
+    row["Learnings"] = _plain_summary_text(row.get("Learnings"))
+    row["Strengths"] = _plain_summary_text(row.get("Strengths"))
+    row["Improvement Areas"] = _plain_summary_text(row.get("Improvement Areas"))
+    return row
+
+
 def _sort_rows(rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    return sorted(rows, key=lambda r: str(r.get("Date", "")), reverse=True)
+    normalized = [_normalize_display_row(dict(r)) for r in rows]
+    return sorted(normalized, key=lambda r: str(r.get("Date", "")), reverse=True)
 
 
 def fetch_all_results(limit: int = 500) -> List[Dict[str, Any]]:

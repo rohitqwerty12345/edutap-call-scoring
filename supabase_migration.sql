@@ -119,3 +119,30 @@ alter table public.call_scores alter column "Date" set default now();
 create index if not exists idx_call_scores_final_date on public.call_scores ("Date" desc);
 create index if not exists idx_call_scores_final_student_number on public.call_scores ("Student Number");
 create index if not exists idx_call_scores_final_call_type on public.call_scores ("Call Type");
+
+-- Normalize Average Score to plain number only: "3.0", not "3.0/10 (30%)" or "19/60".
+do $$
+declare
+  r record;
+  numerator numeric;
+  denominator numeric;
+  new_score text;
+begin
+  for r in select ctid, "Average Score" as score_text from public.call_scores loop
+    if r.score_text is null or trim(r.score_text) = '' then
+      continue;
+    end if;
+
+    if r.score_text ~ '^\s*\d+(\.\d+)?\s*/\s*\d+(\.\d+)?' then
+      numerator := (regexp_match(r.score_text, '(\d+(?:\.\d+)?)\s*/\s*(\d+(?:\.\d+)?)'))[1]::numeric;
+      denominator := (regexp_match(r.score_text, '(\d+(?:\.\d+)?)\s*/\s*(\d+(?:\.\d+)?)'))[2]::numeric;
+      if denominator > 0 then
+        new_score := to_char((numerator / denominator) * 10, 'FM999990.0');
+        update public.call_scores set "Average Score" = new_score where ctid = r.ctid;
+      end if;
+    elsif r.score_text ~ '^\s*\d+(\.\d+)?\s*$' then
+      new_score := to_char(trim(r.score_text)::numeric, 'FM999990.0');
+      update public.call_scores set "Average Score" = new_score where ctid = r.ctid;
+    end if;
+  end loop;
+end $$;

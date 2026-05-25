@@ -65,7 +65,11 @@ def _display_value(row, key, default=""):
     value = row.get(key, default)
     if value is None:
         return default
-    return str(value)
+    text = str(value)
+    # Make numbered point paragraphs easier to read in expanded cell view/tooltips.
+    import re
+    text = re.sub(r"\s+(?=\d+[.)]\s+)", "\n", text.strip())
+    return text
 
 
 def _make_display_rows(rows):
@@ -189,8 +193,13 @@ with tab2:
             column_config = {}
             try:
                 column_config = {
-                    "Call Recording Link": st.column_config.LinkColumn("Call Recording Link"),
-                    "Transcript Link": st.column_config.LinkColumn("Transcript Link"),
+                    "Call Recording Link": st.column_config.LinkColumn("Call Recording Link", width="medium"),
+                    "Transcript Link": st.column_config.LinkColumn("Transcript Link", width="medium"),
+                    "Average Score": st.column_config.TextColumn("Average Score", width="small"),
+                    "Score Parameter Wise": st.column_config.TextColumn("Score Parameter Wise", width="medium"),
+                    "Strengths": st.column_config.TextColumn("Strengths", width="large"),
+                    "Improvement Areas": st.column_config.TextColumn("Improvement Areas", width="large"),
+                    "Learnings": st.column_config.TextColumn("Learnings", width="large"),
                 }
             except Exception:
                 column_config = {}
