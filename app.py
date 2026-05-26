@@ -1,14 +1,14 @@
+import html
 import json
 import os
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date
 
 import pandas as pd
 import streamlit as st
 from dotenv import load_dotenv
 
-from email_sender import send_report
-from pipeline import process_single_file
+from email_sender import send_error_report, send_report
+from pipeline import extract_student_number, process_single_file
 from supabase_client import fetch_all_results
 
 load_dotenv()
@@ -55,10 +55,98 @@ def get_max_parallel_calls(total_files: int) -> int:
     return workers
 
 
-st.set_page_config(page_title="EduTap Call Scoring", page_icon="📞", layout="wide")
-st.title("EduTap Call Scoring System")
+def _simple_error_message(exc: Exception) -> str:
+    text = str(exc or "").lower()
 
-tab1, tab2, tab3 = st.tabs(["Upload Calls", "View Results", "Debug Last Run"])
+    if "deepgram_api_key" in text:
+        return "The transcription service is not set up. Please contact the admin."
+    if "openai_api_key" in text:
+        return "The scoring service is not set up. Please contact the admin."
+    if "supabase_url" in text or "supabase_key" in text:
+        return "The database connection is not set up. Please contact the admin."
+    if "sender_email" in text or "sender_password" in text or "recipient_emails" in text:
+        return "The email report could not be sent. Please contact the admin."
+    if "no transcript words returned" in text:
+        return "We could not read the audio clearly. Please check the recording and try again."
+    if "json" in text or "expecting value" in text or "decode" in text:
+        return "The scoring result could not be read properly. Please try this file again."
+    if "timeout" in text or "timed out" in text:
+        return "Processing took too long. Please try again with a smaller batch."
+    if "storage" in text or "bucket" in text or "upload" in text:
+        return "The call file could not be saved. Please contact the admin."
+    if "database" in text or "relation" in text or "column" in text or "insert" in text:
+        return "The result could not be saved. Please contact the admin."
+
+    return "This call could not be processed. Please try again or contact the admin."
+
+
+def _render_processing_overlay(placeholder, current: int, total: int) -> None:
+    current = max(1, min(current, total))
+    placeholder.markdown(
+        f"""
+        <style>
+        .edutap-processing-backdrop {{
+            position: fixed;
+            inset: 0;
+            background: rgba(12, 17, 25, 0.72);
+            z-index: 999999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(2px);
+        }}
+        .edutap-processing-box {{
+            width: min(440px, 86vw);
+            background: #ffffff;
+            color: #111827;
+            border-radius: 18px;
+            padding: 34px 30px;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.35);
+            text-align: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }}
+        .edutap-processing-title {{
+            font-size: 26px;
+            line-height: 1.2;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }}
+        .edutap-processing-subtitle {{
+            font-size: 18px;
+            color: #374151;
+            margin-bottom: 22px;
+        }}
+        .edutap-processing-bar {{
+            width: 100%;
+            height: 10px;
+            background: #e5e7eb;
+            border-radius: 999px;
+            overflow: hidden;
+        }}
+        .edutap-processing-fill {{
+            height: 100%;
+            width: {(current / total) * 100:.2f}%;
+            background: #ef4444;
+            border-radius: 999px;
+            transition: width 300ms ease;
+        }}
+        .edutap-processing-note {{
+            margin-top: 16px;
+            color: #6b7280;
+            font-size: 14px;
+        }}
+        </style>
+        <div class="edutap-processing-backdrop">
+            <div class="edutap-processing-box">
+                <div class="edutap-processing-title">Processing calls</div>
+                <div class="edutap-processing-subtitle">Processing {current} of {total}</div>
+                <div class="edutap-processing-bar"><div class="edutap-processing-fill"></div></div>
+                <div class="edutap-processing-note">Please keep this window open until processing is complete.</div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 def _display_value(row, key, default=""):
@@ -89,6 +177,11 @@ def _make_display_rows(rows):
     return display_rows
 
 
+st.set_page_config(page_title="EduTap Call Scoring", page_icon="📞", layout="wide")
+st.title("EduTap Call Scoring System")
+
+tab1, tab2, tab3 = st.tabs(["Upload Calls", "View Results", "Debug Last Run"])
+
 with tab1:
     st.subheader("Upload Call Recordings")
     st.caption("Upload MP3, WAV, or M4A files. Processing begins after you click Analyze.")
@@ -105,57 +198,88 @@ with tab1:
         if st.button("Analyze All Calls", type="primary"):
             saved_rows_this_batch = []
             debug_items_this_batch = []
-            progress_bar = st.progress(0)
-            status_area = st.empty()
+            error_items_this_batch = []
+            overlay = st.empty()
 
             file_payloads = [{"name": f.name, "bytes": f.read()} for f in uploaded_files]
-            max_workers = get_max_parallel_calls(len(file_payloads))
-            status_area.info(f"Processing {len(file_payloads)} file(s) with {max_workers} parallel worker(s).")
+            total_files = len(file_payloads)
+            today_label = str(date.today())
 
-            completed_count = 0
-            with ThreadPoolExecutor(max_workers=max_workers) as executor:
-                future_to_file = {
-                    executor.submit(process_single_file, payload["bytes"], payload["name"]): payload["name"]
-                    for payload in file_payloads
-                }
+            for index, payload in enumerate(file_payloads, start=1):
+                filename = payload["name"]
+                student_number = extract_student_number(filename)
+                _render_processing_overlay(overlay, index, total_files)
 
-                for future in as_completed(future_to_file):
-                    filename = future_to_file[future]
-                    try:
-                        result = future.result()
-                        saved_rows_this_batch.append(result["saved_row"])
-                        debug_items_this_batch.append(
-                            {
-                                "filename": result["filename"],
-                                "student_number": result["student_number"],
-                                "call_type": result.get("call_type"),
-                                "worthy": result["worthy"],
-                                **result["debug"],
-                            }
-                        )
-                        status_area.success(f"Processed successfully: {filename}")
-                    except Exception as exc:
-                        status_area.error(f"Error in {filename}: {exc}")
-                        debug_items_this_batch.append({"filename": filename, "error": str(exc)})
-
-                    completed_count += 1
-                    progress_bar.progress(completed_count / len(file_payloads))
+                try:
+                    result = process_single_file(payload["bytes"], filename)
+                    saved_rows_this_batch.append(result["saved_row"])
+                    debug_items_this_batch.append(
+                        {
+                            "filename": result["filename"],
+                            "student_number": result["student_number"],
+                            "call_type": result.get("call_type"),
+                            "worthy": result["worthy"],
+                            **result["debug"],
+                        }
+                    )
+                except Exception as exc:
+                    simple_error = _simple_error_message(exc)
+                    technical_error = str(exc)
+                    error_items_this_batch.append(
+                        {
+                            "filename": filename,
+                            "student_number": student_number,
+                            "simple_error": simple_error,
+                            "technical_error": technical_error,
+                        }
+                    )
+                    debug_items_this_batch.append(
+                        {
+                            "filename": filename,
+                            "student_number": student_number,
+                            "error": simple_error,
+                            "technical_error": technical_error,
+                        }
+                    )
 
             st.session_state["last_run_debug"] = debug_items_this_batch
+            overlay.empty()
 
+            report_error_items = []
             if saved_rows_this_batch:
                 try:
-                    today_label = str(date.today())
                     send_report(saved_rows_this_batch, batch_label=today_label)
-                    st.success(f"Finished. {len(saved_rows_this_batch)} file(s) saved and email report sent.")
                 except Exception as exc:
-                    st.warning(f"Files were processed and saved, but email sending failed: {exc}")
+                    report_error_items.append(
+                        {
+                            "filename": "Daily email report",
+                            "student_number": "N/A",
+                            "simple_error": _simple_error_message(exc),
+                            "technical_error": str(exc),
+                        }
+                    )
+
+            all_error_items = error_items_this_batch + report_error_items
+            error_email_sent = False
+            if all_error_items:
+                try:
+                    send_error_report(all_error_items, batch_label=today_label)
+                    error_email_sent = True
+                except Exception:
+                    error_email_sent = False
+
+            if not all_error_items and saved_rows_this_batch:
+                st.success("All calls processed successfully. You can now close this window.")
+            elif saved_rows_this_batch and all_error_items:
+                if error_email_sent:
+                    st.warning("Some calls could not be processed. Successful calls are saved. Error details have been sent by email. You can now close this window.")
+                else:
+                    st.warning("Some calls could not be processed. Successful calls are saved. Please contact the admin. You can now close this window.")
             else:
-                st.error("No files were successfully processed.")
-
-            st.success("Upload complete.")
-            st.info("Temporary debug data is available in the Debug Last Run tab.")
-
+                if error_email_sent:
+                    st.error("We could not process the uploaded calls. Error details have been sent by email. Please try again or contact the admin.")
+                else:
+                    st.error("We could not process the uploaded calls. Please try again or contact the admin.")
 
 with tab2:
     st.subheader("Call Score Dashboard")
@@ -179,8 +303,8 @@ with tab2:
 
         try:
             rows = fetch_all_results()
-        except Exception as exc:
-            st.error(f"Could not load results: {exc}")
+        except Exception:
+            st.error("Could not load results. Please contact the admin.")
             rows = []
 
         if not rows:
@@ -216,7 +340,6 @@ with tab2:
 
             st.dataframe(df, use_container_width=True, height=650, column_config=column_config)
 
-
 with tab3:
     st.subheader("Debug Last Run")
     st.warning("Temporary testing tab. Remove before final support-team release.")
@@ -242,6 +365,9 @@ with tab3:
                 with st.expander(title, expanded=True):
                     if item.get("error"):
                         st.error(item["error"])
+                        if item.get("technical_error"):
+                            st.caption("Technical detail is hidden from normal users but available here for debugging.")
+                            st.code(str(item["technical_error"]))
                         continue
 
                     st.markdown("### File information")

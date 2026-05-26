@@ -11,7 +11,6 @@ from typing import Dict, List
 import openpyxl
 from dotenv import load_dotenv
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
-from openpyxl.utils import get_column_letter
 
 load_dotenv()
 
@@ -36,6 +35,10 @@ def get_setting(name: str, default: str | None = None) -> str | None:
     except Exception:
         pass
     return default
+
+
+def _split_recipients(raw: str | None) -> List[str]:
+    return [r.strip() for r in (raw or "").split(",") if r.strip()]
 
 
 def _format_multiline(value) -> str:
@@ -138,11 +141,16 @@ def _batch_summary(results: List[Dict]) -> Dict[str, int]:
     }
 
 
+def _smtp_send(sender: str, password: str, recipients: List[str], message: MIMEMultipart) -> None:
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        server.login(sender, password)
+        server.sendmail(sender, recipients, message.as_string())
+
+
 def send_report(results: List[Dict], batch_label: str = "Today") -> None:
     sender = get_setting("SENDER_EMAIL")
     password = get_setting("SENDER_PASSWORD")
-    recipients_raw = get_setting("RECIPIENT_EMAILS", "")
-    recipients = [r.strip() for r in recipients_raw.split(",") if r.strip()]
+    recipients = _split_recipients(get_setting("RECIPIENT_EMAILS", ""))
 
     if not sender:
         raise RuntimeError("SENDER_EMAIL is missing.")
@@ -184,6 +192,49 @@ EduTap Call Scoring System
     )
     msg.attach(attachment)
 
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-        server.login(sender, password)
-        server.sendmail(sender, recipients, msg.as_string())
+    _smtp_send(sender, password, recipients, msg)
+
+
+def send_error_report(error_items: List[Dict], batch_label: str = "Today") -> None:
+    """Send a simple error email for files that could not be processed."""
+    if not error_items:
+        return
+
+    sender = get_setting("SENDER_EMAIL")
+    password = get_setting("SENDER_PASSWORD")
+    recipients = _split_recipients(get_setting("ERROR_RECIPIENT_EMAILS") or get_setting("RECIPIENT_EMAILS", ""))
+
+    if not sender:
+        raise RuntimeError("SENDER_EMAIL is missing.")
+    if not password:
+        raise RuntimeError("SENDER_PASSWORD is missing. Use a Gmail App Password, not your normal Gmail password.")
+    if not recipients:
+        raise RuntimeError("ERROR_RECIPIENT_EMAILS or RECIPIENT_EMAILS is missing.")
+
+    lines = [
+        "Hi,",
+        "",
+        f"Some EduTap call files could not be processed for {batch_label}.",
+        "",
+        "Failed items:",
+    ]
+
+    for index, item in enumerate(error_items, 1):
+        lines.extend([
+            "",
+            f"{index}. File: {item.get('filename', 'Unknown file')}",
+            f"Student number: {item.get('student_number', 'Unknown')}",
+            f"Simple message: {item.get('simple_error', 'This file could not be processed.')}",
+            f"Technical detail: {item.get('technical_error', 'Not available')}",
+        ])
+
+    lines.extend(["", "Regards,", "EduTap Call Scoring System"])
+    body = "\n".join(lines)
+
+    msg = MIMEMultipart()
+    msg["From"] = sender
+    msg["To"] = ", ".join(recipients)
+    msg["Subject"] = f"EduTap Call Processing Error - {batch_label}"
+    msg.attach(MIMEText(body, "plain"))
+
+    _smtp_send(sender, password, recipients, msg)

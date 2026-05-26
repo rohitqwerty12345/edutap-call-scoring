@@ -1,4 +1,4 @@
-# EduTap EPFO Call Scoring System
+# EduTap Call Scoring System
 
 Final simplified version.
 
@@ -13,7 +13,6 @@ Visible names used in prompt, dashboard rows, Supabase text, and email report:
 5. Personal Urgency
 6. Hesitation Discovery
 7. Next Step Clarity
-
 
 ## Final database/dashboard columns
 
@@ -42,6 +41,32 @@ The XLSX sent on email has only these columns:
 5. Improvement Areas
 6. Learnings
 
+## Upload processing screen
+
+After clicking Analyze All Calls, the app shows one processing popup only:
+
+```text
+Processing 1 of total calls
+```
+
+The rest of the screen is greyed out while calls are being processed. After completion, the app shows:
+
+```text
+All calls processed successfully. You can now close this window.
+```
+
+If any call fails, the app shows a simple non-technical message and sends an error email.
+
+## Error email
+
+Add this in Streamlit Secrets to receive separate error emails:
+
+```toml
+ERROR_RECIPIENT_EMAILS = "your-error-email@gmail.com"
+```
+
+If this is left blank, errors will be sent to `RECIPIENT_EMAILS`.
+
 ## Model switching from Streamlit Secrets
 
 No code edit is needed to change the GPT model. Change this line in Streamlit Secrets:
@@ -58,32 +83,6 @@ OPENAI_MODEL = "gpt-5.4"
 
 Then reboot/redeploy the Streamlit app.
 
-## Required files to replace
-
-Replace these files in GitHub:
-
-```text
-app.py
-supabase_client.py
-email_sender.py
-scoring_prompt.py
-supabase_migration.sql
-README.md
-.env.example
-```
-
-Other files can stay as they are.
-
-## Supabase setup
-
-After replacing files in GitHub, open Supabase SQL Editor and run:
-
-```text
-supabase_migration.sql
-```
-
-This will simplify the `call_scores` table so only the final requested columns remain.
-
 ## Streamlit Secrets
 
 ```toml
@@ -96,17 +95,7 @@ SUPABASE_KEY = "your_supabase_key_here"
 SENDER_EMAIL = "creativedits123@gmail.com"
 SENDER_PASSWORD = "your_gmail_app_password_here"
 RECIPIENT_EMAILS = "extrastuff0980@gmail.com"
+ERROR_RECIPIENT_EMAILS = "your-error-email@gmail.com"
 DASHBOARD_PASSWORD = "show123"
 MAX_PARALLEL_CALLS = "5"
 ```
-
-## Tone + Truth failure detail
-
-If Tone + Truth fails, the report will now show:
-
-- whether Tone failed, Truth failed, or both failed
-- what the student partner said or did
-- why it failed
-- what should have been said or done instead
-
-When Tone + Truth fails, the remaining parameters are not evaluated and Average Score is `0.0`.
