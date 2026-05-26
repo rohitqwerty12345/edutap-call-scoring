@@ -56,7 +56,7 @@ def get_max_parallel_calls(total_files: int) -> int:
 
 
 st.set_page_config(page_title="EduTap Call Scoring", page_icon="📞", layout="wide")
-st.title("EduTap EPFO Call Scoring System")
+st.title("EduTap Call Scoring System")
 
 tab1, tab2, tab3 = st.tabs(["Upload Calls", "View Results", "Debug Last Run"])
 
