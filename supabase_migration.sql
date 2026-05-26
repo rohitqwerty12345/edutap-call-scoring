@@ -146,3 +146,39 @@ begin
     end if;
   end loop;
 end $$;
+
+
+
+-- Normalize visible parameter names in stored text columns to the final names.
+do $$
+begin
+  update public.call_scores
+  set "Score Parameter Wise" = replace(replace(replace(replace(replace(replace(replace(replace("Score Parameter Wise", 'Guardrails', 'Tone + Truth'), 'Resonance', 'Personal Urgency'), 'Diagnosis', 'Hesitation Discovery'), 'Closure', 'Next Step Clarity'), 'Real Hesitation Reason', 'Hesitation Discovery'), 'Clear Next Step', 'Next Step Clarity'), 'Discovery', 'Pain Point Discovery'), 'Hesitation Pain Point Discovery', 'Hesitation Discovery')
+  where "Score Parameter Wise" is not null;
+
+  update public.call_scores
+  set "Strengths" = replace(replace(replace(replace(replace(replace(replace(replace("Strengths", 'Guardrails', 'Tone + Truth'), 'Resonance', 'Personal Urgency'), 'Diagnosis', 'Hesitation Discovery'), 'Closure', 'Next Step Clarity'), 'Real Hesitation Reason', 'Hesitation Discovery'), 'Clear Next Step', 'Next Step Clarity'), 'Discovery', 'Pain Point Discovery'), 'Hesitation Pain Point Discovery', 'Hesitation Discovery')
+  where "Strengths" is not null;
+
+  update public.call_scores
+  set "Improvement Areas" = replace(replace(replace(replace(replace(replace(replace(replace("Improvement Areas", 'Guardrails', 'Tone + Truth'), 'Resonance', 'Personal Urgency'), 'Diagnosis', 'Hesitation Discovery'), 'Closure', 'Next Step Clarity'), 'Real Hesitation Reason', 'Hesitation Discovery'), 'Clear Next Step', 'Next Step Clarity'), 'Discovery', 'Pain Point Discovery'), 'Hesitation Pain Point Discovery', 'Hesitation Discovery')
+  where "Improvement Areas" is not null;
+
+  update public.call_scores
+  set "Learnings" = replace(replace(replace(replace(replace(replace(replace(replace("Learnings", 'Guardrails', 'Tone + Truth'), 'Resonance', 'Personal Urgency'), 'Diagnosis', 'Hesitation Discovery'), 'Closure', 'Next Step Clarity'), 'Real Hesitation Reason', 'Hesitation Discovery'), 'Clear Next Step', 'Next Step Clarity'), 'Discovery', 'Pain Point Discovery'), 'Hesitation Pain Point Discovery', 'Hesitation Discovery')
+  where "Learnings" is not null;
+
+  -- Fix accidental double replacement if the migration is run more than once.
+  update public.call_scores
+  set "Score Parameter Wise" = replace("Score Parameter Wise", 'Pain Point Pain Point Discovery', 'Pain Point Discovery')
+  where "Score Parameter Wise" is not null;
+  update public.call_scores
+  set "Strengths" = replace("Strengths", 'Pain Point Pain Point Discovery', 'Pain Point Discovery')
+  where "Strengths" is not null;
+  update public.call_scores
+  set "Improvement Areas" = replace("Improvement Areas", 'Pain Point Pain Point Discovery', 'Pain Point Discovery')
+  where "Improvement Areas" is not null;
+  update public.call_scores
+  set "Learnings" = replace("Learnings", 'Pain Point Pain Point Discovery', 'Pain Point Discovery')
+  where "Learnings" is not null;
+end $$;

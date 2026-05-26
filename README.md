@@ -2,6 +2,19 @@
 
 Final simplified version.
 
+## Final scoring parameters
+
+Visible names used in prompt, dashboard rows, Supabase text, and email report:
+
+1. Tone + Truth
+2. Opening
+3. Pain Point Discovery
+4. Evidence
+5. Personal Urgency
+6. Hesitation Discovery
+7. Next Step Clarity
+
+
 ## Final database/dashboard columns
 
 The `call_scores` table should have only these columns:
@@ -20,7 +33,7 @@ The `call_scores` table should have only these columns:
 
 ## Email report columns
 
-The CSV sent on email has only these columns:
+The XLSX sent on email has only these columns:
 
 1. Call Recording Link
 2. Average Score

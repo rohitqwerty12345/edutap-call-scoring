@@ -76,16 +76,16 @@ def _plain_summary_text(value: Any) -> str:
                 lines.append("")
             lines.append("Parameter-wise details:")
             labels = {
-                "guardrails": "Guardrails",
+                "guardrails": "Tone + Truth",
                 "opening": "Opening",
-                "discovery": "Discovery",
+                "discovery": "Pain Point Discovery",
                 "evidence": "Evidence",
                 "personal_urgency": "Personal Urgency",
-                "real_hesitation_reason": "Real Hesitation Reason",
-                "clear_next_step": "Clear Next Step",
+                "real_hesitation_reason": "Hesitation Discovery",
+                "clear_next_step": "Next Step Clarity",
                 "resonance": "Personal Urgency",
-                "diagnosis": "Real Hesitation Reason",
-                "closure": "Clear Next Step",
+                "diagnosis": "Hesitation Discovery",
+                "closure": "Next Step Clarity",
             }
             order = [
                 "guardrails",
@@ -244,13 +244,13 @@ def _score_parameter_wise_from_result(result: Dict[str, Any], call_type: str) ->
     guardrails = _section(result, "guardrails")
     guardrails_result = guardrails.get("result", "")
     if str(guardrails_result).upper() == "FAIL":
-        return "Guardrails: FAIL\nRemaining parameters: Not evaluated because Guardrails failed"
+        return "Tone + Truth: FAIL\nRemaining parameters: Not evaluated because Tone + Truth failed"
 
     if call_type == "follow_up_only":
         clear_next_step = _section(result, "clear_next_step", "closure")
         return "\n".join([
-            f"Guardrails: {guardrails_result}",
-            f"Clear Next Step: {_score_label(clear_next_step)}",
+            f"Tone + Truth: {guardrails_result}",
+            f"Next Step Clarity: {_score_label(clear_next_step)}",
         ])
 
     opening = _section(result, "opening")
@@ -261,13 +261,13 @@ def _score_parameter_wise_from_result(result: Dict[str, Any], call_type: str) ->
     clear_next_step = _section(result, "clear_next_step", "closure")
 
     return "\n".join([
-        f"Guardrails: {guardrails_result}",
+        f"Tone + Truth: {guardrails_result}",
         f"Opening: {_score_label(opening)}",
-        f"Discovery: {_score_label(discovery)}",
+        f"Pain Point Discovery: {_score_label(discovery)}",
         f"Evidence: {_score_label(evidence)}",
         f"Personal Urgency: {_score_label(personal_urgency)}",
-        f"Real Hesitation Reason: {_score_label(real_hesitation)}",
-        f"Clear Next Step: {_score_label(clear_next_step)}",
+        f"Hesitation Discovery: {_score_label(real_hesitation)}",
+        f"Next Step Clarity: {_score_label(clear_next_step)}",
     ])
 
 
