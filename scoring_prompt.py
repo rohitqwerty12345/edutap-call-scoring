@@ -72,8 +72,8 @@ Score only what actually happened in the transcript. Do not give credit for thin
 
 RULE 10 — TONE + TRUTH FAIL = ZERO SCORE:
 After deciding the call type, check Tone + Truth first.
-If Tone + Truth FAIL in a full_analysis call, give zero score and do not analyze the remaining parameters. Return the Tone + Truth-failed JSON structure from Section F with all other parameter scores as 0 and reasons as "Not evaluated because Tone + Truth failed."
-If Tone + Truth FAIL in a follow_up_only call, give zero score and do not analyze Next Step Clarity. Return the Tone + Truth-failed JSON structure from Section F.
+If Tone + Truth FAIL in a full_analysis or follow_up_only call, give zero score and do not analyze any other scoring parameter.
+Return only the simplified Tone + Truth-failed JSON structure from Section F. Do not include Opening, Pain Point Discovery, Evidence, Personal Urgency, Hesitation Discovery, or Next Step Clarity objects in this fail case.
 Tone + Truth failure is a hard stop because basic honesty and student respect are the floor of the call.
 
 -------------------------------------------
@@ -471,7 +471,7 @@ These should not only describe this call. Try to avoid parameter trick here beca
 Correct format: "learnings": ["Point 1", "Point 2", "Point 3"]
 Wrong format: "learnings": "1. Point 1 2. Point 2 3. Point 3"
 
-CASE 1: If Tone + Truth FAIL, return this JSON structure and do not analyze anything else.
+CASE 1: If Tone + Truth FAIL, return this simplified JSON structure and do not analyze anything else.
 
 {
   "call_type": "Choose one: full_analysis or follow_up_only",
@@ -486,12 +486,6 @@ CASE 1: If Tone + Truth FAIL, return this JSON structure and do not analyze anyt
     "what_should_have_been_said": "The correct information or better respectful line the student partner should have used.",
     "false_information_detail": "If Truth failed, describe exactly what was false/misleading and the correct fact. If only Tone failed, write null."
   },
-  "opening": {"score": 0, "why_this_score": "Not evaluated because Tone + Truth failed."},
-  "discovery": {"score": 0, "why_this_score": "Not evaluated because Tone + Truth failed."},
-  "evidence": {"score": 0, "why_this_score": "Not evaluated because Tone + Truth failed."},
-  "personal_urgency": {"parameter_name": "Personal Urgency", "score": 0, "why_this_score": "Not evaluated because Tone + Truth failed."},
-  "real_hesitation_reason": {"parameter_name": "Hesitation Discovery", "score": 0, "na": true, "why_this_score": "Not evaluated because Tone + Truth failed."},
-  "clear_next_step": {"parameter_name": "Next Step Clarity", "score": 0, "why_this_score": "Not evaluated because Tone + Truth failed."},
   "overall_score": {
     "average_score": "0.0",
     "percentage": "0%",
@@ -499,27 +493,12 @@ CASE 1: If Tone + Truth FAIL, return this JSON structure and do not analyze anyt
     "guardrails_review_flag": "Yes — requires manager review"
   },
   "strengths": {
-    "summary": null,
-    "by_parameter": {
-      "guardrails": null,
-      "opening": null,
-      "discovery": null,
-      "evidence": null,
-      "personal_urgency": null,
-      "real_hesitation_reason": null,
-      "clear_next_step": null
-    }
+    "summary": null
   },
   "improvement_areas": {
     "summary": "Tone + Truth failed, so the call receives zero score. Fix the Tone + Truth issue before judging sales skill.",
     "by_parameter": {
-      "guardrails": "Mention whether Tone failed or Truth failed, quote exactly what the student partner said/did, explain why it failed, and give the correct/better line.",
-      "opening": null,
-      "discovery": null,
-      "evidence": null,
-      "personal_urgency": null,
-      "real_hesitation_reason": null,
-      "clear_next_step": null
+      "guardrails": "Mention whether Tone failed or Truth failed, quote exactly what the student partner said/did, explain why it failed, and give the correct/better line."
     }
   },
   "learnings": ["Two to five practical next-time learnings for the student partner. Focus on future conversion improvement and Tone + Truth safety. Return each learning as a separate array item."]
