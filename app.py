@@ -228,6 +228,9 @@ st.title("EduTap Call Scoring System")
 
 tab1, tab2, tab3 = st.tabs(["Upload Calls", "View Results", "Debug Last Run"])
 
+if "call_uploader_key" not in st.session_state:
+    st.session_state["call_uploader_key"] = 0
+
 with tab1:
     st.subheader("Upload Call Recordings")
     st.caption("Upload MP3, WAV, or M4A files. Processing begins after you click Analyze.")
@@ -236,7 +239,25 @@ with tab1:
         "Choose call recording files",
         type=["mp3", "wav", "m4a"],
         accept_multiple_files=True,
+        key=f"call_recordings_{st.session_state['call_uploader_key']}",
     )
+
+    upload_result_message = st.session_state.get("upload_result_message")
+    if uploaded_files and upload_result_message:
+        del st.session_state["upload_result_message"]
+        upload_result_message = None
+
+    if not uploaded_files and upload_result_message:
+        message_type = upload_result_message.get("type", "info")
+        message_text = upload_result_message.get("text", "")
+        if message_type == "success":
+            st.success(message_text)
+        elif message_type == "warning":
+            st.warning(message_text)
+        elif message_type == "error":
+            st.error(message_text)
+        else:
+            st.info(message_text)
 
     if uploaded_files:
         st.info(f"{len(uploaded_files)} file(s) selected.")
@@ -315,17 +336,31 @@ with tab1:
                     error_email_sent = False
 
             if not all_error_items and saved_rows_this_batch:
-                st.success("All calls processed successfully. You can now close this window.")
+                st.session_state["upload_result_message"] = {
+                    "type": "success",
+                    "text": "All calls processed successfully. You can now close this window.",
+                }
             elif saved_rows_this_batch and all_error_items:
                 if error_email_sent:
-                    st.warning("Some calls could not be processed. Successful calls are saved. Error details have been sent by email. You can now close this window.")
+                    message_text = "Some calls could not be processed. Successful calls are saved. Error details have been sent by email. You can now close this window."
                 else:
-                    st.warning("Some calls could not be processed. Successful calls are saved. Please contact the admin. You can now close this window.")
+                    message_text = "Some calls could not be processed. Successful calls are saved. Please contact the admin. You can now close this window."
+                st.session_state["upload_result_message"] = {
+                    "type": "warning",
+                    "text": message_text,
+                }
             else:
                 if error_email_sent:
-                    st.error("We could not process the uploaded calls. Error details have been sent by email. Please try again or contact the admin.")
+                    message_text = "We could not process the uploaded calls. Error details have been sent by email. Please try again or contact the admin."
                 else:
-                    st.error("We could not process the uploaded calls. Please try again or contact the admin.")
+                    message_text = "We could not process the uploaded calls. Please try again or contact the admin."
+                st.session_state["upload_result_message"] = {
+                    "type": "error",
+                    "text": message_text,
+                }
+
+            st.session_state["call_uploader_key"] += 1
+            st.rerun()
 
 with tab2:
     st.subheader("Call Score Dashboard")
