@@ -13,7 +13,7 @@ values ('call-transcripts', 'call-transcripts', true)
 on conflict (id) do update set public = true;
 
 create table if not exists public.call_scores (
-  "Date" timestamptz,
+  "Date" date default current_date,
   "Student Number" text,
   "Call Type" text,
   "Call Recording Link" text,
@@ -26,7 +26,12 @@ create table if not exists public.call_scores (
   "Transcript Link" text
 );
 
-alter table public.call_scores add column if not exists "Date" timestamptz;
+alter table public.call_scores add column if not exists "Date" date;
+
+-- Keep Date as date-only, not timestamp.
+alter table public.call_scores
+  alter column "Date" type date
+  using ("Date"::date);
 alter table public.call_scores add column if not exists "Student Number" text;
 alter table public.call_scores add column if not exists "Call Type" text;
 alter table public.call_scores add column if not exists "Call Recording Link" text;
@@ -42,9 +47,9 @@ alter table public.call_scores add column if not exists "Transcript Link" text;
 do $$
 begin
   if exists (select 1 from information_schema.columns where table_schema='public' and table_name='call_scores' and column_name='created_at') then
-    execute 'update public.call_scores set "Date" = coalesce("Date", created_at)';
+    execute 'update public.call_scores set "Date" = coalesce("Date", created_at::date)';
   end if;
-  execute 'update public.call_scores set "Date" = coalesce("Date", now())';
+  execute 'update public.call_scores set "Date" = coalesce("Date", current_date)';
 
   if exists (select 1 from information_schema.columns where table_schema='public' and table_name='call_scores' and column_name='student_number') then
     execute 'update public.call_scores set "Student Number" = coalesce("Student Number", student_number)';
@@ -114,7 +119,7 @@ begin
   end loop;
 end $$;
 
-alter table public.call_scores alter column "Date" set default now();
+alter table public.call_scores alter column "Date" set default current_date;
 
 create index if not exists idx_call_scores_final_date on public.call_scores ("Date" desc);
 create index if not exists idx_call_scores_final_student_number on public.call_scores ("Student Number");

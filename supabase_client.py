@@ -240,11 +240,51 @@ def _average_score(result: Dict[str, Any], call_type: str) -> str:
     return _format_average(avg)
 
 
+def _tone_truth_fail_details(guardrails: Dict[str, Any]) -> str:
+    """Build detailed Tone + Truth failure text for dashboard/email."""
+    failed_part = (
+        guardrails.get("failed_part")
+        or guardrails.get("failure_type")
+        or guardrails.get("failed_component")
+        or "Not specified"
+    )
+    what_said = (
+        guardrails.get("what_student_partner_said")
+        or guardrails.get("quote")
+        or guardrails.get("exact_quote")
+        or guardrails.get("line_that_failed")
+        or "Not specified"
+    )
+    why_failed = (
+        guardrails.get("why_it_failed")
+        or guardrails.get("reason")
+        or guardrails.get("false_information_detail")
+        or "Not specified"
+    )
+    right_version = (
+        guardrails.get("what_should_have_been_said")
+        or guardrails.get("correct_version")
+        or guardrails.get("right_information")
+        or guardrails.get("what_is_right")
+        or "Not specified"
+    )
+
+    lines = [
+        "Tone + Truth: FAIL",
+        f"Failed part: {failed_part}",
+        f"Student partner said/did: {what_said}",
+        f"Why it failed: {why_failed}",
+        f"What should have been said/done: {right_version}",
+        "Remaining parameters: Not evaluated because Tone + Truth failed",
+    ]
+    return "\n".join(lines)
+
+
 def _score_parameter_wise_from_result(result: Dict[str, Any], call_type: str) -> str:
     guardrails = _section(result, "guardrails")
     guardrails_result = guardrails.get("result", "")
     if str(guardrails_result).upper() == "FAIL":
-        return "Tone + Truth: FAIL\nRemaining parameters: Not evaluated because Tone + Truth failed"
+        return _tone_truth_fail_details(guardrails)
 
     if call_type == "follow_up_only":
         clear_next_step = _section(result, "clear_next_step", "closure")
@@ -334,9 +374,9 @@ def upload_call_files(client: Client, student_number: str, audio_filename: str, 
 
 
 def build_db_row(student_number: str, audio_filename: str, transcript: str, result: dict | str, call_audio_link: str | None = None, call_transcript_link: str | None = None) -> Dict[str, Any]:
-    now = datetime.utcnow().isoformat()
+    today = date.today().isoformat()
     base = {
-        "Date": now,
+        "Date": today,
         "Student Number": student_number,
         "Call Recording Link": call_audio_link or audio_filename,
         "Transcript Link": call_transcript_link,
@@ -387,7 +427,21 @@ def save_result(student_number: str, audio_filename: str, transcript: str, resul
     return row
 
 
+def _date_only(value: Any) -> str:
+    if value is None:
+        return ""
+    text = str(value).strip()
+    if not text:
+        return ""
+    if "T" in text:
+        return text.split("T", 1)[0]
+    if " " in text:
+        return text.split(" ", 1)[0]
+    return text[:10]
+
+
 def _normalize_display_row(row: Dict[str, Any]) -> Dict[str, Any]:
+    row["Date"] = _date_only(row.get("Date"))
     # Old rows may still contain values like '3.0/10 (30%)' or '19/60'. Show only the average number.
     normalized_average = _average_from_text(row.get("Average Score"))
     if normalized_average is not None:

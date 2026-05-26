@@ -19,7 +19,7 @@ Visible names used in prompt, dashboard rows, Supabase text, and email report:
 
 The `call_scores` table should have only these columns:
 
-1. Date
+1. Date (date only, YYYY-MM-DD)
 2. Student Number
 3. Call Type
 4. Call Recording Link
@@ -99,3 +99,14 @@ RECIPIENT_EMAILS = "extrastuff0980@gmail.com"
 DASHBOARD_PASSWORD = "show123"
 MAX_PARALLEL_CALLS = "5"
 ```
+
+## Tone + Truth failure detail
+
+If Tone + Truth fails, the report will now show:
+
+- whether Tone failed, Truth failed, or both failed
+- what the student partner said or did
+- why it failed
+- what should have been said or done instead
+
+When Tone + Truth fails, the remaining parameters are not evaluated and Average Score is `0.0`.

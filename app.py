@@ -65,10 +65,20 @@ def _display_value(row, key, default=""):
     value = row.get(key, default)
     if value is None:
         return default
-    text = str(value)
+
+    text = str(value).strip()
+
+    # The Date column should show only YYYY-MM-DD, not timestamp/timezone.
+    if key == "Date":
+        if "T" in text:
+            return text.split("T", 1)[0]
+        if " " in text:
+            return text.split(" ", 1)[0]
+        return text[:10]
+
     # Make numbered point paragraphs easier to read in expanded cell view/tooltips.
     import re
-    text = re.sub(r"\s+(?=\d+[.)]\s+)", "\n", text.strip())
+    text = re.sub(r"\s+(?=\d+[.)]\s+)", "\n", text)
     return text
 
 

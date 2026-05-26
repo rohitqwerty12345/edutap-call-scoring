@@ -106,6 +106,17 @@ Mark FAIL if:
 - Student partner guaranteed selection or results
 - Student partner used fake urgency like "offer valid only till tomorrow" when no such deadline exists
 
+When Tone + Truth fails, you must clearly identify which part failed:
+- Tone = the way the student partner spoke was rude, pushy, dismissive, impatient, or disrespectful.
+- Truth = the student partner made a false claim, wrong promise, misleading statement, wrong course detail, fake urgency, or selection guarantee.
+- Tone + Truth = both tone and truth failed in the same call.
+
+For every Tone + Truth failure, explicitly provide:
+1. failed_part: Tone, Truth, or Tone + Truth
+2. what_student_partner_said: the exact quote or exact behaviour that failed
+3. why_it_failed: why this is a tone problem or truth problem
+4. what_should_have_been_said: the correct information or better respectful line the student partner should have used
+
 --- NEXT STEP CLARITY (Scored 1–10) ---
 
 One-line definition: Did both sides know exactly what happens next before the call ended?
@@ -466,8 +477,12 @@ CASE 1: If Tone + Truth FAIL, return this JSON structure and do not analyze anyt
   "converted_status": "Converted or Not converted",
   "guardrails": {
     "result": "FAIL",
-    "reason": "Quote the exact line or describe the exact behaviour that caused failure.",
-    "false_information_detail": "Describe exactly what was said and what is wrong, or null if the failure was behaviour/tone."
+    "failed_part": "Choose one: Tone, Truth, or Tone + Truth",
+    "reason": "One sentence explaining the exact Tone + Truth failure.",
+    "what_student_partner_said": "Exact quote from the transcript or exact behaviour that failed.",
+    "why_it_failed": "Explain clearly why this is a Tone problem, Truth problem, or both.",
+    "what_should_have_been_said": "The correct information or better respectful line the student partner should have used.",
+    "false_information_detail": "If Truth failed, describe exactly what was false/misleading and the correct fact. If only Tone failed, write null."
   },
   "opening": {"score": 0, "why_this_score": "Not evaluated because Tone + Truth failed."},
   "discovery": {"score": 0, "why_this_score": "Not evaluated because Tone + Truth failed."},
@@ -478,7 +493,7 @@ CASE 1: If Tone + Truth FAIL, return this JSON structure and do not analyze anyt
   "overall_score": {
     "average_score": "0.0",
     "percentage": "0%",
-    "score_parameter_wise": "Tone + Truth: FAIL\nOpening: 0/10\nPain Point Discovery: 0/10\nEvidence: 0/10\nPersonal Urgency: 0/10\nHesitation Discovery: 0/10\nNext Step Clarity: 0/10",
+    "score_parameter_wise": "Tone + Truth: FAIL\nFailed part: Tone, Truth, or Tone + Truth\nStudent partner said/did: exact quote or exact behaviour\nWhy it failed: clear reason\nWhat should have been said/done: correct information or better line\nRemaining parameters: Not evaluated because Tone + Truth failed",
     "guardrails_review_flag": "Yes — requires manager review"
   },
   "strengths": {
@@ -496,7 +511,7 @@ CASE 1: If Tone + Truth FAIL, return this JSON structure and do not analyze anyt
   "improvement_areas": {
     "summary": "Tone + Truth failed, so the call receives zero score. Fix the Tone + Truth issue before judging sales skill.",
     "by_parameter": {
-      "guardrails": "Exactly what was said or done, why it failed, and what should have been said instead.",
+      "guardrails": "Mention whether Tone failed or Truth failed, quote exactly what the student partner said/did, explain why it failed, and give the correct/better line.",
       "opening": null,
       "discovery": null,
       "evidence": null,
