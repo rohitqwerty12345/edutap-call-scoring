@@ -82,34 +82,48 @@ def _simple_error_message(exc: Exception) -> str:
 
 def _render_processing_overlay(placeholder, current: int, total: int) -> None:
     current = max(1, min(current, total))
+    percent = (current / total) * 100
     placeholder.markdown(
         f"""
         <style>
         .edutap-processing-backdrop {{
             position: fixed;
             inset: 0;
-            background: rgba(12, 17, 25, 0.72);
+            background: rgba(12, 17, 25, 0.76);
             z-index: 999999;
             display: flex;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(2px);
+            backdrop-filter: blur(4px);
         }}
         .edutap-processing-box {{
-            width: min(440px, 86vw);
+            width: min(460px, 88vw);
             background: #ffffff;
             color: #111827;
-            border-radius: 18px;
-            padding: 34px 30px;
-            box-shadow: 0 24px 80px rgba(0,0,0,0.35);
+            border-radius: 22px;
+            padding: 36px 32px 34px;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.38);
             text-align: center;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }}
+        .edutap-spinner {{
+            width: 58px;
+            height: 58px;
+            margin: 0 auto 18px;
+            border-radius: 50%;
+            border: 6px solid #fee2e2;
+            border-top-color: #ef4444;
+            animation: edutap-spin 0.9s linear infinite;
+        }}
+        @keyframes edutap-spin {{
+            from {{ transform: rotate(0deg); }}
+            to {{ transform: rotate(360deg); }}
+        }}
         .edutap-processing-title {{
-            font-size: 26px;
+            font-size: 27px;
             line-height: 1.2;
-            font-weight: 800;
-            margin-bottom: 10px;
+            font-weight: 850;
+            margin-bottom: 8px;
         }}
         .edutap-processing-subtitle {{
             font-size: 18px;
@@ -117,18 +131,49 @@ def _render_processing_overlay(placeholder, current: int, total: int) -> None:
             margin-bottom: 22px;
         }}
         .edutap-processing-bar {{
+            position: relative;
             width: 100%;
-            height: 10px;
+            height: 12px;
             background: #e5e7eb;
             border-radius: 999px;
             overflow: hidden;
         }}
         .edutap-processing-fill {{
+            position: relative;
             height: 100%;
-            width: {(current / total) * 100:.2f}%;
-            background: #ef4444;
+            width: {percent:.2f}%;
+            min-width: 42px;
+            background: linear-gradient(90deg, #dc2626 0%, #ef4444 45%, #fb7185 100%);
             border-radius: 999px;
             transition: width 300ms ease;
+            overflow: hidden;
+        }}
+        .edutap-processing-fill::after {{
+            content: "";
+            position: absolute;
+            inset: 0;
+            width: 44%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+            animation: edutap-shine 1.15s ease-in-out infinite;
+        }}
+        @keyframes edutap-shine {{
+            from {{ transform: translateX(-120%); }}
+            to {{ transform: translateX(260%); }}
+        }}
+        .edutap-processing-dots span {{
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            margin: 0 3px;
+            border-radius: 50%;
+            background: #ef4444;
+            animation: edutap-dot 1.2s ease-in-out infinite;
+        }}
+        .edutap-processing-dots span:nth-child(2) {{ animation-delay: 0.15s; }}
+        .edutap-processing-dots span:nth-child(3) {{ animation-delay: 0.30s; }}
+        @keyframes edutap-dot {{
+            0%, 80%, 100% {{ opacity: 0.25; transform: translateY(0); }}
+            40% {{ opacity: 1; transform: translateY(-5px); }}
         }}
         .edutap-processing-note {{
             margin-top: 16px;
@@ -138,8 +183,9 @@ def _render_processing_overlay(placeholder, current: int, total: int) -> None:
         </style>
         <div class="edutap-processing-backdrop">
             <div class="edutap-processing-box">
+                <div class="edutap-spinner"></div>
                 <div class="edutap-processing-title">Processing calls</div>
-                <div class="edutap-processing-subtitle">Processing {current} of {total}</div>
+                <div class="edutap-processing-subtitle">Processing {current} of {total} <span class="edutap-processing-dots"><span></span><span></span><span></span></span></div>
                 <div class="edutap-processing-bar"><div class="edutap-processing-fill"></div></div>
                 <div class="edutap-processing-note">Please keep this window open until processing is complete.</div>
             </div>
