@@ -6,6 +6,10 @@ on:
     # Runs every day at 8:00 PM IST (2:30 PM UTC).
     - cron: '30 14 * * *'
 
+concurrency:
+  group: edutap-call-processing
+  cancel-in-progress: false
+
 jobs:
   process-calls:
     runs-on: ubuntu-latest
