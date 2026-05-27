@@ -326,7 +326,7 @@ if "call_uploader_key" not in st.session_state:
 
 with tab1:
     st.subheader("Upload Call Recordings")
-    st.caption("Upload MP3, WAV, or M4A files. After upload, processing will happen in the backend.")
+    st.caption("Upload MP3, WAV, or M4A files.")
 
     uploaded_files = st.file_uploader(
         "Choose call recording files",
