@@ -180,7 +180,7 @@ Rohit Sharma
     msg = MIMEMultipart()
     msg["From"] = sender
     msg["To"] = ", ".join(recipients)
-    msg["Subject"] = f"EduTap Call Scores - {batch_label}"
+    msg["Subject"] = f"Call Scores Report - {batch_label}"
     msg.attach(MIMEText(body, "plain"))
 
     attachment = MIMEBase("application", "vnd.openxmlformats-officedocument.spreadsheetml.sheet")
