@@ -2,6 +2,9 @@ import html
 import json
 import os
 from datetime import date
+from typing import Any
+
+import requests
 
 import pandas as pd
 import streamlit as st
@@ -27,6 +30,52 @@ def get_setting(name: str, default: str | None = None) -> str | None:
 
 
 DASHBOARD_PASSWORD = get_setting("DASHBOARD_PASSWORD", "show123")
+
+GITHUB_WORKFLOW_TIMEOUT_TEXT = (
+    "Upload successful, but backend processing could not be started automatically. "
+    "The files are safely queued and will be picked up by the scheduled backend run. "
+    "The admin has been notified. You can close this window."
+)
+
+
+def _trigger_github_worker() -> tuple[bool, str]:
+    """Trigger the GitHub Actions worker after a successful upload."""
+    token = get_setting("GITHUB_ACTIONS_TOKEN")
+    owner = get_setting("GITHUB_REPO_OWNER", "rohitqwerty12345")
+    repo = get_setting("GITHUB_REPO_NAME", "edutap-call-scoring")
+    workflow_file = get_setting("GITHUB_WORKFLOW_FILE", "process-calls.yml")
+    ref = get_setting("GITHUB_WORKFLOW_REF", "main")
+
+    if not token:
+        return False, "GITHUB_ACTIONS_TOKEN is missing in Streamlit Secrets."
+    if not owner or not repo or not workflow_file or not ref:
+        return False, "GitHub workflow trigger settings are incomplete."
+
+    url = f"https://api.github.com/repos/{owner}/{repo}/actions/workflows/{workflow_file}/dispatches"
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "Authorization": f"Bearer {token}",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+    payload: dict[str, Any] = {"ref": ref}
+
+    try:
+        response = requests.post(url, headers=headers, json=payload, timeout=20)
+    except Exception as exc:
+        return False, f"Could not connect to GitHub Actions API: {exc}"
+
+    if response.status_code == 204:
+        return True, "GitHub Actions backend worker started."
+
+    if response.status_code in {401, 403}:
+        return False, "GitHub token does not have permission to start the workflow."
+    if response.status_code == 404:
+        return False, "GitHub repository or workflow file was not found, or token has no access."
+    if response.status_code == 422:
+        return False, "GitHub workflow could not be started. Check workflow_dispatch and branch name."
+
+    return False, f"GitHub Actions returned status {response.status_code}: {response.text[:500]}"
+
 
 FINAL_COLUMNS = [
     "Date",
@@ -282,13 +331,37 @@ with tab1:
                     "text": "The files could not be uploaded. Error details have been sent to the admin.",
                 }
             else:
-                st.session_state["upload_result_message"] = {
-                    "type": "success",
-                    "text": f"Upload successful. {len(queued_files)} call(s) are now in backend processing queue. You can close this window.",
-                }
+                workflow_started, workflow_message = _trigger_github_worker()
+                if workflow_started:
+                    st.session_state["upload_result_message"] = {
+                        "type": "success",
+                        "text": f"Upload successful. {len(queued_files)} call(s) are queued and backend processing has started automatically. You can close this window.",
+                    }
+                else:
+                    try:
+                        send_error_report(
+                            [
+                                {
+                                    "filename": "GitHub Actions auto-start",
+                                    "student_number": "N/A",
+                                    "simple_error": "Backend processing could not be started automatically.",
+                                    "technical_error": workflow_message,
+                                }
+                            ],
+                            batch_label=str(date.today()),
+                        )
+                    except Exception:
+                        pass
+                    st.session_state["upload_result_message"] = {
+                        "type": "warning",
+                        "text": GITHUB_WORKFLOW_TIMEOUT_TEXT,
+                    }
+
                 st.session_state["last_uploaded_batch"] = {
                     "batch_id": batch_id,
                     "files": queued_files,
+                    "workflow_started": workflow_started,
+                    "workflow_message": workflow_message,
                 }
 
             st.session_state["call_uploader_key"] += 1
