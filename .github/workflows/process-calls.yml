@@ -1,0 +1,43 @@
+name: Process Pending EduTap Calls
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Runs every day at 8:00 PM IST (2:30 PM UTC).
+    - cron: '30 14 * * *'
+
+jobs:
+  process-calls:
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+
+    env:
+      DEEPGRAM_API_KEY: ${{ secrets.DEEPGRAM_API_KEY }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+      OPENAI_REASONING_EFFORT: ${{ secrets.OPENAI_REASONING_EFFORT }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+      SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
+      SENDER_PASSWORD: ${{ secrets.SENDER_PASSWORD }}
+      RECIPIENT_EMAILS: ${{ secrets.RECIPIENT_EMAILS }}
+      ERROR_RECIPIENT_EMAILS: ${{ secrets.ERROR_RECIPIENT_EMAILS }}
+      MAX_PARALLEL_CALLS: ${{ secrets.MAX_PARALLEL_CALLS }}
+      MAX_JOBS_PER_RUN: ${{ secrets.MAX_JOBS_PER_RUN }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Process pending calls
+        run: python worker.py
