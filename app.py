@@ -206,6 +206,73 @@ def _render_upload_overlay(placeholder, current: int, total: int) -> None:
     )
 
 
+def _render_result_overlay(placeholder, message: str, message_type: str = "success") -> None:
+    """Render final upload result as a fixed modal so the page does not feel jumpy after rerun."""
+    is_error = message_type == "error"
+    circle_color = "#ef4444" if is_error else "#16a34a"
+    circle_bg = "#fee2e2" if is_error else "#dcfce7"
+    icon = "!" if is_error else "✓"
+
+    placeholder.markdown(
+        f"""
+        <style>
+        .edutap-result-backdrop {{
+            position: fixed;
+            inset: 0;
+            background: rgba(12, 17, 25, 0.76);
+            z-index: 999999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }}
+        .edutap-result-box {{
+            width: min(520px, 88vw);
+            background: #ffffff;
+            color: #111827;
+            border-radius: 22px;
+            padding: 38px 34px;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.38);
+            text-align: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            animation: edutap-result-pop 220ms ease-out;
+        }}
+        @keyframes edutap-result-pop {{
+            from {{ opacity: 0; transform: translateY(10px) scale(0.98); }}
+            to {{ opacity: 1; transform: translateY(0) scale(1); }}
+        }}
+        .edutap-result-icon {{
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 18px;
+            border-radius: 50%;
+            background: {circle_bg};
+            color: {circle_color};
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 34px;
+            font-weight: 900;
+        }}
+        .edutap-result-message {{
+            font-size: 22px;
+            line-height: 1.45;
+            font-weight: 750;
+            color: #111827;
+        }}
+        </style>
+        <div class="edutap-result-backdrop">
+            <div class="edutap-result-box">
+                <div class="edutap-result-icon">{icon}</div>
+                <div class="edutap-result-message">{html.escape(str(message))}</div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+
 def _display_value(row, key, default=""):
     value = row.get(key, default)
     if value is None:
@@ -276,14 +343,8 @@ with tab1:
     if not uploaded_files and upload_result_message:
         message_type = upload_result_message.get("type", "info")
         message_text = upload_result_message.get("text", "")
-        if message_type == "success":
-            st.success(message_text)
-        elif message_type == "warning":
-            st.warning(message_text)
-        elif message_type == "error":
-            st.error(message_text)
-        else:
-            st.info(message_text)
+        result_overlay = st.empty()
+        _render_result_overlay(result_overlay, message_text, message_type)
 
     if uploaded_files:
         st.info(f"{len(uploaded_files)} file(s) selected.")
@@ -332,12 +393,9 @@ with tab1:
                 }
             else:
                 workflow_started, workflow_message = _trigger_github_worker()
-                if workflow_started:
-                    st.session_state["upload_result_message"] = {
-                        "type": "success",
-                        "text": f"Upload successful. {len(queued_files)} call(s) are queued and backend processing has started automatically. You can close this window.",
-                    }
-                else:
+                success_message = f"{len(queued_files)} call(s) are uploaded successfully. You can close this window."
+
+                if not workflow_started:
                     try:
                         send_error_report(
                             [
@@ -352,10 +410,11 @@ with tab1:
                         )
                     except Exception:
                         pass
-                    st.session_state["upload_result_message"] = {
-                        "type": "warning",
-                        "text": GITHUB_WORKFLOW_TIMEOUT_TEXT,
-                    }
+
+                st.session_state["upload_result_message"] = {
+                    "type": "success",
+                    "text": success_message,
+                }
 
                 st.session_state["last_uploaded_batch"] = {
                     "batch_id": batch_id,
