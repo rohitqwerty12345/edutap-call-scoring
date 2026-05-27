@@ -164,7 +164,7 @@ def send_report(results: List[Dict], batch_label: str = "Today") -> None:
 
     body = f"""Hi,
 
-Please find attached the EduTap EPFO call scoring report for {batch_label}.
+Please find attached the EPFO call scoring report for {batch_label}.
 
 Summary:
 - Total calls processed: {summary['total']}
@@ -174,7 +174,7 @@ Summary:
 - Converted calls: {summary['converted']}
 
 Regards,
-EduTap Call Scoring System
+Rohit Sharma
 """
 
     msg = MIMEMultipart()
