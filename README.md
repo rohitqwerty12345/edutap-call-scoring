@@ -1,101 +1,101 @@
 # EduTap Call Scoring System
 
-Final simplified version.
+This version uses backend processing through GitHub Actions.
 
-## Final scoring parameters
+## Flow
 
-Visible names used in prompt, dashboard rows, Supabase text, and email report:
+1. Support uploads call recordings in Streamlit.
+2. Streamlit uploads the files to Supabase Storage and creates pending jobs.
+3. Support can close the browser after upload success.
+4. GitHub Actions runs the backend worker once daily at 8 PM IST, or manually from the Actions tab.
+5. Worker processes pending jobs through Deepgram + OpenAI.
+6. Results are saved in Supabase and the XLSX report is emailed.
+7. Failed calls are emailed to `ERROR_RECIPIENT_EMAILS`.
 
-1. Tone + Truth
-2. Opening
-3. Pain Point Discovery
-4. Evidence
-5. Personal Urgency
-6. Hesitation Discovery
-7. Next Step Clarity
+## Files to replace/add
 
-## Final database/dashboard columns
-
-The `call_scores` table should have only these columns:
-
-1. Date (date only, YYYY-MM-DD)
-2. Student Number
-3. Call Type
-4. Call Recording Link
-5. Converted Status
-6. Average Score
-7. Score Parameter Wise
-8. Strengths
-9. Improvement Areas
-10. Learnings
-11. Transcript Link
-
-## Email report columns
-
-The XLSX sent on email has only these columns:
-
-1. Call Recording Link
-2. Average Score
-3. Score Parameter Wise
-4. Strengths
-5. Improvement Areas
-6. Learnings
-
-## Upload processing screen
-
-After clicking Analyze All Calls, the app shows one processing popup only:
+Replace:
 
 ```text
-Processing 1 of total calls
+app.py
+pipeline.py
+supabase_client.py
+supabase_migration.sql
+README.md
+.env.example
 ```
 
-The rest of the screen is greyed out while calls are being processed. After completion, the app shows:
+Add:
 
 ```text
-All calls processed successfully. You can now close this window.
+worker.py
+.github/workflows/process-calls.yml
 ```
 
-If any call fails, the app shows a simple non-technical message and sends an error email.
+Other files can stay as they are.
 
-## Error email
+## Supabase
 
-Add this in Streamlit Secrets to receive separate error emails:
+Run the latest `supabase_migration.sql` in Supabase SQL Editor.
 
-```toml
-ERROR_RECIPIENT_EMAILS = "your-error-email@gmail.com"
+It creates:
+
+```text
+call_scores
+call_processing_batches
+call_processing_jobs
+call-recordings bucket
+call-transcripts bucket
 ```
 
-If this is left blank, errors will be sent to `RECIPIENT_EMAILS`.
+## GitHub Actions secrets
 
-## Model switching from Streamlit Secrets
+Add these in GitHub repo → Settings → Secrets and variables → Actions → Repository secrets:
 
-No code edit is needed to change the GPT model. Change this line in Streamlit Secrets:
-
-```toml
-OPENAI_MODEL = "gpt-5.5"
+```text
+DEEPGRAM_API_KEY
+OPENAI_API_KEY
+OPENAI_MODEL
+OPENAI_REASONING_EFFORT
+SUPABASE_URL
+SUPABASE_KEY
+SENDER_EMAIL
+SENDER_PASSWORD
+RECIPIENT_EMAILS
+ERROR_RECIPIENT_EMAILS
+MAX_PARALLEL_CALLS
+MAX_JOBS_PER_RUN
 ```
 
-When you want a lower-cost model, change only the value, for example:
+Recommended values:
 
-```toml
-OPENAI_MODEL = "gpt-5.4"
+```text
+OPENAI_MODEL = gpt-5.5
+OPENAI_REASONING_EFFORT = medium
+MAX_PARALLEL_CALLS = 5
+MAX_JOBS_PER_RUN = 50
 ```
 
-Then reboot/redeploy the Streamlit app.
+## Running the backend worker
 
-## Streamlit Secrets
+Automatic run:
 
-```toml
-DEEPGRAM_API_KEY = "your_deepgram_key_here"
-OPENAI_API_KEY = "your_openai_key_here"
-OPENAI_MODEL = "gpt-5.5"
-OPENAI_REASONING_EFFORT = "xhigh"
-SUPABASE_URL = "https://your-project.supabase.co"
-SUPABASE_KEY = "your_supabase_key_here"
-SENDER_EMAIL = "creativedits123@gmail.com"
-SENDER_PASSWORD = "your_gmail_app_password_here"
-RECIPIENT_EMAILS = "extrastuff0980@gmail.com"
-ERROR_RECIPIENT_EMAILS = "your-error-email@gmail.com"
-DASHBOARD_PASSWORD = "show123"
-MAX_PARALLEL_CALLS = "5"
+```text
+Daily at 8 PM IST
 ```
+
+Manual run:
+
+```text
+GitHub repo → Actions → Process Pending EduTap Calls → Run workflow
+```
+
+## GitHub Actions safety
+
+The workflow has:
+
+```text
+timeout-minutes: 65
+```
+
+So one run cannot continue forever.

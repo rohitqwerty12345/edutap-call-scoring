@@ -24,7 +24,7 @@ def extract_student_number(filename: str) -> str:
     return "unknown"
 
 
-def process_single_file(file_bytes: bytes, filename: str) -> Dict[str, Any]:
+def process_single_file(file_bytes: bytes, filename: str, existing_audio_url: str | None = None) -> Dict[str, Any]:
     """
     Full pipeline for one recording file.
     """
@@ -40,7 +40,8 @@ def process_single_file(file_bytes: bytes, filename: str) -> Dict[str, Any]:
         audio_filename=filename,
         transcript=transcript,
         result=result,
-        audio_bytes=file_bytes,
+        audio_bytes=None if existing_audio_url else file_bytes,
+        existing_audio_url=existing_audio_url,
     )
 
     call_type = "not_worthy" if is_not_worthy_result(result) else result.get("call_type", "full_analysis") if isinstance(result, dict) else "full_analysis"

@@ -7,9 +7,9 @@ import pandas as pd
 import streamlit as st
 from dotenv import load_dotenv
 
-from email_sender import send_error_report, send_report
-from pipeline import extract_student_number, process_single_file
-from supabase_client import fetch_all_results
+from email_sender import send_error_report
+from pipeline import extract_student_number
+from supabase_client import enqueue_call_batch, fetch_all_results, fetch_recent_batches
 
 load_dotenv()
 
@@ -43,46 +43,23 @@ FINAL_COLUMNS = [
 ]
 
 
-def get_max_parallel_calls(total_files: int) -> int:
-    raw_value = get_setting("MAX_PARALLEL_CALLS", "5")
-    try:
-        workers = int(raw_value or "5")
-    except ValueError:
-        workers = 5
-    workers = max(1, workers)
-    workers = min(workers, total_files)
-    workers = min(workers, 20)
-    return workers
-
-
 def _simple_error_message(exc: Exception) -> str:
     text = str(exc or "").lower()
 
-    if "deepgram_api_key" in text:
-        return "The transcription service is not set up. Please contact the admin."
-    if "openai_api_key" in text:
-        return "The scoring service is not set up. Please contact the admin."
     if "supabase_url" in text or "supabase_key" in text:
         return "The database connection is not set up. Please contact the admin."
-    if "sender_email" in text or "sender_password" in text or "recipient_emails" in text:
-        return "The email report could not be sent. Please contact the admin."
-    if "no transcript words returned" in text:
-        return "We could not read the audio clearly. Please check the recording and try again."
-    if "json" in text or "expecting value" in text or "decode" in text:
-        return "The scoring result could not be read properly. Please try this file again."
-    if "timeout" in text or "timed out" in text:
-        return "Processing took too long. Please try again with a smaller batch."
     if "storage" in text or "bucket" in text or "upload" in text:
-        return "The call file could not be saved. Please contact the admin."
+        return "The call file could not be uploaded. Please contact the admin."
     if "database" in text or "relation" in text or "column" in text or "insert" in text:
-        return "The result could not be saved. Please contact the admin."
+        return "The upload entry could not be saved. Please contact the admin."
+    if "sender_email" in text or "sender_password" in text or "recipient_emails" in text:
+        return "The error email could not be sent. Please contact the admin."
+    return "The files could not be uploaded. Please try again or contact the admin."
 
-    return "This call could not be processed. Please try again or contact the admin."
 
-
-def _render_processing_overlay(placeholder, current: int, total: int) -> None:
-    current = max(1, min(current, total))
-    percent = (current / total) * 100
+def _render_upload_overlay(placeholder, current: int, total: int) -> None:
+    current = max(1, min(current, max(total, 1)))
+    percent = (current / max(total, 1)) * 100
     placeholder.markdown(
         f"""
         <style>
@@ -160,21 +137,6 @@ def _render_processing_overlay(placeholder, current: int, total: int) -> None:
             from {{ transform: translateX(-120%); }}
             to {{ transform: translateX(260%); }}
         }}
-        .edutap-processing-dots span {{
-            display: inline-block;
-            width: 6px;
-            height: 6px;
-            margin: 0 3px;
-            border-radius: 50%;
-            background: #ef4444;
-            animation: edutap-dot 1.2s ease-in-out infinite;
-        }}
-        .edutap-processing-dots span:nth-child(2) {{ animation-delay: 0.15s; }}
-        .edutap-processing-dots span:nth-child(3) {{ animation-delay: 0.30s; }}
-        @keyframes edutap-dot {{
-            0%, 80%, 100% {{ opacity: 0.25; transform: translateY(0); }}
-            40% {{ opacity: 1; transform: translateY(-5px); }}
-        }}
         .edutap-processing-note {{
             margin-top: 16px;
             color: #6b7280;
@@ -184,10 +146,10 @@ def _render_processing_overlay(placeholder, current: int, total: int) -> None:
         <div class="edutap-processing-backdrop">
             <div class="edutap-processing-box">
                 <div class="edutap-spinner"></div>
-                <div class="edutap-processing-title">Processing calls</div>
-                <div class="edutap-processing-subtitle">Processing {current} of {total} <span class="edutap-processing-dots"><span></span><span></span><span></span></span></div>
+                <div class="edutap-processing-title">Uploading calls</div>
+                <div class="edutap-processing-subtitle">Uploading {current} of {total}</div>
                 <div class="edutap-processing-bar"><div class="edutap-processing-fill"></div></div>
-                <div class="edutap-processing-note">Please keep this window open until processing is complete.</div>
+                <div class="edutap-processing-note">Please wait. This usually takes only a few seconds.</div>
             </div>
         </div>
         """,
@@ -202,7 +164,6 @@ def _display_value(row, key, default=""):
 
     text = str(value).strip()
 
-    # The Date column should show only YYYY-MM-DD, not timestamp/timezone.
     if key == "Date":
         if "T" in text:
             return text.split("T", 1)[0]
@@ -210,30 +171,46 @@ def _display_value(row, key, default=""):
             return text.split(" ", 1)[0]
         return text[:10]
 
-    # Make numbered point paragraphs easier to read in expanded cell view/tooltips.
     import re
     text = re.sub(r"\s+(?=\d+[.)]\s+)", "\n", text)
     return text
 
 
 def _make_display_rows(rows):
-    display_rows = []
+    return [{col: _display_value(row, col) for col in FINAL_COLUMNS} for row in rows]
+
+
+def _make_batch_rows(rows):
+    display = []
     for row in rows:
-        display_rows.append({col: _display_value(row, col) for col in FINAL_COLUMNS})
-    return display_rows
+        created_at = str(row.get("created_at") or "")
+        if "T" in created_at:
+            created_at = created_at.replace("T", " ").split(".", 1)[0]
+        display.append(
+            {
+                "Uploaded At": created_at,
+                "Batch ID": row.get("batch_id", ""),
+                "Status": row.get("status", ""),
+                "Total Files": row.get("total_files", 0),
+                "Completed": row.get("completed_files", 0),
+                "Failed": row.get("failed_files", 0),
+                "Report Sent": "Yes" if row.get("report_sent") else "No",
+            }
+        )
+    return display
 
 
 st.set_page_config(page_title="EduTap Call Scoring", page_icon="📞", layout="wide")
 st.title("EduTap Call Scoring System")
 
-tab1, tab2, tab3 = st.tabs(["Upload Calls", "View Results", "Debug Last Run"])
+tab1, tab2, tab3 = st.tabs(["Upload Calls", "View Results", "Backend Queue"])
 
 if "call_uploader_key" not in st.session_state:
     st.session_state["call_uploader_key"] = 0
 
 with tab1:
     st.subheader("Upload Call Recordings")
-    st.caption("Upload MP3, WAV, or M4A files. Processing begins after you click Analyze.")
+    st.caption("Upload MP3, WAV, or M4A files. After upload, processing will happen in the backend.")
 
     uploaded_files = st.file_uploader(
         "Choose call recording files",
@@ -262,101 +239,56 @@ with tab1:
     if uploaded_files:
         st.info(f"{len(uploaded_files)} file(s) selected.")
 
-        if st.button("Analyze All Calls", type="primary"):
-            saved_rows_this_batch = []
-            debug_items_this_batch = []
-            error_items_this_batch = []
+        if st.button("Upload Calls", type="primary"):
             overlay = st.empty()
+            error_items = []
+            queued_files = []
+            batch_id = None
 
-            file_payloads = [{"name": f.name, "bytes": f.read()} for f in uploaded_files]
-            total_files = len(file_payloads)
-            today_label = str(date.today())
+            try:
+                file_payloads = []
+                total_files = len(uploaded_files)
+                for index, uploaded_file in enumerate(uploaded_files, start=1):
+                    _render_upload_overlay(overlay, index, total_files)
+                    file_payloads.append(
+                        {
+                            "name": uploaded_file.name,
+                            "bytes": uploaded_file.read(),
+                            "student_number": extract_student_number(uploaded_file.name),
+                        }
+                    )
 
-            for index, payload in enumerate(file_payloads, start=1):
-                filename = payload["name"]
-                student_number = extract_student_number(filename)
-                _render_processing_overlay(overlay, index, total_files)
+                batch_id, queued_files = enqueue_call_batch(file_payloads)
+            except Exception as exc:
+                simple_error = _simple_error_message(exc)
+                error_items.append(
+                    {
+                        "filename": "Batch upload",
+                        "student_number": "N/A",
+                        "simple_error": simple_error,
+                        "technical_error": str(exc),
+                    }
+                )
+            finally:
+                overlay.empty()
 
+            if error_items:
                 try:
-                    result = process_single_file(payload["bytes"], filename)
-                    saved_rows_this_batch.append(result["saved_row"])
-                    debug_items_this_batch.append(
-                        {
-                            "filename": result["filename"],
-                            "student_number": result["student_number"],
-                            "call_type": result.get("call_type"),
-                            "worthy": result["worthy"],
-                            **result["debug"],
-                        }
-                    )
-                except Exception as exc:
-                    simple_error = _simple_error_message(exc)
-                    technical_error = str(exc)
-                    error_items_this_batch.append(
-                        {
-                            "filename": filename,
-                            "student_number": student_number,
-                            "simple_error": simple_error,
-                            "technical_error": technical_error,
-                        }
-                    )
-                    debug_items_this_batch.append(
-                        {
-                            "filename": filename,
-                            "student_number": student_number,
-                            "error": simple_error,
-                            "technical_error": technical_error,
-                        }
-                    )
-
-            st.session_state["last_run_debug"] = debug_items_this_batch
-            overlay.empty()
-
-            report_error_items = []
-            if saved_rows_this_batch:
-                try:
-                    send_report(saved_rows_this_batch, batch_label=today_label)
-                except Exception as exc:
-                    report_error_items.append(
-                        {
-                            "filename": "Daily email report",
-                            "student_number": "N/A",
-                            "simple_error": _simple_error_message(exc),
-                            "technical_error": str(exc),
-                        }
-                    )
-
-            all_error_items = error_items_this_batch + report_error_items
-            error_email_sent = False
-            if all_error_items:
-                try:
-                    send_error_report(all_error_items, batch_label=today_label)
-                    error_email_sent = True
+                    send_error_report(error_items, batch_label=str(date.today()))
                 except Exception:
-                    error_email_sent = False
-
-            if not all_error_items and saved_rows_this_batch:
-                st.session_state["upload_result_message"] = {
-                    "type": "success",
-                    "text": "All calls processed successfully. You can now close this window.",
-                }
-            elif saved_rows_this_batch and all_error_items:
-                if error_email_sent:
-                    message_text = "Some calls could not be processed. Successful calls are saved. Error details have been sent by email. You can now close this window."
-                else:
-                    message_text = "Some calls could not be processed. Successful calls are saved. Please contact the admin. You can now close this window."
-                st.session_state["upload_result_message"] = {
-                    "type": "warning",
-                    "text": message_text,
-                }
-            else:
-                if error_email_sent:
-                    message_text = "We could not process the uploaded calls. Error details have been sent by email. Please try again or contact the admin."
-                else:
-                    message_text = "We could not process the uploaded calls. Please try again or contact the admin."
+                    pass
                 st.session_state["upload_result_message"] = {
                     "type": "error",
-                    "text": message_text,
+                    "text": "The files could not be uploaded. Error details have been sent to the admin.",
+                }
+            else:
+                st.session_state["upload_result_message"] = {
+                    "type": "success",
+                    "text": f"Upload successful. {len(queued_files)} call(s) are now in backend processing queue. You can close this window.",
+                }
+                st.session_state["last_uploaded_batch"] = {
+                    "batch_id": batch_id,
+                    "files": queued_files,
                 }
 
             st.session_state["call_uploader_key"] += 1
@@ -422,69 +354,43 @@ with tab2:
             st.dataframe(df, use_container_width=True, height=650, column_config=column_config)
 
 with tab3:
-    st.subheader("Debug Last Run")
-    st.warning("Temporary testing tab. Remove before final support-team release.")
+    st.subheader("Backend Queue")
+    st.caption("This shows recent upload batches waiting for or completed by the GitHub backend worker.")
 
-    if "debug_unlocked" not in st.session_state:
-        st.session_state.debug_unlocked = False
+    if "queue_unlocked" not in st.session_state:
+        st.session_state.queue_unlocked = False
 
-    if not st.session_state.debug_unlocked:
-        debug_pwd = st.text_input("Enter password to view debug data", type="password", key="debug_pwd")
-        if st.button("Unlock Debug"):
-            if debug_pwd == DASHBOARD_PASSWORD:
-                st.session_state.debug_unlocked = True
+    if not st.session_state.queue_unlocked:
+        queue_pwd = st.text_input("Enter password to view backend queue", type="password", key="queue_pwd")
+        if st.button("Unlock Queue"):
+            if queue_pwd == DASHBOARD_PASSWORD:
+                st.session_state.queue_unlocked = True
                 st.rerun()
             else:
                 st.error("Wrong password.")
     else:
-        debug_items = st.session_state.get("last_run_debug", [])
-        if not debug_items:
-            st.info("No debug data yet. Upload and analyze one call first.")
+        if st.button("Refresh Queue"):
+            st.rerun()
+
+        last_batch = st.session_state.get("last_uploaded_batch")
+        if last_batch:
+            safe_batch_id = html.escape(str(last_batch.get("batch_id", "")))
+            st.info(f"Last uploaded batch: {safe_batch_id}")
+
+        try:
+            batch_rows = fetch_recent_batches(limit=50)
+        except Exception:
+            st.error("Could not load backend queue. Please contact the admin.")
+            batch_rows = []
+
+        if not batch_rows:
+            st.info("No backend batches yet.")
         else:
-            for item in debug_items:
-                title = item.get("filename", "unknown file")
-                with st.expander(title, expanded=True):
-                    if item.get("error"):
-                        st.error(item["error"])
-                        if item.get("technical_error"):
-                            st.caption("Technical detail is hidden from normal users but available here for debugging.")
-                            st.code(str(item["technical_error"]))
-                        continue
+            batch_df = pd.DataFrame(_make_batch_rows(batch_rows))
+            st.dataframe(batch_df, use_container_width=True, height=520)
 
-                    st.markdown("### File information")
-                    st.write(
-                        {
-                            "filename": item.get("filename"),
-                            "student_number": item.get("student_number"),
-                            "call_type": item.get("call_type"),
-                            "worthy": item.get("worthy"),
-                            "openai_model": item.get("openai_model"),
-                            "openai_reasoning_effort": item.get("openai_reasoning_effort"),
-                        }
-                    )
-
-                    st.markdown("### Deepgram transcript output")
-                    st.text_area("Deepgram transcript", value=item.get("deepgram_transcript", ""), height=300, key=f"deepgram_{title}")
-
-                    st.markdown("### Prompt sent to OpenAI GPT")
-                    st.text_area("System prompt / instructions", value=item.get("openai_system_prompt", ""), height=350, key=f"prompt_{title}")
-                    st.text_area("User input sent to OpenAI", value=item.get("openai_user_input", ""), height=250, key=f"user_input_{title}")
-
-                    st.markdown("### Raw OpenAI output")
-                    st.text_area("Raw OpenAI output", value=item.get("openai_raw_output", ""), height=300, key=f"raw_output_{title}")
-
-                    st.markdown("### Parsed output used by code")
-                    parsed = item.get("openai_parsed_output")
-                    if isinstance(parsed, (dict, list)):
-                        st.json(parsed)
-                    else:
-                        st.code(str(parsed))
-
-                    debug_download = json.dumps(item, ensure_ascii=False, indent=2, default=str)
-                    st.download_button(
-                        "Download debug JSON",
-                        data=debug_download,
-                        file_name=f"debug_{item.get('student_number', 'unknown')}.json",
-                        mime="application/json",
-                        key=f"download_{title}",
-                    )
+        st.markdown("### What happens next?")
+        st.write(
+            "After upload, GitHub Actions processes pending calls in the backend. "
+            "When a batch finishes, the email report is sent automatically."
+        )

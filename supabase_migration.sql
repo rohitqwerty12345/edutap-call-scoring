@@ -187,3 +187,58 @@ begin
   set "Learnings" = replace("Learnings", 'Pain Point Pain Point Discovery', 'Pain Point Discovery')
   where "Learnings" is not null;
 end $$;
+
+-- Backend processing queue tables for GitHub Actions worker.
+create table if not exists public.call_processing_batches (
+  batch_id text primary key,
+  created_at timestamptz default now(),
+  completed_at timestamptz,
+  status text default 'pending',
+  total_files integer default 0,
+  completed_files integer default 0,
+  failed_files integer default 0,
+  report_sent boolean default false,
+  error_email_sent boolean default false,
+  last_error text
+);
+
+create table if not exists public.call_processing_jobs (
+  id uuid primary key default gen_random_uuid(),
+  batch_id text references public.call_processing_batches(batch_id) on delete cascade,
+  created_at timestamptz default now(),
+  started_at timestamptz,
+  completed_at timestamptz,
+  status text default 'pending',
+  student_number text,
+  audio_filename text,
+  audio_storage_path text,
+  audio_public_url text,
+  attempt_count integer default 0,
+  error_message text,
+  saved_row_json jsonb
+);
+
+alter table public.call_processing_batches add column if not exists completed_at timestamptz;
+alter table public.call_processing_batches add column if not exists status text default 'pending';
+alter table public.call_processing_batches add column if not exists total_files integer default 0;
+alter table public.call_processing_batches add column if not exists completed_files integer default 0;
+alter table public.call_processing_batches add column if not exists failed_files integer default 0;
+alter table public.call_processing_batches add column if not exists report_sent boolean default false;
+alter table public.call_processing_batches add column if not exists error_email_sent boolean default false;
+alter table public.call_processing_batches add column if not exists last_error text;
+
+alter table public.call_processing_jobs add column if not exists started_at timestamptz;
+alter table public.call_processing_jobs add column if not exists completed_at timestamptz;
+alter table public.call_processing_jobs add column if not exists status text default 'pending';
+alter table public.call_processing_jobs add column if not exists student_number text;
+alter table public.call_processing_jobs add column if not exists audio_filename text;
+alter table public.call_processing_jobs add column if not exists audio_storage_path text;
+alter table public.call_processing_jobs add column if not exists audio_public_url text;
+alter table public.call_processing_jobs add column if not exists attempt_count integer default 0;
+alter table public.call_processing_jobs add column if not exists error_message text;
+alter table public.call_processing_jobs add column if not exists saved_row_json jsonb;
+
+create index if not exists idx_call_processing_jobs_status_created on public.call_processing_jobs (status, created_at);
+create index if not exists idx_call_processing_jobs_batch on public.call_processing_jobs (batch_id);
+create index if not exists idx_call_processing_batches_created on public.call_processing_batches (created_at desc);
+create index if not exists idx_call_processing_batches_status on public.call_processing_batches (status);

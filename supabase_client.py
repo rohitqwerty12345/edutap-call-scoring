@@ -2,7 +2,7 @@ import json
 import mimetypes
 import os
 import re
-from datetime import date, datetime, time
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List
 from uuid import uuid4
@@ -133,7 +133,6 @@ def _plain_summary_text(value: Any) -> str:
                 return _plain_summary_text(json.loads(text))
             except Exception:
                 return value
-        # Make numbered learning paragraphs readable: "1. ... 2. ..." -> separate lines.
         text = re.sub(r"\s+(?=\d+[.)]\s+)", "\n", text)
         return text
     return str(value)
@@ -173,14 +172,12 @@ def _format_score(score: float | None) -> str:
 
 
 def _format_average(score: float | None) -> str:
-    """Average Score must be shown as a plain number only, e.g. 3.0."""
     if score is None:
         return ""
     return f"{score:.1f}"
 
 
 def _average_from_text(value: Any) -> str | None:
-    """Convert strings like '3.0/10 (30%)' or '19/60' to plain average score like '3.0' or '3.2'."""
     if value is None:
         return None
     text = str(value).strip()
@@ -241,7 +238,6 @@ def _average_score(result: Dict[str, Any], call_type: str) -> str:
 
 
 def _tone_truth_fail_details(guardrails: Dict[str, Any]) -> str:
-    """Build detailed Tone + Truth failure text for dashboard/email."""
     failed_part = (
         guardrails.get("failed_part")
         or guardrails.get("failure_type")
@@ -356,13 +352,20 @@ def _upload_bytes(client: Client, bucket_name: str, object_path: str, file_bytes
     return _public_url(client, bucket_name, object_path)
 
 
-def upload_call_files(client: Client, student_number: str, audio_filename: str, audio_bytes: bytes | None, transcript: str) -> tuple[str | None, str | None]:
+def upload_call_files(
+    client: Client,
+    student_number: str,
+    audio_filename: str,
+    audio_bytes: bytes | None,
+    transcript: str,
+    existing_audio_url: str | None = None,
+) -> tuple[str | None, str | None]:
     timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
     unique_id = uuid4().hex[:8]
     safe_audio_name = _slug_filename(audio_filename)
 
-    audio_url = None
-    if audio_bytes:
+    audio_url = existing_audio_url
+    if audio_bytes and not existing_audio_url:
         content_type = mimetypes.guess_type(safe_audio_name)[0] or "application/octet-stream"
         audio_path = f"{student_number}/{timestamp}_{unique_id}_{safe_audio_name}"
         audio_url = _upload_bytes(client, AUDIO_BUCKET, audio_path, audio_bytes, content_type)
@@ -373,7 +376,14 @@ def upload_call_files(client: Client, student_number: str, audio_filename: str, 
     return audio_url, transcript_url
 
 
-def build_db_row(student_number: str, audio_filename: str, transcript: str, result: dict | str, call_audio_link: str | None = None, call_transcript_link: str | None = None) -> Dict[str, Any]:
+def build_db_row(
+    student_number: str,
+    audio_filename: str,
+    transcript: str,
+    result: dict | str,
+    call_audio_link: str | None = None,
+    call_transcript_link: str | None = None,
+) -> Dict[str, Any]:
     today = date.today().isoformat()
     base = {
         "Date": today,
@@ -417,14 +427,180 @@ def build_db_row(student_number: str, audio_filename: str, transcript: str, resu
     }
 
 
-def save_result(student_number: str, audio_filename: str, transcript: str, result: dict | str, audio_bytes: bytes | None = None) -> Dict[str, Any]:
+def save_result(
+    student_number: str,
+    audio_filename: str,
+    transcript: str,
+    result: dict | str,
+    audio_bytes: bytes | None = None,
+    existing_audio_url: str | None = None,
+) -> Dict[str, Any]:
     client = get_client()
-    audio_url, transcript_url = upload_call_files(client, student_number, audio_filename, audio_bytes, transcript)
+    audio_url, transcript_url = upload_call_files(
+        client,
+        student_number,
+        audio_filename,
+        audio_bytes,
+        transcript,
+        existing_audio_url=existing_audio_url,
+    )
     row = build_db_row(student_number, audio_filename, transcript, result, audio_url, transcript_url)
     response = client.table("call_scores").insert(row).execute()
     if getattr(response, "data", None):
         return response.data[0]
     return row
+
+
+def enqueue_call_batch(file_payloads: List[Dict[str, Any]]) -> tuple[str, List[Dict[str, Any]]]:
+    """Upload raw call recordings and create pending backend jobs."""
+    if not file_payloads:
+        raise RuntimeError("No files were selected.")
+
+    client = get_client()
+    batch_id = uuid4().hex
+    now_iso = datetime.utcnow().isoformat()
+
+    batch_row = {
+        "batch_id": batch_id,
+        "created_at": now_iso,
+        "status": "pending",
+        "total_files": len(file_payloads),
+        "completed_files": 0,
+        "failed_files": 0,
+        "report_sent": False,
+        "error_email_sent": False,
+    }
+    client.table("call_processing_batches").insert(batch_row).execute()
+
+    queued_files: List[Dict[str, Any]] = []
+    job_rows: List[Dict[str, Any]] = []
+    for payload in file_payloads:
+        filename = str(payload.get("name") or "call_recording")
+        file_bytes = payload.get("bytes") or b""
+        student_number = str(payload.get("student_number") or "unknown")
+        safe_audio_name = _slug_filename(filename)
+        unique_id = uuid4().hex[:8]
+        content_type = mimetypes.guess_type(safe_audio_name)[0] or "application/octet-stream"
+        object_path = f"queued/{batch_id}/{student_number}_{unique_id}_{safe_audio_name}"
+        audio_url = _upload_bytes(client, AUDIO_BUCKET, object_path, file_bytes, content_type)
+        if not audio_url:
+            raise RuntimeError(f"Could not upload {filename} to storage.")
+
+        job_rows.append(
+            {
+                "batch_id": batch_id,
+                "status": "pending",
+                "student_number": student_number,
+                "audio_filename": filename,
+                "audio_storage_path": object_path,
+                "audio_public_url": audio_url,
+                "attempt_count": 0,
+            }
+        )
+        queued_files.append(
+            {
+                "filename": filename,
+                "student_number": student_number,
+                "audio_public_url": audio_url,
+            }
+        )
+
+    client.table("call_processing_jobs").insert(job_rows).execute()
+    return batch_id, queued_files
+
+
+def fetch_recent_batches(limit: int = 50) -> List[Dict[str, Any]]:
+    client = get_client()
+    response = (
+        client.table("call_processing_batches")
+        .select("*")
+        .order("created_at", desc=True)
+        .limit(limit)
+        .execute()
+    )
+    return response.data or []
+
+
+def fetch_pending_jobs(limit: int = 50) -> List[Dict[str, Any]]:
+    client = get_client()
+    response = (
+        client.table("call_processing_jobs")
+        .select("*")
+        .eq("status", "pending")
+        .order("created_at")
+        .limit(limit)
+        .execute()
+    )
+    return response.data or []
+
+
+def mark_job_processing(job: Dict[str, Any]) -> None:
+    client = get_client()
+    attempt_count = int(job.get("attempt_count") or 0) + 1
+    client.table("call_processing_jobs").update(
+        {
+            "status": "processing",
+            "started_at": datetime.utcnow().isoformat(),
+            "attempt_count": attempt_count,
+            "error_message": None,
+        }
+    ).eq("id", job["id"]).execute()
+
+
+def mark_job_completed(job_id: str, saved_row: Dict[str, Any]) -> None:
+    client = get_client()
+    client.table("call_processing_jobs").update(
+        {
+            "status": "completed",
+            "completed_at": datetime.utcnow().isoformat(),
+            "saved_row_json": saved_row,
+            "error_message": None,
+        }
+    ).eq("id", job_id).execute()
+
+
+def mark_job_failed(job_id: str, error_message: str) -> None:
+    client = get_client()
+    client.table("call_processing_jobs").update(
+        {
+            "status": "failed",
+            "completed_at": datetime.utcnow().isoformat(),
+            "error_message": error_message[:4000],
+        }
+    ).eq("id", job_id).execute()
+
+
+def reset_stale_processing_jobs(hours: int = 2) -> None:
+    client = get_client()
+    cutoff = (datetime.utcnow() - timedelta(hours=hours)).isoformat()
+    try:
+        client.table("call_processing_jobs").update({"status": "pending"}).eq("status", "processing").lt("started_at", cutoff).execute()
+    except Exception:
+        pass
+
+
+def fetch_jobs_for_batch(batch_id: str) -> List[Dict[str, Any]]:
+    client = get_client()
+    response = (
+        client.table("call_processing_jobs")
+        .select("*")
+        .eq("batch_id", batch_id)
+        .order("created_at")
+        .execute()
+    )
+    return response.data or []
+
+
+def update_batch(batch_id: str, updates: Dict[str, Any]) -> None:
+    client = get_client()
+    client.table("call_processing_batches").update(updates).eq("batch_id", batch_id).execute()
+
+
+def fetch_batch(batch_id: str) -> Dict[str, Any] | None:
+    client = get_client()
+    response = client.table("call_processing_batches").select("*").eq("batch_id", batch_id).limit(1).execute()
+    rows = response.data or []
+    return rows[0] if rows else None
 
 
 def _date_only(value: Any) -> str:
@@ -442,7 +618,6 @@ def _date_only(value: Any) -> str:
 
 def _normalize_display_row(row: Dict[str, Any]) -> Dict[str, Any]:
     row["Date"] = _date_only(row.get("Date"))
-    # Old rows may still contain values like '3.0/10 (30%)' or '19/60'. Show only the average number.
     normalized_average = _average_from_text(row.get("Average Score"))
     if normalized_average is not None:
         row["Average Score"] = normalized_average
