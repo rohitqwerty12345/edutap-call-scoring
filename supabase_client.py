@@ -369,6 +369,21 @@ def _public_url(client: Client, bucket_name: str, object_path: str) -> str | Non
     return None
 
 
+def _download_url(url: str | None, filename: str = "transcript.txt") -> str | None:
+    """Make a Supabase public object URL download instead of opening inline in browser."""
+    if not url:
+        return url
+    text = str(url).strip()
+    if not text:
+        return text
+    if "download=" in text or text.endswith("?download") or "?download&" in text or "&download&" in text:
+        return text
+
+    safe_name = re.sub(r"[^A-Za-z0-9_.-]+", "_", filename or "transcript.txt") or "transcript.txt"
+    separator = "&" if "?" in text else "?"
+    return f"{text}{separator}download={safe_name}"
+
+
 def _upload_bytes(client: Client, bucket_name: str, object_path: str, file_bytes: bytes, content_type: str) -> str | None:
     _ensure_bucket(client, bucket_name)
     file_options = {"content-type": content_type, "upsert": "true"}
@@ -405,6 +420,8 @@ def upload_call_files(
     transcript_bytes = (transcript or "").encode("utf-8")
     transcript_path = f"{student_number}/{timestamp}_{unique_id}_{safe_audio_name}.txt"
     transcript_url = _upload_bytes(client, TRANSCRIPT_BUCKET, transcript_path, transcript_bytes, "text/plain; charset=utf-8")
+    transcript_download_name = f"{student_number}_{timestamp}_{unique_id}_transcript.txt"
+    transcript_url = _download_url(transcript_url, transcript_download_name)
     return audio_url, transcript_url
 
 
@@ -665,6 +682,8 @@ def _normalize_display_row(row: Dict[str, Any]) -> Dict[str, Any]:
     normalized_average = _average_from_text(row.get("Average Score"))
     if normalized_average is not None:
         row["Average Score"] = normalized_average
+    if row.get("Transcript Link"):
+        row["Transcript Link"] = _download_url(row.get("Transcript Link"), "transcript.txt")
     row["Learnings"] = _plain_summary_text(row.get("Learnings"))
     row["Strengths"] = _plain_summary_text(row.get("Strengths"))
     row["Improvement Areas"] = _plain_summary_text(row.get("Improvement Areas"))

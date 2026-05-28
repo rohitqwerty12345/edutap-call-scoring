@@ -273,6 +273,17 @@ def _render_result_overlay(placeholder, message: str, message_type: str = "succe
 
 
 
+def _force_download_link(url: str, filename: str = "transcript.txt") -> str:
+    text = str(url or "").strip()
+    if not text:
+        return text
+    if "download=" in text or text.endswith("?download") or "?download&" in text or "&download&" in text:
+        return text
+    safe_name = "".join(ch if ch.isalnum() or ch in "._-" else "_" for ch in filename) or "transcript.txt"
+    separator = "&" if "?" in text else "?"
+    return f"{text}{separator}download={safe_name}"
+
+
 def _display_value(row, key, default=""):
     value = row.get(key, default)
     if value is None:
@@ -286,6 +297,9 @@ def _display_value(row, key, default=""):
         if " " in text:
             return text.split(" ", 1)[0]
         return text[:10]
+
+    if key == "Transcript Link":
+        return _force_download_link(text, "transcript.txt")
 
     import re
     text = re.sub(r"\s+(?=\d+[.)]\s+)", "\n", text)
