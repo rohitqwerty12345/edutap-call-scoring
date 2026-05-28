@@ -384,19 +384,6 @@ def _render_analytics_dashboard() -> None:
     st.subheader("Analytic Dashboard")
     st.caption("Day-wise average score based on completed scored calls.")
 
-    if "analytics_unlocked" not in st.session_state:
-        st.session_state.analytics_unlocked = False
-
-    if not st.session_state.analytics_unlocked:
-        pwd = st.text_input("Enter password to view analytics", type="password", key="analytics_pwd")
-        if st.button("Unlock Analytics"):
-            if pwd == DASHBOARD_PASSWORD:
-                st.session_state.analytics_unlocked = True
-                st.rerun()
-            else:
-                st.error("Wrong password.")
-        return
-
     today = date.today()
     filter_mode = st.radio(
         "Filter by",
@@ -432,18 +419,6 @@ def _render_analytics_dashboard() -> None:
     if daily_df.empty:
         st.info("No scored calls found for this date range.")
         return
-
-    overall_average = float(daily_df["Average Score"].mean())
-    total_scored_calls = int(daily_df["Calls Scored"].sum())
-    best_day_row = daily_df.loc[daily_df["Average Score"].idxmax()]
-
-    c1, c2, c3 = st.columns(3)
-    c1.metric("Overall Average", f"{overall_average:.2f}")
-    c2.metric("Scored Calls", total_scored_calls)
-    c3.metric("Best Day", f"{best_day_row['Date']} ({best_day_row['Average Score']:.2f})")
-
-    chart_df = daily_df.set_index("Date")[["Average Score"]]
-    st.line_chart(chart_df, height=360)
 
     st.dataframe(
         daily_df,

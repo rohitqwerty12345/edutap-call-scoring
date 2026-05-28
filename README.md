@@ -147,3 +147,34 @@ call_summary_for_followup
 These columns are not shown in the Streamlit dashboard and are not included in the email sheet. They are stored only for future follow-up-call logic.
 
 After replacing files, run the latest `supabase_migration.sql` once in Supabase SQL Editor.
+
+## Analytic Dashboard tab
+
+The app now has tab order:
+
+```text
+Upload Calls
+Analytic Dashboard
+View Results
+Backend Queue
+```
+
+The Analytic Dashboard does not ask for a password. It shows only a day-wise table with:
+
+```text
+Date
+Average Score
+Calls Scored
+```
+
+Filters available:
+
+```text
+Week
+Month
+Custom Date Range
+```
+
+## Follow-up storage update
+
+The backend injects `Call Number: X` before sending the transcript to OpenAI. The LLM's `call_summary_for_followup` output is saved internally in Supabase for future follow-up logic. It is not shown in the dashboard and not sent in the email XLSX.
