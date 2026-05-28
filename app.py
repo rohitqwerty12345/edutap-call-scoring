@@ -1,7 +1,7 @@
 import html
 import json
 import os
-from datetime import date
+from datetime import date, timedelta
 from typing import Any
 
 import requests
@@ -316,17 +316,157 @@ def _make_batch_rows(rows):
     return display
 
 
+
+def _parse_score_for_analytics(value) -> float | None:
+    """Convert Average Score values like '6.5', '3.0/10', or '19/60' into a float."""
+    if value is None:
+        return None
+    text = str(value).strip()
+    if not text:
+        return None
+
+    import re
+    ratio = re.search(r"(\d+(?:\.\d+)?)\s*/\s*(\d+(?:\.\d+)?)", text)
+    if ratio:
+        numerator = float(ratio.group(1))
+        denominator = float(ratio.group(2))
+        if denominator > 0:
+            return round((numerator / denominator) * 10, 2)
+
+    number = re.search(r"\d+(?:\.\d+)?", text)
+    if not number:
+        return None
+    return float(number.group(0))
+
+
+def _parse_date_for_analytics(value) -> date | None:
+    if value is None:
+        return None
+    text = str(value).strip()
+    if not text:
+        return None
+    if "T" in text:
+        text = text.split("T", 1)[0]
+    elif " " in text:
+        text = text.split(" ", 1)[0]
+    else:
+        text = text[:10]
+    try:
+        return date.fromisoformat(text)
+    except Exception:
+        return None
+
+
+def _build_daily_analytics(rows, start_date: date, end_date: date) -> pd.DataFrame:
+    records = []
+    for row in rows:
+        row_date = _parse_date_for_analytics(row.get("Date"))
+        score = _parse_score_for_analytics(row.get("Average Score"))
+        if row_date is None or score is None:
+            continue
+        if start_date <= row_date <= end_date:
+            records.append({"Date": row_date.isoformat(), "Average Score": score})
+
+    if not records:
+        return pd.DataFrame(columns=["Date", "Average Score", "Calls Scored"])
+
+    df = pd.DataFrame(records)
+    grouped = (
+        df.groupby("Date", as_index=False)
+        .agg(**{"Average Score": ("Average Score", "mean"), "Calls Scored": ("Average Score", "count")})
+        .sort_values("Date")
+    )
+    grouped["Average Score"] = grouped["Average Score"].round(2)
+    return grouped
+
+
+def _render_analytics_dashboard() -> None:
+    st.subheader("Analytic Dashboard")
+    st.caption("Day-wise average score based on completed scored calls.")
+
+    if "analytics_unlocked" not in st.session_state:
+        st.session_state.analytics_unlocked = False
+
+    if not st.session_state.analytics_unlocked:
+        pwd = st.text_input("Enter password to view analytics", type="password", key="analytics_pwd")
+        if st.button("Unlock Analytics"):
+            if pwd == DASHBOARD_PASSWORD:
+                st.session_state.analytics_unlocked = True
+                st.rerun()
+            else:
+                st.error("Wrong password.")
+        return
+
+    today = date.today()
+    filter_mode = st.radio(
+        "Filter by",
+        ["Week", "Month", "Custom Date Range"],
+        horizontal=True,
+        key="analytics_filter_mode",
+    )
+
+    if filter_mode == "Week":
+        start_date = today - timedelta(days=6)
+        end_date = today
+    elif filter_mode == "Month":
+        start_date = today.replace(day=1)
+        end_date = today
+    else:
+        col_start, col_end = st.columns(2)
+        with col_start:
+            start_date = st.date_input("Start date", value=today - timedelta(days=6), key="analytics_start_date")
+        with col_end:
+            end_date = st.date_input("End date", value=today, key="analytics_end_date")
+        if start_date > end_date:
+            st.error("Start date cannot be after end date.")
+            return
+
+    try:
+        rows = fetch_all_results(limit=5000)
+    except Exception:
+        st.error("Could not load analytics. Please contact the admin.")
+        return
+
+    daily_df = _build_daily_analytics(rows, start_date, end_date)
+
+    if daily_df.empty:
+        st.info("No scored calls found for this date range.")
+        return
+
+    overall_average = float(daily_df["Average Score"].mean())
+    total_scored_calls = int(daily_df["Calls Scored"].sum())
+    best_day_row = daily_df.loc[daily_df["Average Score"].idxmax()]
+
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Overall Average", f"{overall_average:.2f}")
+    c2.metric("Scored Calls", total_scored_calls)
+    c3.metric("Best Day", f"{best_day_row['Date']} ({best_day_row['Average Score']:.2f})")
+
+    chart_df = daily_df.set_index("Date")[["Average Score"]]
+    st.line_chart(chart_df, height=360)
+
+    st.dataframe(
+        daily_df,
+        use_container_width=True,
+        hide_index=True,
+        column_config={
+            "Date": st.column_config.TextColumn("Date", width="medium"),
+            "Average Score": st.column_config.NumberColumn("Average Score", format="%.2f", width="medium"),
+            "Calls Scored": st.column_config.NumberColumn("Calls Scored", width="medium"),
+        },
+    )
+
 st.set_page_config(page_title="EduTap Call Scoring", page_icon="📞", layout="wide")
 st.title("EduTap Call Scoring System")
 
-tab1, tab2, tab3 = st.tabs(["Upload Calls", "View Results", "Backend Queue"])
+tab1, tab2, tab3, tab4 = st.tabs(["Upload Calls", "Analytic Dashboard", "View Results", "Backend Queue"])
 
 if "call_uploader_key" not in st.session_state:
     st.session_state["call_uploader_key"] = 0
 
 with tab1:
     st.subheader("Upload Call Recordings")
-    st.caption("Upload MP3, WAV, or M4A files.")
+    st.caption("Upload MP3, WAV, or M4A files. After upload, processing will happen in the backend.")
 
     uploaded_files = st.file_uploader(
         "Choose call recording files",
@@ -427,6 +567,9 @@ with tab1:
             st.rerun()
 
 with tab2:
+    _render_analytics_dashboard()
+
+with tab3:
     st.subheader("Call Score Dashboard")
 
     if "dashboard_unlocked" not in st.session_state:
@@ -485,7 +628,7 @@ with tab2:
 
             st.dataframe(df, use_container_width=True, height=650, column_config=column_config)
 
-with tab3:
+with tab4:
     st.subheader("Backend Queue")
     st.caption("This shows recent upload batches waiting for or completed by the GitHub backend worker.")
 
