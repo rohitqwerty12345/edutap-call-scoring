@@ -1,3 +1,4 @@
+import html as html_lib
 import io
 import os
 import re
@@ -71,6 +72,57 @@ def _normalize_average(value) -> str:
         return f"{float(number.group(0)):.1f}"
 
     return text
+
+
+def _html_text(value) -> str:
+    """Escape text safely for HTML email and preserve line breaks."""
+    text = _format_multiline(value)
+    return html_lib.escape(text).replace("\n", "<br>")
+
+
+def _build_quick_html_table(results: List[Dict]) -> str:
+    """Build a short readable table inside the email body."""
+    if not results:
+        return "<p>No scored calls were found in this batch.</p>"
+
+    rows_html: list[str] = []
+    for row in results:
+        recording_url = str(row.get("Call Recording Link") or "").strip()
+        if recording_url:
+            recording_cell = (
+                f'<a href="{html_lib.escape(recording_url, quote=True)}" '
+                f'style="color:#0b57d0;text-decoration:underline;font-weight:600;">Recording</a>'
+            )
+        else:
+            recording_cell = ""
+
+        score = html_lib.escape(_normalize_average(row.get("Average Score")))
+        parameter_score = _html_text(row.get("Score Parameter Wise"))
+
+        rows_html.append(
+            f"""
+            <tr>
+                <td style="border:1px solid #d9d9d9;padding:10px;vertical-align:top;">{recording_cell}</td>
+                <td style="border:1px solid #d9d9d9;padding:10px;vertical-align:top;text-align:center;font-weight:700;">{score}</td>
+                <td style="border:1px solid #d9d9d9;padding:10px;vertical-align:top;line-height:1.45;">{parameter_score}</td>
+            </tr>
+            """
+        )
+
+    return f"""
+    <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:14px;">
+        <thead>
+            <tr>
+                <th style="border:1px solid #d9d9d9;background:#fff2cc;color:#000;padding:10px;text-align:left;">Recording</th>
+                <th style="border:1px solid #d9d9d9;background:#fff2cc;color:#000;padding:10px;text-align:center;">Score</th>
+                <th style="border:1px solid #d9d9d9;background:#fff2cc;color:#000;padding:10px;text-align:left;">Parameter Score</th>
+            </tr>
+        </thead>
+        <tbody>
+            {''.join(rows_html)}
+        </tbody>
+    </table>
+    """
 
 
 def build_excel(results: List[Dict]) -> bytes:
@@ -161,8 +213,9 @@ def send_report(results: List[Dict], batch_label: str = "Today") -> None:
 
     excel_bytes = build_excel(results)
     summary = _batch_summary(results)
+    quick_table_html = _build_quick_html_table(results)
 
-    body = f"""Hi,
+    plain_body = f"""Hi,
 
 Please find attached the EPFO call scoring report for {batch_label}.
 
@@ -173,15 +226,47 @@ Summary:
 - Not worthy calls: {summary['not_worthy']}
 - Converted calls: {summary['converted']}
 
+A quick formatted summary table is included in the email body. The full detailed report is attached as an Excel sheet.
+
 Regards,
 Rohit Sharma
 """
 
-    msg = MIMEMultipart()
+    html_body = f"""
+    <html>
+    <body style="font-family:Arial,sans-serif;color:#111827;font-size:14px;line-height:1.5;">
+        <p>Hi,</p>
+
+        <p>Please find attached the EPFO call scoring report for <strong>{html_lib.escape(str(batch_label))}</strong>.</p>
+
+        <p><strong>Summary:</strong></p>
+        <ul>
+            <li>Total calls processed: {summary['total']}</li>
+            <li>Full analysis calls: {summary['full_analysis']}</li>
+            <li>Follow-up only calls: {summary['follow_up_only']}</li>
+            <li>Not worthy calls: {summary['not_worthy']}</li>
+            <li>Converted calls: {summary['converted']}</li>
+        </ul>
+
+        <p><strong>Quick Score Table:</strong></p>
+        {quick_table_html}
+
+        <p style="margin-top:18px;">Full detailed report is attached as an Excel sheet.</p>
+
+        <p>Regards,<br>Rohit Sharma</p>
+    </body>
+    </html>
+    """
+
+    msg = MIMEMultipart("mixed")
     msg["From"] = sender
     msg["To"] = ", ".join(recipients)
     msg["Subject"] = f"Call Scores Report - {batch_label}"
-    msg.attach(MIMEText(body, "plain"))
+
+    body_part = MIMEMultipart("alternative")
+    body_part.attach(MIMEText(plain_body, "plain"))
+    body_part.attach(MIMEText(html_body, "html"))
+    msg.attach(body_part)
 
     attachment = MIMEBase("application", "vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     attachment.set_payload(excel_bytes)
