@@ -62,6 +62,38 @@ def is_not_worthy_result(result: Any) -> bool:
     return False
 
 
+def get_next_call_number(student_number: str) -> int:
+    """Allocate the next call number for a student number using an atomic Supabase SQL function."""
+    clean_number = str(student_number or "unknown").strip() or "unknown"
+    client = get_client()
+    response = client.rpc("allocate_call_number", {"p_student_number": clean_number}).execute()
+    data = getattr(response, "data", None)
+
+    if isinstance(data, int):
+        return data
+    if isinstance(data, float):
+        return int(data)
+    if isinstance(data, str) and data.strip().isdigit():
+        return int(data.strip())
+    if isinstance(data, list) and data:
+        first = data[0]
+        if isinstance(first, int):
+            return first
+        if isinstance(first, dict):
+            value = first.get("allocate_call_number") or first.get("next_call_number") or first.get("call_number")
+            if value is not None:
+                return int(value)
+
+    raise RuntimeError("Could not allocate call number for this student.")
+
+
+def _call_summary_for_followup(result: Any) -> Any:
+    """Extract follow-up summary from LLM JSON. Missing values/null are valid and stored as-is."""
+    if isinstance(result, dict):
+        return result.get("call_summary_for_followup")
+    return None
+
+
 def _plain_summary_text(value: Any) -> str:
     if value is None:
         return ""
@@ -383,6 +415,7 @@ def build_db_row(
     result: dict | str,
     call_audio_link: str | None = None,
     call_transcript_link: str | None = None,
+    call_number: int | None = None,
 ) -> Dict[str, Any]:
     today = date.today().isoformat()
     base = {
@@ -390,6 +423,8 @@ def build_db_row(
         "Student Number": student_number,
         "Call Recording Link": call_audio_link or audio_filename,
         "Transcript Link": call_transcript_link,
+        "call_number": call_number,
+        "call_summary_for_followup": _call_summary_for_followup(result),
     }
 
     if is_not_worthy_result(result):
@@ -434,6 +469,7 @@ def save_result(
     result: dict | str,
     audio_bytes: bytes | None = None,
     existing_audio_url: str | None = None,
+    call_number: int | None = None,
 ) -> Dict[str, Any]:
     client = get_client()
     audio_url, transcript_url = upload_call_files(
@@ -444,7 +480,15 @@ def save_result(
         transcript,
         existing_audio_url=existing_audio_url,
     )
-    row = build_db_row(student_number, audio_filename, transcript, result, audio_url, transcript_url)
+    row = build_db_row(
+        student_number,
+        audio_filename,
+        transcript,
+        result,
+        audio_url,
+        transcript_url,
+        call_number=call_number,
+    )
     response = client.table("call_scores").insert(row).execute()
     if getattr(response, "data", None):
         return response.data[0]

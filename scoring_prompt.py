@@ -51,6 +51,8 @@ No generic feedback. No praise or criticism without pointing to the exact line.
 RULE 4 — TRANSCRIPT SPELLING TOLERANCE:
 This transcript is auto-generated from a call recording using speech-to-text. Words will frequently be misspelled or appear phonetically. Course names, platform names, and exam names may appear in distorted forms — for example "edutab" or "add o tab" instead of "EduTap", "ups epf" instead of "UPSC EPFO", "apf c" instead of "APFC", "e o" instead of "EO/AO". Do NOT flag these as factual errors or Tone + Truth failures. Judge meaning, not spelling. Only flag something as factually wrong if the actual claim being made is incorrect — not the phonetic transcription of a word or name.
 
+Additionally, do NOT flag or penalise name mismatches between the student partner and the student. Students frequently enroll using a nickname, a family member's name, or an incorrectly typed name. The student partner reads the name from the CRM at the time of enrollment, which may differ from what the student confirms on the call. This is a data entry issue, not a student partner error. Do not treat it as a Tone + Truth failure, an Opening weakness, or any other scoring concern.
+
 RULE 5 — FREE OFFERINGS TOLERANCE:
 The student partner may mention complimentary services not listed in the paid course. These are approved free offerings — do NOT flag them as false information:
 Strategy calls (1-on-1), Calendly sessions, LG workshop, LN workshop, Starter packs, Demo courses, Trial lessons within paid courses, Interview guidance bundles for RBI/SEBI/NABARD, 1st free mock interview for RBI/SEBI/NABARD, Solved PYQs, Guidebooks, Current affair boosters on website, E-books on website, Mock tests on website, YouTube free videos with PDFs on Telegram (CT 360, Finance 360, Govt Schemes, Perspective 360, ARD Current Affairs for NABARD), Exam preparation and strategy videos on YouTube.
@@ -69,6 +71,11 @@ Mark "Converted" only if the student clearly paid, agreed to pay immediately, or
 
 RULE 9 — NEVER ASSUME INTENT:
 Score only what actually happened in the transcript. Do not give credit for things the student partner might have meant to do.
+
+RULE 11 — CALL DROP MID-CONVERSATION:
+Sometimes a call ends abruptly because the line disconnected from the student's side — not because the student partner chose to close the call. Signals of a dropped call include: the transcript ends mid-sentence, the student partner says "hello hello" or "hello" repeatedly at the end with no response, or the last exchange shows the student partner still actively speaking when the transcript cuts off.
+
+If the call dropped mid-conversation, do NOT treat it as an incomplete or weak closure by the student partner. Do NOT penalise Next Step Clarity for the absence of a closing line if there was no opportunity to give one. Instead, score Next Step Clarity only on whatever was established before the drop — any follow-up time agreed, links sent, or commitments made earlier in the call. Note in what_happened_at_end that the call appears to have been dropped from the student's side.
 
 RULE 10 — TONE + TRUTH FAIL = ZERO SCORE:
 After deciding the call type, check Tone + Truth first.
@@ -126,6 +133,9 @@ One-line definition: Did both sides know exactly what happens next before the ca
 If converted: payment link sent immediately, access confirmed, student told what to do first when they log in.
 If not converted: specific follow-up date and time agreed, Master Course details and link sent on WhatsApp, student partner's direct number shared, offer validity communicated clearly.
 Never acceptable: "soch lo, call karna kabhi." That is giving up on the student.
+
+CRITICAL — Missed buying signal:
+If the student expressed clear buying intent at any point during the call — for example "enroll karunga aaj", "le lunga", "abhi le leta hoon", or any variation of "I will take this today/now" — and the student partner did not act on it by sending a payment link, confirming a payment time, or asking "toh abhi kya rok raha hai?" — this is a missed conversion and Next Step Clarity cannot score above 5, regardless of what else happened at the end of the call. The student told the partner they were ready. The partner's job was to remove every remaining obstacle and close. Not doing so is a direct Next Step Clarity failure.
 
 Special follow-up-only case:
 If the student cannot talk now, Next Step Clarity is judged on how well the student partner handles that short moment. A weak ending is: "ok kal call kar lunga" with no exact time, no confirmation, and no care. A strong ending is: "I understand you are busy. I am calling because I want to help you choose the right preparation direction. Can I call you tomorrow at 5 PM? I will also send the course details on WhatsApp so you can check when free."
@@ -203,6 +213,10 @@ The test: does the question make the student reveal something about THEMSELVES �
 
 CRITICAL — Active vs Passive:
 Do NOT count information the student volunteered on their own without being asked. A student who volunteers 7 pain points while the student partner asks one vague question gets the student partner a low score — because the student did the work. Measure what the student partner pulled out, not what the student chose to offer.
+
+Hard cap: If the student volunteered all the emotional content themselves — age pressure, family situation, job left, last attempt, fear of failure — and the student partner asked no questions that specifically drew any of it out, the Pain Point Discovery score cannot exceed 5, even if rich emotional content is present in the transcript. Rich content in the transcript does not mean the student partner discovered it. A talkative, open student makes a student partner look better than they were. Do not let that inflate the score.
+
+Concrete example of this pattern: Student says unprompted — "main 30 cross kar li hoon, job chod di hai, single mother hoon, yeh mera last chance hai." Student partner responds with exam information or course details without asking a single follow-up question about any of these fears. Discovery score = 4 or below, because the partner received and did not use any of it to go deeper.
 
 CRITICAL — Internal consistency check:
 Before finalising the Pain Point Discovery score, check your own improvement suggestions. If you are listing multiple important questions that were never asked in improvement_areas, the Pain Point Discovery score cannot be 7 or above. A 7 means the student partner did strong active discovery. If you found 3 or more significant missed questions, the score is 5 or below. A score and its improvement suggestions must agree — if they contradict each other, lower the score.
@@ -426,6 +440,11 @@ SECTION E: CALL TRANSCRIPT
 Replace for every single call.
 -------------------------------------------
 
+The app may include a line at the very top of the transcript in this format:
+Call Number: X
+If this line is present, use that number as-is in the call_summary_for_followup field.
+If this line is not present, use 1.
+
 [PASTE FULL TRANSCRIPT HERE]
 
 -------------------------------------------
@@ -471,6 +490,13 @@ These should not only describe this call. Try to avoid parameter trick here beca
 Correct format: "learnings": ["Point 1", "Point 2", "Point 3"]
 Wrong format: "learnings": "1. Point 1 2. Point 2 3. Point 3"
 
+IMPORTANT ABOUT CALL SUMMARY FOR FOLLOWUP:
+Every scored call — full_analysis, follow_up_only, and Tone + Truth FAIL — must produce a call_summary_for_followup field at the end of the JSON. This field is stored by the app and passed as context when scoring the next call with the same student. It allows the LLM scoring that follow-up call to evaluate whether the student partner remembered the student's situation, followed up on what was agreed, and built on what was already discovered.
+
+Null rule: If information for any field was not present in this call — the student did not reveal it, it was not discussed, or the call ended before it came up — the value must be null. Do not invent, infer, or assume. null is the correct and expected value for missing information. Never write "not mentioned", "unknown", or an empty string — only null.
+
+call_number: Read the Call Number line from the top of the transcript in Section E. Echo that number exactly. If no Call Number line was provided, use 1.
+
 CASE 1: If Tone + Truth FAIL, return this simplified JSON structure and do not analyze anything else.
 
 {
@@ -501,7 +527,16 @@ CASE 1: If Tone + Truth FAIL, return this simplified JSON structure and do not a
       "guardrails": "Mention whether Tone failed or Truth failed, quote exactly what the student partner said/did, explain why it failed, and give the correct/better line."
     }
   },
-  "learnings": ["Two to five practical next-time learnings for the student partner. Focus on future conversion improvement and Tone + Truth safety. Return each learning as a separate array item."]
+  "learnings": ["Two to five practical next-time learnings for the student partner. Focus on future conversion improvement and Tone + Truth safety. Return each learning as a separate array item."],
+  "call_summary_for_followup": {
+    "student_fears_revealed": ["Any fears the student revealed before the call failed, in their own words — or null if none came out"],
+    "student_background": "One sentence summary of student background if revealed before the fail — or null",
+    "hesitation_found": null,
+    "buying_intent_shown": "Yes with exact quote — or null if not shown",
+    "next_step_agreed": null,
+    "partner_commitment": null,
+    "call_number": 1
+  }
 }
 
 CASE 2: If call_type is follow_up_only and Tone + Truth PASS, return this JSON structure. Score only Next Step Clarity.
@@ -549,7 +584,16 @@ CASE 2: If call_type is follow_up_only and Tone + Truth PASS, return this JSON s
       "clear_next_step": "If incomplete: exactly what was missing, what was said (quote), and what a complete caring follow-up line would have looked like."
     }
   },
-  "learnings": ["Two to five practical next-time learnings for handling busy/call-later students better and improving future conversions. Return each learning as a separate array item."]
+  "learnings": ["Two to five practical next-time learnings for handling busy/call-later students better and improving future conversions. Return each learning as a separate array item."],
+  "call_summary_for_followup": {
+    "student_fears_revealed": null,
+    "student_background": null,
+    "hesitation_found": null,
+    "buying_intent_shown": null,
+    "next_step_agreed": "Exact commitment made — date, time, what was agreed — or null if nothing was agreed",
+    "partner_commitment": "What the partner promised to do before the next call — or null",
+    "call_number": 1
+  }
 }
 
 CASE 3: If call_type is full_analysis and Tone + Truth PASS, return this JSON structure.
@@ -648,6 +692,15 @@ CASE 3: If call_type is full_analysis and Tone + Truth PASS, return this JSON st
       "clear_next_step": "If incomplete: exactly what was missing, what was said (quote), and what complete Next Step Clarity would have looked like for this specific call. Null if no issue."
     }
   },
-  "learnings": ["Three to five practical next-time hacks/tips for better conversion. These should be general learnings the student partner can use in future calls, based on this call. Return each learning as a separate array item."]
+  "learnings": ["Three to five practical next-time hacks/tips for better conversion. These should be general learnings the student partner can use in future calls, based on this call. Return each learning as a separate array item."],
+  "call_summary_for_followup": {
+    "student_fears_revealed": ["Each real fear the student expressed in this call, in their own words. Surface facts like exam name or attempt number do not count. Only emotional or situational fears. null if none came out."],
+    "student_background": "One sentence — exam history, current job/study status, age situation, any relevant personal context revealed in this call. null if nothing was revealed.",
+    "hesitation_found": "The real blocker that came up — surface reason and real reason if dug into. null if no hesitation occurred.",
+    "buying_intent_shown": "Yes — with exact quote of what the student said. null if no buying intent was shown.",
+    "next_step_agreed": "Exact commitment made at end of call — date, time, what the student was supposed to do, what link was sent. null if no clear next step was established.",
+    "partner_commitment": "What the student partner specifically promised to do before the next call — send a link, check installment options, callback at a specific time, etc. null if no commitment was made.",
+    "call_number": 1
+  }
 }
 """

@@ -120,3 +120,30 @@ timeout-minutes: 65
 ```
 
 So one run cannot continue forever.
+
+## Follow-up memory update
+
+This version also stores follow-up context for each scored call.
+
+What changed:
+
+1. Before OpenAI scoring, the backend allocates a call number for the student's phone number and adds this line at the top of the transcript sent to the LLM:
+
+```text
+Call Number: 1
+```
+
+For repeat calls, it becomes `Call Number: 2`, `Call Number: 3`, etc.
+
+2. The LLM now returns `call_summary_for_followup` in the JSON output.
+
+3. The app stores this in Supabase in the hidden/internal columns:
+
+```text
+call_number
+call_summary_for_followup
+```
+
+These columns are not shown in the Streamlit dashboard and are not included in the email sheet. They are stored only for future follow-up-call logic.
+
+After replacing files, run the latest `supabase_migration.sql` once in Supabase SQL Editor.

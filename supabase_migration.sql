@@ -1,5 +1,4 @@
--- EduTap final simplified call_scores table
--- This keeps ONLY the final dashboard/database columns requested.
+-- EduTap final simplified call_scores table with backend queue and follow-up summary storage.
 -- Run once in Supabase SQL Editor after replacing the code files.
 
 create extension if not exists pgcrypto;
@@ -13,6 +12,7 @@ values ('call-transcripts', 'call-transcripts', true)
 on conflict (id) do update set public = true;
 
 create table if not exists public.call_scores (
+  id uuid default gen_random_uuid(),
   "Date" date default current_date,
   "Student Number" text,
   "Call Type" text,
@@ -23,7 +23,9 @@ create table if not exists public.call_scores (
   "Strengths" text,
   "Improvement Areas" text,
   "Learnings" text,
-  "Transcript Link" text
+  "Transcript Link" text,
+  call_number integer,
+  call_summary_for_followup jsonb
 );
 
 alter table public.call_scores add column if not exists "Date" date;
@@ -42,6 +44,24 @@ alter table public.call_scores add column if not exists "Strengths" text;
 alter table public.call_scores add column if not exists "Improvement Areas" text;
 alter table public.call_scores add column if not exists "Learnings" text;
 alter table public.call_scores add column if not exists "Transcript Link" text;
+alter table public.call_scores add column if not exists id uuid default gen_random_uuid();
+alter table public.call_scores add column if not exists call_number integer;
+alter table public.call_scores add column if not exists call_summary_for_followup jsonb;
+
+update public.call_scores set id = gen_random_uuid() where id is null;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conrelid = 'public.call_scores'::regclass
+      and contype = 'p'
+  ) then
+    alter table public.call_scores
+    add constraint call_scores_pkey primary key (id);
+  end if;
+end $$;
 
 -- Best-effort migration from older column names into the final columns.
 do $$
@@ -105,7 +125,10 @@ declare
     'Strengths',
     'Improvement Areas',
     'Learnings',
-    'Transcript Link'
+    'Transcript Link',
+    'id',
+    'call_number',
+    'call_summary_for_followup'
   ];
 begin
   for col in
@@ -187,6 +210,70 @@ begin
   set "Learnings" = replace("Learnings", 'Pain Point Pain Point Discovery', 'Pain Point Discovery')
   where "Learnings" is not null;
 end $$;
+
+-- Internal storage for follow-up context. These columns are not shown in the Streamlit dashboard/email report.
+alter table public.call_scores add column if not exists call_number integer;
+alter table public.call_scores add column if not exists call_summary_for_followup jsonb;
+
+-- Fill call_number for any existing old rows where possible.
+with numbered_calls as (
+  select
+    ctid,
+    row_number() over (
+      partition by coalesce(nullif(trim("Student Number"), ''), 'unknown')
+      order by "Date", "Call Recording Link", ctid
+    )::integer as rn
+  from public.call_scores
+  where call_number is null
+)
+update public.call_scores cs
+set call_number = nc.rn
+from numbered_calls nc
+where cs.ctid = nc.ctid;
+
+create index if not exists idx_call_scores_student_call_number
+  on public.call_scores ("Student Number", call_number);
+
+-- Atomic counter used by the backend worker before sending a transcript to OpenAI.
+create table if not exists public.student_call_counters (
+  student_number text primary key,
+  last_call_number integer not null default 0,
+  updated_at timestamptz default now()
+);
+
+insert into public.student_call_counters (student_number, last_call_number, updated_at)
+select
+  coalesce(nullif(trim("Student Number"), ''), 'unknown') as student_number,
+  greatest(count(*)::integer, coalesce(max(call_number), 0)) as last_call_number,
+  now()
+from public.call_scores
+group by coalesce(nullif(trim("Student Number"), ''), 'unknown')
+on conflict (student_number) do update
+set last_call_number = greatest(public.student_call_counters.last_call_number, excluded.last_call_number),
+    updated_at = now();
+
+create or replace function public.allocate_call_number(p_student_number text)
+returns integer
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_student_number text;
+  v_call_number integer;
+begin
+  v_student_number := coalesce(nullif(trim(p_student_number), ''), 'unknown');
+
+  insert into public.student_call_counters (student_number, last_call_number, updated_at)
+  values (v_student_number, 1, now())
+  on conflict (student_number) do update
+    set last_call_number = public.student_call_counters.last_call_number + 1,
+        updated_at = now()
+  returning last_call_number into v_call_number;
+
+  return v_call_number;
+end;
+$$;
 
 -- Backend processing queue tables for GitHub Actions worker.
 create table if not exists public.call_processing_batches (
