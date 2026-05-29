@@ -1,0 +1,49 @@
+name: Process Pending EduTap Calls
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Poll/continue backend work every 30 minutes.
+    # In standard mode, it exits quickly when no jobs are pending.
+    # In batch mode, this checks whether OpenAI Batch API results are ready.
+    - cron: "*/30 * * * *"
+
+concurrency:
+  group: edutap-call-processing
+  cancel-in-progress: false
+
+jobs:
+  process-calls:
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Process pending calls
+        env:
+          DEEPGRAM_API_KEY: ${{ secrets.DEEPGRAM_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+          OPENAI_REASONING_EFFORT: ${{ secrets.OPENAI_REASONING_EFFORT }}
+          OPENAI_PROCESSING_MODE: ${{ secrets.OPENAI_PROCESSING_MODE }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
+          SENDER_PASSWORD: ${{ secrets.SENDER_PASSWORD }}
+          RECIPIENT_EMAILS: ${{ secrets.RECIPIENT_EMAILS }}
+          ERROR_RECIPIENT_EMAILS: ${{ secrets.ERROR_RECIPIENT_EMAILS }}
+          MAX_PARALLEL_CALLS: ${{ secrets.MAX_PARALLEL_CALLS }}
+          MAX_JOBS_PER_RUN: ${{ secrets.MAX_JOBS_PER_RUN }}
+        run: python worker.py
