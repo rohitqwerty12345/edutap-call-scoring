@@ -1,6 +1,7 @@
 import re
 from typing import Any, Dict
 
+from cost_utils import merge_cost_parts
 from deepgram_client import transcribe_audio
 from openai_client import score_transcript_debug
 from supabase_client import get_next_call_number, is_not_worthy_result, save_result
@@ -35,6 +36,10 @@ def transcribe_and_prepare_llm_input(file_bytes: bytes, filename: str, student_n
         "transcript": transcript,
         "call_number": call_number,
         "transcript_for_llm": transcript_for_llm,
+        "cost_json": {
+            "student_number": clean_student_number,
+            "audio_filename": filename,
+        },
     }
 
 
@@ -51,6 +56,16 @@ def process_single_file(file_bytes: bytes, filename: str, existing_audio_url: st
 
     openai_debug = score_transcript_debug(transcript_for_llm)
     result = openai_debug["parsed_output"]
+    cost_json = merge_cost_parts(prepared.get("cost_json"), openai_debug.get("cost"))
+    cost_json.update(
+        {
+            "student_number": student_number,
+            "audio_filename": filename,
+            "audio_public_url": existing_audio_url,
+            "processing_mode": "standard",
+            "openai_reasoning_effort": openai_debug.get("reasoning_effort"),
+        }
+    )
 
     saved_row = save_result(
         student_number=student_number,
@@ -60,6 +75,7 @@ def process_single_file(file_bytes: bytes, filename: str, existing_audio_url: st
         audio_bytes=None if existing_audio_url else file_bytes,
         existing_audio_url=existing_audio_url,
         call_number=call_number,
+        cost_json=cost_json,
     )
 
     call_type = "not_worthy" if is_not_worthy_result(result) else result.get("call_type", "full_analysis") if isinstance(result, dict) else "full_analysis"
@@ -72,6 +88,7 @@ def process_single_file(file_bytes: bytes, filename: str, existing_audio_url: st
         "transcript": transcript,
         "result": result,
         "saved_row": saved_row,
+        "cost_json": cost_json,
         "debug": {
             "deepgram_transcript": transcript,
             "call_number": call_number,
@@ -82,6 +99,8 @@ def process_single_file(file_bytes: bytes, filename: str, existing_audio_url: st
             "openai_user_input": openai_debug["user_input"],
             "openai_raw_output": openai_debug["raw_output"],
             "openai_parsed_output": openai_debug["parsed_output"],
+            "openai_usage": openai_debug.get("usage"),
+            "cost_json": cost_json,
             "saved_row": saved_row,
         },
     }

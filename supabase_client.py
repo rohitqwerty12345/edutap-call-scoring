@@ -433,6 +433,7 @@ def build_db_row(
     call_audio_link: str | None = None,
     call_transcript_link: str | None = None,
     call_number: int | None = None,
+    cost_json: Dict[str, Any] | None = None,
 ) -> Dict[str, Any]:
     today = date.today().isoformat()
     base = {
@@ -442,6 +443,7 @@ def build_db_row(
         "Transcript Link": call_transcript_link,
         "call_number": call_number,
         "call_summary_for_followup": _call_summary_for_followup(result),
+        "cost_json": cost_json,
     }
 
     if is_not_worthy_result(result):
@@ -487,6 +489,7 @@ def save_result(
     audio_bytes: bytes | None = None,
     existing_audio_url: str | None = None,
     call_number: int | None = None,
+    cost_json: Dict[str, Any] | None = None,
 ) -> Dict[str, Any]:
     client = get_client()
     audio_url, transcript_url = upload_call_files(
@@ -505,6 +508,7 @@ def save_result(
         audio_url,
         transcript_url,
         call_number=call_number,
+        cost_json=cost_json,
     )
     response = client.table("call_scores").insert(row).execute()
     if getattr(response, "data", None):
@@ -529,6 +533,7 @@ def enqueue_call_batch(file_payloads: List[Dict[str, Any]]) -> tuple[str, List[D
         "completed_files": 0,
         "failed_files": 0,
         "report_sent": False,
+        "cost_report_sent": False,
         "error_email_sent": False,
     }
     client.table("call_processing_batches").insert(batch_row).execute()
@@ -608,16 +613,17 @@ def mark_job_processing(job: Dict[str, Any]) -> None:
     ).eq("id", job["id"]).execute()
 
 
-def mark_job_completed(job_id: str, saved_row: Dict[str, Any]) -> None:
+def mark_job_completed(job_id: str, saved_row: Dict[str, Any], cost_json: Dict[str, Any] | None = None) -> None:
     client = get_client()
-    client.table("call_processing_jobs").update(
-        {
-            "status": "completed",
-            "completed_at": datetime.utcnow().isoformat(),
-            "saved_row_json": saved_row,
-            "error_message": None,
-        }
-    ).eq("id", job_id).execute()
+    updates = {
+        "status": "completed",
+        "completed_at": datetime.utcnow().isoformat(),
+        "saved_row_json": saved_row,
+        "error_message": None,
+    }
+    if cost_json is not None:
+        updates["cost_json"] = cost_json
+    client.table("call_processing_jobs").update(updates).eq("id", job_id).execute()
 
 
 def mark_job_failed(job_id: str, error_message: str) -> None:
@@ -723,16 +729,16 @@ def update_job(job_id: str, updates: Dict[str, Any]) -> None:
     client.table("call_processing_jobs").update(updates).eq("id", job_id).execute()
 
 
-def mark_job_transcribed(job_id: str, transcript_text: str, call_number: int) -> None:
-    update_job(
-        job_id,
-        {
-            "status": "transcribed",
-            "transcript_text": transcript_text,
-            "call_number": call_number,
-            "error_message": None,
-        },
-    )
+def mark_job_transcribed(job_id: str, transcript_text: str, call_number: int, cost_json: Dict[str, Any] | None = None) -> None:
+    updates = {
+        "status": "transcribed",
+        "transcript_text": transcript_text,
+        "call_number": call_number,
+        "error_message": None,
+    }
+    if cost_json is not None:
+        updates["cost_json"] = cost_json
+    update_job(job_id, updates)
 
 
 def mark_job_openai_batch_submitted(job_id: str, openai_batch_id: str, openai_custom_id: str) -> None:

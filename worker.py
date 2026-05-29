@@ -5,7 +5,8 @@ from typing import Any, Dict, List, Set
 
 import requests
 
-from email_sender import send_error_report, send_report
+from email_sender import send_cost_report, send_error_report, send_report
+from cost_utils import merge_cost_parts
 from openai_client import (
     build_batch_request,
     create_openai_batch,
@@ -94,7 +95,8 @@ def process_standard_job(job: Dict[str, Any]) -> Dict[str, Any]:
             existing_audio_url=job.get("audio_public_url"),
         )
         saved_row = result["saved_row"]
-        mark_job_completed(job_id, saved_row)
+        cost_json = result.get("cost_json")
+        mark_job_completed(job_id, saved_row, cost_json=cost_json)
         return {
             "ok": True,
             "batch_id": batch_id,
@@ -129,7 +131,14 @@ def prepare_batch_job(job: Dict[str, Any]) -> Dict[str, Any]:
         prepared = transcribe_and_prepare_llm_input(audio_bytes, filename, student_number=student_number)
         transcript_for_llm = prepared["transcript_for_llm"]
         call_number = int(prepared["call_number"])
-        mark_job_transcribed(job_id, transcript_for_llm, call_number)
+        cost_json = prepared.get("cost_json") or {}
+        cost_json.update({
+            "student_number": student_number,
+            "audio_filename": filename,
+            "audio_public_url": job.get("audio_public_url"),
+            "processing_mode": "batch",
+        })
+        mark_job_transcribed(job_id, transcript_for_llm, call_number, cost_json=cost_json)
 
         custom_id = job_id
         request = build_batch_request(custom_id, transcript_for_llm)
@@ -195,17 +204,35 @@ def finalize_batch(batch_id: str) -> None:
     updates["completed_at"] = datetime.utcnow().isoformat()
 
     report_sent = bool(batch.get("report_sent"))
+    cost_report_sent = bool(batch.get("cost_report_sent"))
     error_email_sent = bool(batch.get("error_email_sent"))
 
     completed_rows: List[Dict[str, Any]] = []
-    for job in completed_jobs:
+    cost_items: List[Dict[str, Any]] = []
+    for job in completed_jobs + failed_jobs:
         saved_row = job.get("saved_row_json")
-        if isinstance(saved_row, dict):
+        if isinstance(saved_row, dict) and job in completed_jobs:
             completed_rows.append(saved_row)
+        cost_json = job.get("cost_json")
+        if isinstance(cost_json, dict):
+            enriched_cost = dict(cost_json)
+            enriched_cost.setdefault("student_number", job.get("student_number"))
+            enriched_cost.setdefault("audio_filename", job.get("audio_filename"))
+            enriched_cost.setdefault("audio_public_url", job.get("audio_public_url"))
+            enriched_cost.setdefault("job_status", job.get("status"))
+            cost_items.append(enriched_cost)
 
     if completed_rows and not report_sent:
         send_report(completed_rows, batch_label=str(date.today()))
         updates["report_sent"] = True
+
+    if cost_items and not cost_report_sent:
+        try:
+            send_cost_report(cost_items, batch_label=str(date.today()))
+            updates["cost_report_sent"] = True
+        except Exception as exc:
+            updates["last_error"] = f"Cost report email failed: {str(exc)[:3800]}"
+            print(f"Cost report email failed: {exc}", flush=True)
 
     if failed_jobs and not error_email_sent:
         error_items = []
@@ -343,6 +370,13 @@ def poll_openai_batches() -> Set[str]:
                     if parsed.get("ok"):
                         try:
                             result = parsed["parsed_output"]
+                            cost_json = merge_cost_parts(job.get("cost_json"), parsed.get("cost"))
+                            cost_json.update({
+                                "student_number": str(job.get("student_number") or "unknown"),
+                                "audio_filename": str(job.get("audio_filename") or "call_recording"),
+                                "audio_public_url": job.get("audio_public_url"),
+                                "processing_mode": "batch",
+                            })
                             saved_row = save_result(
                                 student_number=str(job.get("student_number") or "unknown"),
                                 audio_filename=str(job.get("audio_filename") or "call_recording"),
@@ -351,9 +385,10 @@ def poll_openai_batches() -> Set[str]:
                                 audio_bytes=None,
                                 existing_audio_url=job.get("audio_public_url"),
                                 call_number=job.get("call_number"),
+                                cost_json=cost_json,
                             )
-                            update_job(job_id, {"openai_response_json": parsed.get("raw_item")})
-                            mark_job_completed(job_id, saved_row)
+                            update_job(job_id, {"openai_response_json": parsed.get("raw_item"), "cost_json": cost_json})
+                            mark_job_completed(job_id, saved_row, cost_json=cost_json)
                             print(f"Saved completed batch result: {job.get('audio_filename')}", flush=True)
                         except Exception as exc:
                             mark_job_failed(job_id, str(exc))

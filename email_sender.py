@@ -323,3 +323,140 @@ def send_error_report(error_items: List[Dict], batch_label: str = "Today") -> No
     msg.attach(MIMEText(body, "plain"))
 
     _smtp_send(sender, password, recipients, msg)
+
+
+def _cost_float(value) -> float:
+    try:
+        return float(value or 0.0)
+    except Exception:
+        return 0.0
+
+
+def _format_cost(value) -> str:
+    return f"${_cost_float(value):.6f}"
+
+
+def _format_tokens(value) -> str:
+    try:
+        return f"{int(value or 0):,}"
+    except Exception:
+        return "0"
+
+
+def _build_cost_html_table(cost_items: List[Dict]) -> str:
+    if not cost_items:
+        return "<p>No OpenAI cost data was captured for this batch.</p>"
+
+    rows_html: list[str] = []
+    for item in cost_items:
+        recording_url = str(item.get("audio_public_url") or item.get("call_recording_link") or "").strip()
+        if recording_url:
+            recording_cell = (
+                f'<a href="{html_lib.escape(recording_url, quote=True)}" '
+                f'style="color:#0b57d0;text-decoration:underline;font-weight:600;">Recording</a>'
+            )
+        else:
+            recording_cell = html_lib.escape(str(item.get("audio_filename") or ""))
+
+        rows_html.append(
+            f"""
+            <tr>
+                <td style="border:1px solid #d9d9d9;padding:8px;vertical-align:top;">{recording_cell}</td>
+                <td style="border:1px solid #d9d9d9;padding:8px;vertical-align:top;">{html_lib.escape(str(item.get('student_number') or ''))}</td>
+                <td style="border:1px solid #d9d9d9;padding:8px;vertical-align:top;">{html_lib.escape(str(item.get('processing_mode') or ''))}</td>
+                <td style="border:1px solid #d9d9d9;padding:8px;vertical-align:top;">{html_lib.escape(str(item.get('openai_model') or ''))}</td>
+                <td style="border:1px solid #d9d9d9;padding:8px;text-align:right;">{_format_tokens(item.get('input_tokens'))}</td>
+                <td style="border:1px solid #d9d9d9;padding:8px;text-align:right;">{_format_tokens(item.get('cached_input_tokens'))}</td>
+                <td style="border:1px solid #d9d9d9;padding:8px;text-align:right;">{_format_tokens(item.get('output_tokens'))}</td>
+                <td style="border:1px solid #d9d9d9;padding:8px;text-align:right;">{_format_cost(item.get('openai_input_cost_usd'))}</td>
+                <td style="border:1px solid #d9d9d9;padding:8px;text-align:right;">{_format_cost(item.get('openai_output_cost_usd'))}</td>
+                <td style="border:1px solid #d9d9d9;padding:8px;text-align:right;font-weight:700;">{_format_cost(item.get('openai_total_cost_usd'))}</td>
+            </tr>
+            """
+        )
+
+    return f"""
+    <table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:13px;">
+        <thead>
+            <tr>
+                <th style="border:1px solid #d9d9d9;background:#fff2cc;padding:8px;text-align:left;">Recording</th>
+                <th style="border:1px solid #d9d9d9;background:#fff2cc;padding:8px;text-align:left;">Student</th>
+                <th style="border:1px solid #d9d9d9;background:#fff2cc;padding:8px;text-align:left;">Mode</th>
+                <th style="border:1px solid #d9d9d9;background:#fff2cc;padding:8px;text-align:left;">Model</th>
+                <th style="border:1px solid #d9d9d9;background:#fff2cc;padding:8px;text-align:right;">Input Tokens</th>
+                <th style="border:1px solid #d9d9d9;background:#fff2cc;padding:8px;text-align:right;">Cached Tokens</th>
+                <th style="border:1px solid #d9d9d9;background:#fff2cc;padding:8px;text-align:right;">Output Tokens</th>
+                <th style="border:1px solid #d9d9d9;background:#fff2cc;padding:8px;text-align:right;">Input Cost</th>
+                <th style="border:1px solid #d9d9d9;background:#fff2cc;padding:8px;text-align:right;">Output Cost</th>
+                <th style="border:1px solid #d9d9d9;background:#fff2cc;padding:8px;text-align:right;">Total OpenAI Cost</th>
+            </tr>
+        </thead>
+        <tbody>{''.join(rows_html)}</tbody>
+    </table>
+    """
+
+def send_cost_report(cost_items: List[Dict], batch_label: str = "Today") -> None:
+    """Send separate OpenAI API cost report email for a completed backend batch."""
+    if not cost_items:
+        return
+
+    sender = get_setting("SENDER_EMAIL")
+    password = get_setting("SENDER_PASSWORD")
+    recipients = _split_recipients(get_setting("COST_REPORT_RECIPIENT_EMAILS") or get_setting("RECIPIENT_EMAILS", ""))
+
+    if not sender:
+        raise RuntimeError("SENDER_EMAIL is missing.")
+    if not password:
+        raise RuntimeError("SENDER_PASSWORD is missing. Use a Gmail App Password, not your normal Gmail password.")
+    if not recipients:
+        raise RuntimeError("COST_REPORT_RECIPIENT_EMAILS or RECIPIENT_EMAILS is missing.")
+
+    total_openai = sum(_cost_float(item.get("openai_total_cost_usd")) for item in cost_items)
+    total_input = sum(int(item.get("input_tokens") or 0) for item in cost_items)
+    total_cached = sum(int(item.get("cached_input_tokens") or 0) for item in cost_items)
+    total_output = sum(int(item.get("output_tokens") or 0) for item in cost_items)
+
+    html_table = _build_cost_html_table(cost_items)
+    plain_lines = [
+        "Hi,",
+        "",
+        f"OpenAI API cost report for {batch_label}.",
+        "",
+        f"Total calls with cost data: {len(cost_items)}",
+        f"Total input tokens: {total_input:,}",
+        f"Total cached input tokens: {total_cached:,}",
+        f"Total output tokens: {total_output:,}",
+        f"Total OpenAI cost: {_format_cost(total_openai)}",
+        "",
+        "Regards,",
+        "EduTap Call Scoring System",
+    ]
+
+    html_body = f"""
+    <html>
+    <body style="font-family:Arial,sans-serif;color:#111827;font-size:14px;line-height:1.5;">
+        <p>Hi,</p>
+        <p>OpenAI API cost report for <strong>{html_lib.escape(str(batch_label))}</strong>.</p>
+        <p><strong>Summary:</strong></p>
+        <ul>
+            <li>Total calls with cost data: {len(cost_items)}</li>
+            <li>Total input tokens: {total_input:,}</li>
+            <li>Total cached input tokens: {total_cached:,}</li>
+            <li>Total output tokens: {total_output:,}</li>
+            <li>Total OpenAI cost: <strong>{_format_cost(total_openai)}</strong></li>
+        </ul>
+        <p><strong>Per-call OpenAI cost table:</strong></p>
+        {html_table}
+        <p>Regards,<br>EduTap Call Scoring System</p>
+    </body>
+    </html>
+    """
+
+    msg = MIMEMultipart("alternative")
+    msg["From"] = sender
+    msg["To"] = ", ".join(recipients)
+    msg["Subject"] = f"OpenAI API Cost Report - {batch_label}"
+    msg.attach(MIMEText("\n".join(plain_lines), "plain"))
+    msg.attach(MIMEText(html_body, "html"))
+
+    _smtp_send(sender, password, recipients, msg)

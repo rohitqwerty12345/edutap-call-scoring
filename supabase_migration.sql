@@ -356,3 +356,11 @@ create index if not exists idx_call_processing_jobs_openai_batch_id
   on public.call_processing_jobs (openai_batch_id);
 create index if not exists idx_call_processing_jobs_openai_custom_id
   on public.call_processing_jobs (openai_custom_id);
+
+-- Internal API cost tracking for separate daily/batch cost email.
+alter table public.call_scores add column if not exists cost_json jsonb;
+alter table public.call_processing_jobs add column if not exists cost_json jsonb;
+alter table public.call_processing_batches add column if not exists cost_report_sent boolean default false;
+
+create index if not exists idx_call_processing_batches_cost_report_sent
+  on public.call_processing_batches (cost_report_sent);

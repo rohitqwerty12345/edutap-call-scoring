@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 
 from scoring_prompt import SCORING_PROMPT
+from cost_utils import calculate_openai_cost, extract_openai_usage
 
 load_dotenv()
 
@@ -119,6 +120,7 @@ def score_transcript_debug(transcript: str) -> dict:
     user_input = build_openai_input(transcript or "")
 
     if not transcript or not transcript.strip():
+        empty_usage = extract_openai_usage({})
         return {
             "model": model,
             "reasoning_effort": reasoning_effort,
@@ -126,6 +128,8 @@ def score_transcript_debug(transcript: str) -> dict:
             "user_input": user_input,
             "raw_output": "not_worthy",
             "parsed_output": "not_worthy",
+            "usage": empty_usage,
+            "cost": calculate_openai_cost(empty_usage, model, processing_mode="standard"),
         }
 
     client = get_client()
@@ -133,6 +137,8 @@ def score_transcript_debug(transcript: str) -> dict:
 
     raw = _get_response_text(response)
     parsed = _parse_model_output(raw)
+    usage = extract_openai_usage(response)
+    cost = calculate_openai_cost(usage, model, processing_mode="standard")
 
     return {
         "model": model,
@@ -141,6 +147,8 @@ def score_transcript_debug(transcript: str) -> dict:
         "user_input": user_input,
         "raw_output": raw,
         "parsed_output": parsed,
+        "usage": usage,
+        "cost": cost,
     }
 
 
@@ -254,12 +262,17 @@ def parse_batch_output_text(output_text: str) -> List[Dict[str, Any]]:
 
             raw_output = _get_response_text(body)
             parsed_output = _parse_model_output(raw_output)
+            model = str(body.get("model") or "") if isinstance(body, dict) else ""
+            usage = extract_openai_usage(body)
+            cost = calculate_openai_cost(usage, model or current_openai_model(), processing_mode="batch")
             parsed_lines.append(
                 {
                     "custom_id": custom_id,
                     "ok": True,
                     "raw_output": raw_output,
                     "parsed_output": parsed_output,
+                    "usage": usage,
+                    "cost": cost,
                     "raw_item": item,
                 }
             )
