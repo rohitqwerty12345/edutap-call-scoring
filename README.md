@@ -1,77 +1,135 @@
 # EduTap Call Scoring System
 
-This version uses backend processing through GitHub Actions.
+This version supports both normal OpenAI processing and optional OpenAI Batch API processing.
 
-## Flow
+## Main flow
 
-1. Support uploads call recordings in Streamlit.
-2. Streamlit uploads the files to Supabase Storage and creates pending jobs.
-3. Support can close the browser after upload success.
-4. Streamlit automatically triggers the GitHub Actions backend worker immediately after a successful upload.
-5. Worker processes pending jobs through Deepgram + OpenAI.
-6. Results are saved in Supabase and the XLSX report is emailed.
-7. Failed calls are emailed to `ERROR_RECIPIENT_EMAILS`.
+1. Student partners upload call recordings in Streamlit.
+2. Streamlit saves audio files in Supabase Storage and creates pending jobs.
+3. Streamlit automatically triggers GitHub Actions.
+4. GitHub Actions worker processes the jobs.
+5. Results are saved in Supabase.
+6. Email is sent with:
+   - a quick formatted table in the email body: Recording, Score, Parameter Score
+   - the full XLSX report attached
 
-## Files to replace/add
+## Processing modes
 
-Replace:
+Set this secret in GitHub Actions:
+
+```text
+OPENAI_PROCESSING_MODE=standard
+```
+
+or:
+
+```text
+OPENAI_PROCESSING_MODE=batch
+```
+
+### Standard mode
+
+```text
+Audio -> Deepgram transcript -> OpenAI immediate scoring -> Supabase -> Email
+```
+
+Use this when you want faster results.
+
+### Batch mode
+
+```text
+Audio -> Deepgram transcript -> OpenAI Batch API submission -> scheduled polling -> Supabase -> Email
+```
+
+Use this when lower OpenAI cost is more important than instant results.
+
+Batch mode does not keep GitHub Actions running for 24 hours. The worker submits the OpenAI batch and exits. The scheduled workflow checks every 30 minutes and completes the results when OpenAI output is ready.
+
+## Files included
+
+Replace/add these files in GitHub:
 
 ```text
 app.py
+deepgram_client.py
+email_sender.py
+openai_client.py
 pipeline.py
+scoring_prompt.py
 supabase_client.py
 supabase_migration.sql
+worker.py
+requirements.txt
 README.md
 .env.example
-```
-
-Add:
-
-```text
-worker.py
+env.example
 .github/workflows/process-calls.yml
 ```
 
-Other files can stay as they are.
-
 ## Supabase
 
-Run the latest `supabase_migration.sql` in Supabase SQL Editor.
+Run `supabase_migration.sql` once in Supabase SQL Editor after replacing files.
 
-It creates:
+It ensures:
 
 ```text
 call_scores
 call_processing_batches
 call_processing_jobs
+student_call_counters
 call-recordings bucket
 call-transcripts bucket
 ```
 
+It also adds internal Batch API columns such as:
 
-## Streamlit secrets for auto-starting GitHub Actions
+```text
+processing_mode
+openai_batch_id
+openai_input_file_id
+openai_output_file_id
+openai_batch_status
+transcript_text
+openai_custom_id
+openai_response_json
+```
 
-Add these extra secrets in Streamlit Cloud → App → Settings → Secrets. These are needed because Streamlit is the app that starts the GitHub backend worker after upload.
+## Streamlit Secrets
+
+Streamlit needs secrets for upload, Supabase, and GitHub auto-trigger.
 
 ```toml
-GITHUB_ACTIONS_TOKEN = "your_github_fine_grained_token_here"
+DEEPGRAM_API_KEY = "..."
+OPENAI_API_KEY = "..."
+OPENAI_MODEL = "gpt-5.5"
+OPENAI_REASONING_EFFORT = "medium"
+OPENAI_PROCESSING_MODE = "standard"
+SUPABASE_URL = "..."
+SUPABASE_KEY = "..."
+SENDER_EMAIL = "..."
+SENDER_PASSWORD = "..."
+RECIPIENT_EMAILS = "..."
+ERROR_RECIPIENT_EMAILS = "..."
+DASHBOARD_PASSWORD = "show123"
+MAX_PARALLEL_CALLS = "5"
+MAX_JOBS_PER_RUN = "50"
+GITHUB_ACTIONS_TOKEN = "..."
 GITHUB_REPO_OWNER = "rohitqwerty12345"
 GITHUB_REPO_NAME = "edutap-call-scoring"
 GITHUB_WORKFLOW_FILE = "process-calls.yml"
 GITHUB_WORKFLOW_REF = "main"
 ```
 
-The GitHub token should be a fine-grained personal access token with access to this repository and permission to run Actions workflows. Keep this token only in Streamlit Secrets, never inside GitHub files.
+## GitHub Actions Secrets
 
-## GitHub Actions secrets
-
-Add these in GitHub repo → Settings → Secrets and variables → Actions → Repository secrets:
+Add these in GitHub repo -> Settings -> Secrets and variables -> Actions:
 
 ```text
 DEEPGRAM_API_KEY
 OPENAI_API_KEY
 OPENAI_MODEL
 OPENAI_REASONING_EFFORT
+OPENAI_PROCESSING_MODE
 SUPABASE_URL
 SUPABASE_KEY
 SENDER_EMAIL
@@ -82,99 +140,55 @@ MAX_PARALLEL_CALLS
 MAX_JOBS_PER_RUN
 ```
 
-Recommended values:
+Recommended:
 
 ```text
 OPENAI_MODEL = gpt-5.5
 OPENAI_REASONING_EFFORT = medium
+OPENAI_PROCESSING_MODE = standard
 MAX_PARALLEL_CALLS = 5
 MAX_JOBS_PER_RUN = 50
 ```
 
-## Running the backend worker
-
-Immediate automatic run:
+To enable OpenAI Batch API:
 
 ```text
-Upload in Streamlit → pending jobs created → GitHub Actions starts automatically
+OPENAI_PROCESSING_MODE = batch
 ```
 
-Fallback scheduled run:
+## GitHub workflow
+
+The workflow runs:
 
 ```text
-Daily at 8 PM IST
+1. Automatically after Streamlit upload
+2. Every 30 minutes by schedule
+3. Manually from GitHub Actions if needed
 ```
 
-Manual run if needed:
+The 30-minute schedule is mainly for Batch API polling. In standard mode, it exits quickly if no pending jobs are found.
 
-```text
-GitHub repo → Actions → Process Pending EduTap Calls → Run workflow
-```
+## What stays unchanged
 
-## GitHub Actions safety
+The dashboard and XLSX email report still show only the final visible columns.
 
-The workflow has:
-
-```text
-timeout-minutes: 65
-```
-
-So one run cannot continue forever.
-
-## Follow-up memory update
-
-This version also stores follow-up context for each scored call.
-
-What changed:
-
-1. Before OpenAI scoring, the backend allocates a call number for the student's phone number and adds this line at the top of the transcript sent to the LLM:
-
-```text
-Call Number: 1
-```
-
-For repeat calls, it becomes `Call Number: 2`, `Call Number: 3`, etc.
-
-2. The LLM now returns `call_summary_for_followup` in the JSON output.
-
-3. The app stores this in Supabase in the hidden/internal columns:
+Internal fields remain hidden:
 
 ```text
 call_number
 call_summary_for_followup
+openai_batch_id
+transcript_text
+openai_response_json
 ```
 
-These columns are not shown in the Streamlit dashboard and are not included in the email sheet. They are stored only for future follow-up-call logic.
+## Testing order
 
-After replacing files, run the latest `supabase_migration.sql` once in Supabase SQL Editor.
-
-## Analytic Dashboard tab
-
-The app now has tab order:
-
-```text
-Upload Calls
-Analytic Dashboard
-View Results
-Backend Queue
-```
-
-The Analytic Dashboard does not ask for a password. It shows only a day-wise table with:
-
-```text
-Date
-Average Score
-Calls Scored
-```
-
-Filters available:
-
-```text
-Week
-Month
-Custom Date Range
-```
-
-## Follow-up storage update
-
-The backend injects `Call Number: X` before sending the transcript to OpenAI. The LLM's `call_summary_for_followup` output is saved internally in Supabase for future follow-up logic. It is not shown in the dashboard and not sent in the email XLSX.
+1. Replace files in GitHub.
+2. Run `supabase_migration.sql`.
+3. Add/update GitHub secret `OPENAI_PROCESSING_MODE`.
+4. Start with `OPENAI_PROCESSING_MODE=standard`.
+5. Upload 1 call and confirm result/email.
+6. Switch to `OPENAI_PROCESSING_MODE=batch`.
+7. Upload 1 call and wait for the scheduled poller to complete.
+8. Then test 5 calls, then full daily batch.

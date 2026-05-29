@@ -329,3 +329,30 @@ create index if not exists idx_call_processing_jobs_status_created on public.cal
 create index if not exists idx_call_processing_jobs_batch on public.call_processing_jobs (batch_id);
 create index if not exists idx_call_processing_batches_created on public.call_processing_batches (created_at desc);
 create index if not exists idx_call_processing_batches_status on public.call_processing_batches (status);
+
+-- Optional OpenAI Batch API support.
+-- These columns allow the worker to transcribe now, submit OpenAI scoring asynchronously,
+-- poll later, and save results only after the OpenAI batch completes.
+alter table public.call_processing_batches add column if not exists processing_mode text default 'standard';
+alter table public.call_processing_batches add column if not exists openai_batch_id text;
+alter table public.call_processing_batches add column if not exists openai_input_file_id text;
+alter table public.call_processing_batches add column if not exists openai_output_file_id text;
+alter table public.call_processing_batches add column if not exists openai_error_file_id text;
+alter table public.call_processing_batches add column if not exists openai_batch_status text;
+alter table public.call_processing_batches add column if not exists openai_batch_submitted_at timestamptz;
+alter table public.call_processing_batches add column if not exists openai_batch_completed_at timestamptz;
+
+alter table public.call_processing_jobs add column if not exists transcript_text text;
+alter table public.call_processing_jobs add column if not exists call_number integer;
+alter table public.call_processing_jobs add column if not exists openai_custom_id text;
+alter table public.call_processing_jobs add column if not exists openai_batch_id text;
+alter table public.call_processing_jobs add column if not exists openai_response_json jsonb;
+
+create index if not exists idx_call_processing_batches_openai_batch_id
+  on public.call_processing_batches (openai_batch_id);
+create index if not exists idx_call_processing_batches_mode_status
+  on public.call_processing_batches (processing_mode, status, created_at);
+create index if not exists idx_call_processing_jobs_openai_batch_id
+  on public.call_processing_jobs (openai_batch_id);
+create index if not exists idx_call_processing_jobs_openai_custom_id
+  on public.call_processing_jobs (openai_custom_id);

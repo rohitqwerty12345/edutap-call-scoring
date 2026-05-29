@@ -705,3 +705,112 @@ def fetch_results_for_date(target_date: date) -> List[Dict[str, Any]]:
     rows = fetch_all_results(limit=2000)
     target = target_date.isoformat()
     return [r for r in rows if str(r.get("Date", ""))[:10] == target]
+
+# -----------------------------
+# OpenAI Batch API helpers
+# -----------------------------
+
+OPENAI_BATCH_WAITING_STATUSES = [
+    "openai_batch_submitted",
+    "openai_batch_validating",
+    "openai_batch_in_progress",
+    "openai_batch_finalizing",
+]
+
+
+def update_job(job_id: str, updates: Dict[str, Any]) -> None:
+    client = get_client()
+    client.table("call_processing_jobs").update(updates).eq("id", job_id).execute()
+
+
+def mark_job_transcribed(job_id: str, transcript_text: str, call_number: int) -> None:
+    update_job(
+        job_id,
+        {
+            "status": "transcribed",
+            "transcript_text": transcript_text,
+            "call_number": call_number,
+            "error_message": None,
+        },
+    )
+
+
+def mark_job_openai_batch_submitted(job_id: str, openai_batch_id: str, openai_custom_id: str) -> None:
+    update_job(
+        job_id,
+        {
+            "status": "openai_batch_submitted",
+            "openai_batch_id": openai_batch_id,
+            "openai_custom_id": openai_custom_id,
+            "error_message": None,
+        },
+    )
+
+
+def fetch_openai_batches_to_check(limit: int = 20) -> List[Dict[str, Any]]:
+    """Fetch app batches that have an OpenAI batch running and need polling."""
+    client = get_client()
+    response = (
+        client.table("call_processing_batches")
+        .select("*")
+        .in_("status", OPENAI_BATCH_WAITING_STATUSES)
+        .order("created_at")
+        .limit(limit)
+        .execute()
+    )
+    return response.data or []
+
+
+def fetch_jobs_by_openai_custom_ids(custom_ids: List[str]) -> List[Dict[str, Any]]:
+    if not custom_ids:
+        return []
+    client = get_client()
+    response = (
+        client.table("call_processing_jobs")
+        .select("*")
+        .in_("openai_custom_id", custom_ids)
+        .execute()
+    )
+    return response.data or []
+
+
+def mark_batch_openai_submitted(
+    batch_id: str,
+    openai_batch_id: str,
+    openai_input_file_id: str | None,
+    status: str = "openai_batch_submitted",
+) -> None:
+    update_batch(
+        batch_id,
+        {
+            "status": status,
+            "processing_mode": "batch",
+            "openai_batch_id": openai_batch_id,
+            "openai_input_file_id": openai_input_file_id,
+            "openai_batch_status": status.replace("openai_batch_", ""),
+            "openai_batch_submitted_at": datetime.utcnow().isoformat(),
+            "last_error": None,
+        },
+    )
+
+
+def update_batch_openai_status(
+    batch_id: str,
+    app_status: str,
+    openai_batch_status: str | None = None,
+    openai_output_file_id: str | None = None,
+    openai_error_file_id: str | None = None,
+    last_error: str | None = None,
+) -> None:
+    updates: Dict[str, Any] = {"status": app_status}
+    if openai_batch_status is not None:
+        updates["openai_batch_status"] = openai_batch_status
+    if openai_output_file_id is not None:
+        updates["openai_output_file_id"] = openai_output_file_id
+    if openai_error_file_id is not None:
+        updates["openai_error_file_id"] = openai_error_file_id
+    if last_error is not None:
+        updates["last_error"] = last_error[:4000]
+    if app_status == "openai_batch_completed":
+        updates["openai_batch_completed_at"] = datetime.utcnow().isoformat()
+    update_batch(batch_id, updates)
