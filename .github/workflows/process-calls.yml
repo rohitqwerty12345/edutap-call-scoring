@@ -50,22 +50,26 @@ jobs:
           MAX_JOBS_PER_RUN: ${{ secrets.MAX_JOBS_PER_RUN }}
         run: python worker.py
 
-      - name: Schedule next run in 15 minutes
+      - name: Schedule next polling run if needed
         if: always()
         env:
           GH_ACTIONS_TOKEN: ${{ secrets.GH_ACTIONS_TOKEN }}
         run: |
-          echo "Waiting 14 minutes before triggering next run..."
-          sleep 840
-          echo "Triggering next run now..."
-          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
-            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/process-calls.yml/dispatches" \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${GH_ACTIONS_TOKEN}" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            -d '{"ref":"main"}')
-          if [ "$RESPONSE" = "204" ]; then
-            echo "Next run triggered successfully."
+          if [ -f needs_polling.txt ] && [ "$(cat needs_polling.txt)" = "yes" ]; then
+            echo "OpenAI batch still pending. Waiting 15 minutes before next polling run..."
+            sleep 840
+            echo "Triggering next polling run..."
+            RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+              "https://api.github.com/repos/${{ github.repository }}/actions/workflows/process-calls.yml/dispatches" \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer ${GH_ACTIONS_TOKEN}" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              -d '{"ref":"main"}')
+            if [ "$RESPONSE" = "204" ]; then
+              echo "Next polling run triggered successfully."
+            else
+              echo "Trigger returned HTTP $RESPONSE."
+            fi
           else
-            echo "Trigger returned HTTP $RESPONSE. Cron backup will catch this."
+            echo "No pending OpenAI batches or jobs. Polling chain stopped."
           fi
