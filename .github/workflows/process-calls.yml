@@ -6,7 +6,7 @@ on:
     # Poll/continue backend work every 30 minutes.
     # In standard mode, it exits quickly when no jobs are pending.
     # In batch mode, this checks whether OpenAI Batch API results are ready.
-    - cron: "*/30 * * * *"
+    - cron: "7,37 * * * *"
 
 concurrency:
   group: edutap-call-processing
