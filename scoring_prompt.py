@@ -130,20 +130,25 @@ For every Tone + Truth failure, explicitly provide:
 
 One-line definition: Did both sides know exactly what happens next before the call ended?
 
-If converted: payment link sent immediately, access confirmed, student told what to do first when they log in.
-If not converted: specific follow-up date and time agreed, Master Course details and link sent on WhatsApp, student partner's direct number shared, offer validity communicated clearly.
+IMPORTANT — These are counselling calls, not hard sales calls. The student partner's job is to guide the student to the right next action for their preparation journey. Next Step Clarity is about whether the student left the call knowing exactly what to do next — whether that is reviewing a link, attending a workshop, doing a homework task, or making a payment when they are ready. A strong next step never makes the student feel pushed or cornered. It makes them feel supported and clear.
+
+If converted: course link sent on email, access confirmed, student told what to do first when they log in.
+If not converted: specific follow-up date and time agreed, Master Course details and link sent on email, student partner's direct number shared, and any homework or action item for the student clearly stated.
 Never acceptable: "soch lo, call karna kabhi." That is giving up on the student.
 
 CRITICAL — Missed buying signal:
-If the student expressed clear buying intent at any point during the call — for example "enroll karunga aaj", "le lunga", "abhi le leta hoon", or any variation of "I will take this today/now" — and the student partner did not act on it by sending a payment link, confirming a payment time, or asking "toh abhi kya rok raha hai?" — this is a missed conversion and Next Step Clarity cannot score above 5, regardless of what else happened at the end of the call. The student told the partner they were ready. The partner's job was to remove every remaining obstacle and close. Not doing so is a direct Next Step Clarity failure.
+If the student expressed clear buying intent at any point during the call — for example "enroll karunga aaj", "le lunga", "abhi le leta hoon", or any variation of "I will take this today/now" — and the student partner did not act on it by sending a payment link on email, confirming a payment time, or asking "toh abhi kya rok raha hai?" — this is a missed conversion and Next Step Clarity cannot score above 5, regardless of what else happened at the end of the call. The student told the partner they were ready. The partner's job was to remove every remaining obstacle and close. Not doing so is a direct Next Step Clarity failure.
 
 Special follow-up-only case:
-If the student cannot talk now, Next Step Clarity is judged on how well the student partner handles that short moment. A weak ending is: "ok kal call kar lunga" with no exact time, no confirmation, and no care. A strong ending is: "I understand you are busy. I am calling because I want to help you choose the right preparation direction. Can I call you tomorrow at 5 PM? I will also send the course details on WhatsApp so you can check when free."
+If the student cannot talk now, Next Step Clarity is judged on how well the student partner handles that short moment. A weak ending is: "ok kal call kar lunga" with no exact time, no confirmation, and no care. A strong ending is: "I understand you are busy. I am calling because I want to help you choose the right preparation direction. Can I call you tomorrow at 5 PM? I will also send the course details on email so you can check when free."
 
 Score 1–3: Call ended with no next step at all. No link, no date, nothing. Student has no idea what happens now.
 Score 4–6: Some attempt at clear next step but incomplete. Link sent but not confirmed, or follow-up was vague ("main call kar lunga").
-Score 7–9: Clear next step for both sides. Link sent and confirmed OR specific date and time for follow-up agreed with details sent on WhatsApp.
-Score 10: Perfect next-step clarity. Converted = link sent, confirmed, onboarding explained ("pehle yeh section kholna jab login karo"). Not converted = specific date and time agreed, WhatsApp details sent, offer validity clear, student partner's direct number shared.
+Score 7–9: Clear next step for both sides. Link sent on email and confirmed OR specific date and time for follow-up agreed with details sent on email.
+Score 10: Perfect next-step clarity. Converted = link sent on email, confirmed, onboarding explained ("pehle yeh section kholna jab login karo"). Not converted = specific date and time agreed, email details sent, offer validity clear, student partner's direct number shared.
+
+IMPORTANT — Tone of improvement suggestions for Next Step Clarity:
+When writing improvement areas and learnings for this parameter, suggestions must reflect the counselling-first nature of the call. Do NOT suggest the student partner push for payment confirmation, ask the student to send payment screenshots, or frame the closing in a way that makes it feel like a sales chase. The goal of the next step is to keep the student on their preparation journey with clarity. A good closing gives the student their next action — whether that is a homework task, a link to review, a workshop to attend, or a follow-up call — not pressure to pay immediately.
 
 GROUP 2: COVERAGE
 Must appear in every call.
@@ -561,7 +566,7 @@ CASE 2: If call_type is follow_up_only and Tone + Truth PASS, return this JSON s
     "what_happened_at_end": "Describe how the student partner handled the student being busy or asking to call later.",
     "payment_link_sent": "No",
     "followup_date_and_time_agreed": "Yes — state date and time, or No",
-    "course_details_sent_on_whatsapp": "Yes, No, or Not mentioned",
+    "course_details_sent_on_email": "Yes, No, or Not mentioned",
     "quote_of_closing_line": "Exact line student partner used to end the call",
     "why_this_score": "One sentence explaining whether the follow-up felt caring and clear or vague and random."
   },
@@ -658,7 +663,7 @@ CASE 3: If call_type is full_analysis and Tone + Truth PASS, return this JSON st
     "what_happened_at_end": "Describe what happened at the end of the call",
     "payment_link_sent": "Yes or No",
     "followup_date_and_time_agreed": "Yes — state date and time, or No",
-    "course_details_sent_on_whatsapp": "Yes, No, or Not mentioned",
+    "course_details_sent_on_email": "Yes, No, or Not mentioned",
     "quote_of_closing_line": "Exact line student partner used to end the call",
     "why_this_score": "One sentence"
   },
