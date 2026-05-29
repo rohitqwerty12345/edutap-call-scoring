@@ -44,6 +44,11 @@ jobs:
           SENDER_PASSWORD: ${{ secrets.SENDER_PASSWORD }}
           RECIPIENT_EMAILS: ${{ secrets.RECIPIENT_EMAILS }}
           ERROR_RECIPIENT_EMAILS: ${{ secrets.ERROR_RECIPIENT_EMAILS }}
+          COST_REPORT_RECIPIENT_EMAILS: ${{ secrets.COST_REPORT_RECIPIENT_EMAILS }}
+          OPENAI_INPUT_PRICE_PER_1M: ${{ secrets.OPENAI_INPUT_PRICE_PER_1M }}
+          OPENAI_OUTPUT_PRICE_PER_1M: ${{ secrets.OPENAI_OUTPUT_PRICE_PER_1M }}
+          OPENAI_CACHED_INPUT_PRICE_PER_1M: ${{ secrets.OPENAI_CACHED_INPUT_PRICE_PER_1M }}
+          OPENAI_BATCH_DISCOUNT: ${{ secrets.OPENAI_BATCH_DISCOUNT }}
           MAX_PARALLEL_CALLS: ${{ secrets.MAX_PARALLEL_CALLS }}
           MAX_JOBS_PER_RUN: ${{ secrets.MAX_JOBS_PER_RUN }}
         run: python worker.py
