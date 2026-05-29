@@ -24,16 +24,30 @@ def extract_student_number(filename: str) -> str:
     return "unknown"
 
 
+def transcribe_and_prepare_llm_input(file_bytes: bytes, filename: str, student_number: str | None = None) -> Dict[str, Any]:
+    """Transcribe audio, allocate call number, and prepare transcript for LLM scoring."""
+    clean_student_number = student_number or extract_student_number(filename)
+    transcript = transcribe_audio(file_bytes, filename)
+    call_number = get_next_call_number(clean_student_number)
+    transcript_for_llm = f"Call Number: {call_number}\n\n{transcript}"
+    return {
+        "student_number": clean_student_number,
+        "transcript": transcript,
+        "call_number": call_number,
+        "transcript_for_llm": transcript_for_llm,
+    }
+
+
 def process_single_file(file_bytes: bytes, filename: str, existing_audio_url: str | None = None) -> Dict[str, Any]:
     """
-    Full pipeline for one recording file.
+    Full standard/immediate pipeline for one recording file.
+    Batch API mode uses transcribe_and_prepare_llm_input() and saves later.
     """
     student_number = extract_student_number(filename)
-
-    transcript = transcribe_audio(file_bytes, filename)
-
-    call_number = get_next_call_number(student_number)
-    transcript_for_llm = f"Call Number: {call_number}\n\n{transcript}"
+    prepared = transcribe_and_prepare_llm_input(file_bytes, filename, student_number=student_number)
+    transcript = prepared["transcript"]
+    call_number = prepared["call_number"]
+    transcript_for_llm = prepared["transcript_for_llm"]
 
     openai_debug = score_transcript_debug(transcript_for_llm)
     result = openai_debug["parsed_output"]
