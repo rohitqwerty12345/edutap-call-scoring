@@ -322,21 +322,41 @@ Score 10: Surfaced a fear the student had not even fully articulated. Student fe
 SECTION C: TRIAL COURSE INFORMATION
 -------------------------------------------
 
-Course Name: UPSC EPFO APFC & EO/AO Exam — 10 Hour Trial Course
+Course Name: UPSC EPFO APFC & EO/AO 2026-2027 — 2 Day Demo Master Course
 Platform: EduTap (learnyst)
-Price: Rs 100 (coupon code EPFO99 for 99% off — effectively free)
+Price: Rs 1
 Validity: 2 days from date of subscription
-Rating: 5.0
+Total: 18 courses bundled together
 
 What is included:
-- 43 lessons total, 5 quizzes
-- Section 1 — Introduction (1 lesson)
-- Section 2 — EPFO Exam Guidance (8 lessons + 8 attachments): decoded syllabus, PYQ analysis, past cut-offs, complete booklist and sources, component-wise preparation strategy, 500-hour day-wise study plan, other exams you can target with this preparation
-- Section 3 — EPFO Exam Motivation (13 lessons + 10 attachments): self-study vs coaching, common challenges, physical and mental health, time management, staying motivated, handling anxiety and nervousness, avoiding distraction, success story sessions (Akshay Rank 141 APFC 2023, Ankit Kumar Rank 121 EO 2023)
-- Section 4 — EPFO Exam Content (14 lessons + 5 tests + 13 attachments): sample concept classes and notes for Accountancy (Introduction to Accountancy), IR and LL (Inter-State Migrant Workmen Act 1979), Quantitative Aptitude (Number System), English (Subject Verb Agreement), Governance and Constitution (Constitutional Framework)
-- Section 5 — EPFO Exam Information (7 lessons + 6 attachments): complete recruitment cycle, expected notification date, eligibility for APFC and EO exam, exam pattern, job profile and responsibilities, salary perks and allowances
+- How to Start Your Preparation (6 lessons)
+- Quantitative Aptitude (170 lessons)
+- Logical Reasoning (61 lessons)
+- General English (187 lessons)
+- Current Affairs (26 lessons)
+- Governance and Constitution of India (43 lessons)
+- Indian Culture and Heritage (32 lessons)
+- Indian History (36 lessons)
+- Indian Economy (71 lessons)
+- General Science (42 lessons)
+- Developmental Issues (8 lessons)
+- Industrial Relations and Labor Laws (100 lessons)
+- Auditing (50 lessons)
+- Insurance (6 lessons)
+- Accountancy (130 lessons)
+- Statistics (20 lessons)
+- Basics of Computer Applications (35 lessons)
+- Previous Year Questions (6 lessons)
 
-Purpose: To give students clarity, confidence, and a structured approach before investing in the full Master Course. This is NOT the complete course.
+Content type per subject: Concept classes (video lessons) + Concept notes + Chapter-wise quizzes where applicable.
+
+Medium: Concept Classes for Accountancy, Insurance, and Indian Economy are in English. All other subjects are in Hinglish (English content explained in Hindi). Concept Notes and Chapter-wise Quizzes are in English.
+
+Access: Web browser or Android app. Cannot download PDFs in the demo course.
+
+Purpose: To help students assess the quality, structure, and coverage of the full Master Course before paying full fees. This is NOT the complete course — it is a demo to evaluate before investing.
+
+Support: hello@edutap.co.in | 8146207241 (9 AM to 6 PM all days)
 
 -------------------------------------------
 SECTION D: MASTER COURSE INFORMATION
