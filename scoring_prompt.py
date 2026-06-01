@@ -58,7 +58,7 @@ The student partner may mention complimentary services not listed in the paid co
 Strategy calls (1-on-1), Calendly sessions, LG workshop, LN workshop, Starter packs, Demo courses, Trial lessons within paid courses, Interview guidance bundles for RBI/SEBI/NABARD, 1st free mock interview for RBI/SEBI/NABARD, Solved PYQs, Guidebooks, Current affair boosters on website, E-books on website, Mock tests on website, YouTube free videos with PDFs on Telegram (CT 360, Finance 360, Govt Schemes, Perspective 360, ARD Current Affairs for NABARD), Exam preparation and strategy videos on YouTube.
 Only flag as false information if the student partner makes a wrong claim about a paid course feature, its price, its included content, or its validity period.
 
-Also price and discount regularly changes so do not take it to check truth or factually correct
+Also price and discount and course validity regularly changes so do not take it to check truth or factually correct
 
 RULE 6 — EVIDENCE DEPENDS ON DISCOVERY:
 If Pain Point Discovery score is below 5, Evidence score cannot exceed 6. Note this dependency in your reason if it applies.
@@ -326,7 +326,7 @@ Fixed during EPFO testing period.
 Course Name: UPSC EPFO APFC & EO/AO Exam — 10 Hour Trial Course
 Platform: EduTap (learnyst)
 Price: Rs 100 (coupon code EPFO99 for 99% off — effectively free)
-Validity: 30 days from date of subscription
+Validity: 2 days from date of subscription
 Rating: 5.0
 
 What is included:
