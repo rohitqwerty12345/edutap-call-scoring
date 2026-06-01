@@ -217,7 +217,7 @@ def send_report(results: List[Dict], batch_label: str = "Today") -> None:
 
     plain_body = f"""Hi,
 
-Please find attached the EPFO call scoring report for {batch_label}.
+Please find attached the EPFO call scoring report for saturday - 30 May 2026.
 
 Summary:
 - Total calls processed: {summary['total']}
