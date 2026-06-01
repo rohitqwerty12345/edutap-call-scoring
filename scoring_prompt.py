@@ -320,7 +320,6 @@ Score 10: Surfaced a fear the student had not even fully articulated. Student fe
 
 -------------------------------------------
 SECTION C: TRIAL COURSE INFORMATION
-Fixed during EPFO testing period.
 -------------------------------------------
 
 Course Name: UPSC EPFO APFC & EO/AO Exam — 10 Hour Trial Course
@@ -341,7 +340,6 @@ Purpose: To give students clarity, confidence, and a structured approach before 
 
 -------------------------------------------
 SECTION D: MASTER COURSE INFORMATION
-Fixed until product changes.
 -------------------------------------------
 
 Course Name: EPFO APFC and EO/AO 2026-2027 Master Course
