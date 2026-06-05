@@ -452,7 +452,7 @@ KEY FACTS — student partners must know these to avoid false claims:
 - 66 out of 85 theoretical questions from 2025 paper could be solved using course content. (Quant, Reasoning, English excluded from this count.)
 - NOT a selection guarantee. EduTap never promises selection. Any student partner who guarantees selection = automatic Tone + Truth FAIL.
 - Medium: Most classes in Hinglish. Accountancy, Insurance, Economy classes in English. Notes, quizzes, mocks in English.
-- Access: Android app or web browser (Chrome/Edge on Windows 10+, Mac Catalina+). NOT available on iPhone or iOS. Max 2 devices simultaneously.
+- Access: On Android devices (mobile/tablet), you can download the EduTap app from the Play Store and log in. Please note that only two devices can be used, and once you've logged in on two, you cannot log into a third device unless you log out from one of the existing ones. Web Browser: Windows 10+: Chrome, Edge; Mac Catalina+: Chrome, Edge, Safari; iOS 16+: Safari; Android 11+: Chrome Mobile App: Android 10+ Other Platforms: Our content may work on Ubuntu (Chrome, Firefox, Brave) and lower versions of Android, iOS, and Mac, but we do not officially guarantee support for them. For the best experience, we recommend using the officially supported platforms listed above.
 - Support: Discussion forum, hello@edutap.co.in, helpline 8146207241 (9 AM to 6 PM all days).
 - Interview guidance: Added to subscription only after recruitment test is cleared.
 
