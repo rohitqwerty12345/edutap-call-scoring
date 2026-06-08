@@ -144,7 +144,7 @@ def _plain_summary_text(value: Any) -> str:
                     lines.append(f"- {label}: {str(detail).strip()}")
         if lines:
             return "\n".join(lines)
-        return json.dumps(value, ensure_ascii=False)
+        return ""
     if isinstance(value, list):
         lines = []
         for item in value:
