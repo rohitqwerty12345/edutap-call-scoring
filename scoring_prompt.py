@@ -282,6 +282,8 @@ What does NOT count as Evidence:
 - Course features not connected to any pain point the student revealed
 - Factually wrong claims — those are handled under Tone + Truth only, not penalised again here
 
+If the student has explicitly stated they have no interest in giving this examination at all (not a hesitation about price, timing, or preparation — but the exam itself), do not penalize the partner for not creating urgency or evidence. The correct response in that situation is graceful acceptance and leaving the door open, which should not score low on urgency.
+
 Score 1–3: Answered product questions with a generic feature list. No connection to the student's revealed pain points at all.
 Score 4–6: Partially connected — answered product questions specifically, OR connected to some pain points but missed the most important ones that came out in Discovery.
 Score 7–9: Clear and specific connection between the student's actual revealed pain points and what the Master Course offers — using real features, success stories, or result data tied to those pains.
@@ -315,6 +317,7 @@ Score 10: Student's own exact words or fears were reflected back so clearly that
 
 GROUP 3: CONDITIONAL
 Scored only if an objection occurs in this call.
+If the student has explicitly stated they have no interest in giving this examination at all (not a hesitation about price, timing, or preparation — but the exam itself), do not penalize the partner for not creating urgency or evidence. The correct response in that situation is graceful acceptance and leaving the door open, which should not score low on urgency.
 
 --- HESITATION DISCOVERY (Scored 1–10, or N/A if no hesitation/objection occurred) ---
 
