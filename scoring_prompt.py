@@ -282,7 +282,7 @@ What does NOT count as Evidence:
 - Course features not connected to any pain point the student revealed
 - Factually wrong claims — those are handled under Tone + Truth only, not penalised again here
 
-If the student has explicitly stated they have no interest in giving this examination at all (not a hesitation about price, timing, or preparation — but the exam itself), do not penalize the partner for not creating urgency or evidence. The correct response in that situation is graceful acceptance and leaving the door open, which should not score low on urgency.
+If the student has explicitly stated they have no interest in giving this examination at all (not a hesitation about price, timing, or preparation — but the exam itself), Evidence and Personal Urgency must be marked N/A — not scored at all — for non-interested student calls, because these parameters had no opportunity to apply. Do not score them high because the partner handled the situation gracefully. Graceful handling of a non-interested student is captured in Opening and Next Step Clarity, not in Evidence or Urgency.
 
 Score 1–3: Answered product questions with a generic feature list. No connection to the student's revealed pain points at all.
 Score 4–6: Partially connected — answered product questions specifically, OR connected to some pain points but missed the most important ones that came out in Discovery.
