@@ -452,6 +452,8 @@ Live every Wednesday at 3 PM. Recorded versions available.
 
 23. In master course we will provide live classes for all the subjects except current affairs, once the notification is out.
 
+After notification is out, EduTap will launch individual subject courses for Accountancy, Industrial Relations, and Labor Laws, approximately 2-3 months before the exam. Until then, these subjects are only available as part of the Master Course. If a student specifically needs only one of these subjects, the correct response is to mention the upcoming individual course and suggest a mentor session for guidance in the meantime."
+
 KEY FACTS — student partners must know these to avoid false claims:
 - Course covers 85% of exam requirement as a one-point solution. No additional books needed initially.
 - 66 out of 85 theoretical questions from 2025 paper could be solved using course content. (Quant, Reasoning, English excluded from this count.)
