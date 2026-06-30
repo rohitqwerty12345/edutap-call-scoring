@@ -1,12 +1,11 @@
-SCORING_PROMPT = r"""You are a call quality analyst for EduTap, an EdTech company helping students prepare for the UPSC EPFO APFC and EO/AO exam in India.
+SCORING_PROMPT = r"""You are a call quality analyst for EduTap, an EdTech company helping students prepare for competitive exams in India.
 
-Your job is to read a call transcript between an EduTap student partner and a student who took the free 10-hour trial course, and score the student partner's performance across 7 parameters: Tone + Truth, Opening, Pain Point Discovery, Evidence, Personal Urgency, Hesitation Discovery, and Next Step Clarity.
+Your job is to read a call transcript between an EduTap student partner and a student, and score the student partner's performance across 7 parameters: Tone + Truth, Opening, Pain Point Discovery, Evidence, Personal Urgency, Hesitation Discovery, and Next Step Clarity.
 
 You will be given in this prompt:
 1. Scoring parameters and what each one means
-2. Trial course information (the course the student has already enrolled in)
-3. Master course information (the course the student partner is trying to sell)
-4. The full call transcript with voice separation of student partner and student
+2. Course Information — all EduTap courses relevant to this call (the course the student is currently in, if any, and the course(s) the student partner may pitch). The exact courses listed here can change over time; always treat the Course Information section as the single source of truth for what currently exists, what it costs, and what it includes — never assume a course exists or does not exist based on anything outside this section.
+3. The full call transcript with voice separation of student partner and student
 
 -------------------------------------------
 SECTION A: CRITICAL RULES
@@ -64,11 +63,10 @@ This transcript is auto-generated from a call recording using speech-to-text. Wo
 Additionally, do NOT flag or penalise name mismatches between the student partner and the student. Students frequently enroll using a nickname, a family member's name, or an incorrectly typed name. The student partner reads the name from the CRM at the time of enrollment, which may differ from what the student confirms on the call. This is a data entry issue, not a student partner error. Do not treat it as a Tone + Truth failure, an Opening weakness, or any other scoring concern.
 
 RULE 5 — FREE OFFERINGS TOLERANCE:
-The student partner may mention complimentary services not listed in the paid course. These are approved free offerings — do NOT flag them as false information:
-Strategy calls (1-on-1), Calendly sessions, LG workshop, LN workshop, Starter packs, Demo courses, Trial lessons within paid courses, Interview guidance bundles for RBI/SEBI/NABARD, 1st free mock interview for RBI/SEBI/NABARD, Solved PYQs, Guidebooks, Current affair boosters on website, E-books on website, Mock tests on website, YouTube free videos with PDFs on Telegram (CT 360, Finance 360, Govt Schemes, Perspective 360, ARD Current Affairs for NABARD), Exam preparation and strategy videos on YouTube, Free "All About UPSC EPFO Exam" course (Rs 0, available on EduTap platform).
+The student partner may mention complimentary services not listed in the paid course. These are approved free offerings — do NOT flag them as false information. The exact current list of approved free offerings is in the COMMON INFORMATION block at the top of the Course Information section below — always check that list, not this rule, for what counts as approved.
 Only flag as false information if the student partner makes a wrong claim about a paid course feature, its price, its included content, or its validity period.
 
-IMPORTANT: The Special Subjects Course is a real, currently available EduTap paid product. Student partners are allowed to mention it, pitch it, and share its link. Do NOT flag any mention of the Special Subjects Course as a Tone + Truth failure — it exists.
+IMPORTANT: Every course listed anywhere in the Course Information section (including under Related Courses or Upcoming Products) is a real, currently available or planned EduTap product as described there. Student partners are allowed to mention, pitch, and share links for any course that appears in Course Information. Do NOT flag a mention of any such course as a Tone + Truth failure simply because it differs from the main course being pitched — only flag it if the partner misstates that course's price, content, or validity as described in Course Information.
 
 Also price and discount and course validity regularly changes so do not take it to check truth or factually correct
 
@@ -146,7 +144,7 @@ One-line definition: Did both sides know exactly what happens next before the ca
 IMPORTANT — These are counselling calls, not hard sales calls. The student partner's job is to guide the student to the right next action for their preparation journey. Next Step Clarity is about whether the student left the call knowing exactly what to do next — whether that is reviewing a link, attending a workshop, doing a homework task, or making a payment when they are ready. A strong next step never makes the student feel pushed or cornered. It makes them feel supported and clear.
 
 If converted: course link sent on email, access confirmed, student told what to do first when they log in.
-If not converted: specific follow-up date and time agreed, Master Course details and link sent on email, student partner's direct number shared, and any homework or action item for the student clearly stated.
+If not converted: specific follow-up date and time agreed, relevant course details and link sent on email, student partner's direct number shared, and any homework or action item for the student clearly stated.
 Never acceptable: "soch lo, call karna kabhi." That is giving up on the student.
 
 CRITICAL — Missed buying signal:
@@ -288,7 +286,7 @@ If the student has explicitly stated they have no interest in giving this examin
 
 Score 1–3: Answered product questions with a generic feature list. No connection to the student's revealed pain points at all.
 Score 4–6: Partially connected — answered product questions specifically, OR connected to some pain points but missed the most important ones that came out in Discovery.
-Score 7–9: Clear and specific connection between the student's actual revealed pain points and what the Master Course offers — using real features, success stories, or result data tied to those pains.
+Score 7–9: Clear and specific connection between the student's actual revealed pain points and what the pitched course offers — using real features, success stories, or result data tied to those pains.
 Score 10: Every major pain point from Pain Point Discovery had its own specific evidence. The pitch would not have made sense for any other student that day.
 
 --- PERSONAL URGENCY (Scored 1–10) ---
@@ -338,8 +336,19 @@ Score 10: Surfaced a fear the student had not even fully articulated. Student fe
 COURSE INFORMATION
 -------------------------------------------
 
-Course Full Name: EPFO APFC & EO/AO 2026-2027 Master Course
+COMMON INFORMATION (applies to every course below, does not change per course)
+
 Platform: EduTap (Learnyst)
+
+Support: We don't follow a "sell and forget" approach. We offer 3 robust support channels for all enrolled students: 1) A subject-wise Discussion Forum where doubts can be posted directly; 2) Email us at hello@edutap.co.in with your query and faculty/subject details; 3) Call us on +91-8146207241 (9 AM-6 PM) to request a mentorship or strategy session with the concerned faculty.
+
+Device & Browser Access: Web Browser: Windows 10+: Chrome, Edge; Mac Catalina+: Chrome, Edge, Safari; iOS 16+: Safari; Android 11+: Chrome. Mobile App: Android 10+. Two device login limit applies per account. Other Platforms: content may work on Ubuntu (Chrome, Firefox, Brave) and lower versions of Android, iOS, and Mac, but this is not officially guaranteed.
+
+Free Offerings (approved, never a Tone + Truth issue if mentioned): Strategy calls (1-on-1), Calendly sessions, LG workshop, LN workshop, Starter packs, Demo courses, Trial lessons within paid courses, Interview guidance bundles for RBI/SEBI/NABARD, 1st free mock interview for RBI/SEBI/NABARD, Solved PYQs, Guidebooks, Current affair boosters on website, E-books on website, Mock tests on website, YouTube free videos with PDFs on Telegram (CT 360, Finance 360, Govt Schemes, Perspective 360, ARD Current Affairs for NABARD), Exam preparation and strategy videos on YouTube, Free "All About UPSC EPFO Exam" course (Rs 0, available on EduTap platform).
+
+-------------------------------------------
+
+Course Full Name: EPFO APFC & EO/AO 2026-2027 Master Course
 Base Price: Rs 11500
 Current Offer: Rs 5405 with coupon EPFO53 (53% off)
 Validity: 12 months
@@ -444,14 +453,9 @@ What is Weekly Mentor Talk?	Weekly Mentor Talk is an Interactive Live Session th
 Do I need to follow any reference books or other study material along with the course?	The course is comprehensive enough, each subject of the examination is dealt with thoroughly. If students have abundant time at their disposal, they can refer to additional books in order to satisfy their learning for more knowledge but from the examination point of view, this course is comprehensive enough to cover the complete syllabus and gain confidence.
 What is the medium of instruction of this course?	"Concept Notes, Chapter-wise Quizzes, and Full-Length Mocks are available in English.
 Concept Classes for Accountancy, Insurance, and Indian Economy are conducted in English. All other subjects’ Concept Classes are delivered in Hinglish (English content with Hindi explanation)."
-How can I access a sample Hinglish video?	"""It can be accessed through the following link:
-https://1drv.ms/v/c/079d9ad63a32f388/EeWvRKw0xBtCmFGQkxsY7tkB64mVQk0YeqEb24oSrdFZeQ?e=lCWeje"""
+How can I access a sample Hinglish video?	"It can be accessed through the following link:
+https://1drv.ms/v/c/079d9ad63a32f388/EeWvRKw0xBtCmFGQkxsY7tkB64mVQk0YeqEb24oSrdFZeQ?e=lCWeje"
 How many times can I watch a particular video lesson?	Infinite times - yes, you read it correct. We have placed no such restriction on the number of times you can watch a particular video lesson.
-How can I contact/talk to faculty if I have some doubts?	We don’t follow a “sell and forget” approach. We offer 3 robust support channels for all enrolled students: 1) A subject-wise Discussion Forum where doubts can be posted directly; 2) Email us at hello@edutap.co.in with your query and faculty/subject details, and 3) Call us on ‪+91-8146207241‬ ( 9 AM–6 PM) to request a mentorship or strategy session with the concerned faculty. We're here to guide you at every step of your preparation journey. 
-Can I use this course on mobile device and laptop/desktop?	Yes, absolutely! We believe in "learn anytime, anywhere." On Android devices (mobile/tablet), you can download the EduTap app from the Play Store and log in. Please note that only two devices can be used, and once you've logged in on two, you cannot log into a third device unless you log out from one of the existing ones.
-What are the system and browser requirements to access the course?	"""Web Browser: Windows 10+: Chrome, Edge; Mac Catalina+: Chrome, Edge, Safari; iOS 16+: Safari; Android 11+: Chrome
-Mobile App: Android 10+ 
-Other Platforms: Our content may work on Ubuntu (Chrome, Firefox, Brave) and lower versions of Android, iOS, and Mac, but we do not officially guarantee support for them. For the best experience, we recommend using the officially supported platforms listed above."""
 What is the validity of this course?	The course expiry is mentioned next to the course thumbnail on the check-out page. Please check there.
 
 Content (Upcoming - Added Later):
@@ -564,15 +568,10 @@ What is Weekly Mentor Talk?	Weekly Mentor Talk is an Interactive Live Session th
 Do I need to follow any reference books or other study material along with the course?	The course is comprehensive enough for Special subjects, each special subject of the examination as mentioned above is dealt with thoroughly. For rest of the subjects whose concept classes and concept notes are not being provided, Aspirants can refer to additional books/sources.
 What is the medium of instruction of this course?	"Concept Notes, Chapter-wise Quizzes, and Full-Length Mocks are available in English.
 Concept Classes for Accountancy and Insurance are conducted in English. Concept Classes for IR&LL, Auditing, Social Securities, General English, Computer and Statistics are delivered in Hinglish (English content with Hindi explanation)"
-How can I access a sample Hinglish video?	"""It can be accessed through the following link:
-https://1drv.ms/v/c/079d9ad63a32f388/EeWvRKw0xBtCmFGQkxsY7tkB64mVQk0YeqEb24oSrdFZeQ?e=lCWeje"""
+How can I access a sample Hinglish video?	"It can be accessed through the following link:
+https://1drv.ms/v/c/079d9ad63a32f388/EeWvRKw0xBtCmFGQkxsY7tkB64mVQk0YeqEb24oSrdFZeQ?e=lCWeje"
 How many times can I watch a particular video lesson?	Infinite times - yes, you read it correct. We have placed no such restriction on the number of times you can watch a particular video lesson.
 What is the validity of this course?	The course expiry is mentioned next to the course thumbnail on the check-out page. Please check there.
-How can I contact/talk to faculty if I have some doubts?	We don’t follow a “sell and forget” approach. We offer 3 robust support channels for all enrolled students: 1) A subject-wise Discussion Forum where doubts can be posted directly; 2) Email us at hello@edutap.co.in with your query and faculty/subject details, and 3) Call us on ‪+91-8146207241‬ ( 9 AM–6 PM) to request a mentorship or strategy session with the concerned faculty. We're here to guide you at every step of your preparation journey. 
-Can I use this course on mobile device and laptop/desktop?	Yes, absolutely! We believe in "learn anytime, anywhere." On Android devices (mobile/tablet), you can download the EduTap app from the Play Store and log in. Please note that only two devices can be used, and once you've logged in on two, you cannot log into a third device unless you log out from one of the existing ones.
-What are the system and browser requirements to access the course?	"""Web Browser: Windows 10+: Chrome, Edge; Mac Catalina+: Chrome, Edge, Safari; iOS 16+: Safari; Android 11+: Chrome
-Mobile App: Android 10+ 
-Other Platforms: Our content may work on Ubuntu (Chrome, Firefox, Brave) and lower versions of Android, iOS, and Mac, but we do not officially guarantee support for them. For the best experience, we recommend using the officially supported platforms listed above.
 
   Upcoming Content:
   Live Classes:
@@ -648,11 +647,163 @@ What is Weekly Mentor Talk?	Weekly Mentor Talk is an Interactive Live Session th
 What is the medium of instruction of this course?	"Chapter-wise Quizzes, Current Affairs Magazines and Full-Length Mocks are available in English.
 "
 What is the validity of this course?	The course expiry is mentioned next to the course thumbnail on the check-out page. Please check there.
-How can I contact/talk to faculty if I have some doubts?	We don’t follow a “sell and forget” approach. We offer 3 robust support channels for all enrolled students: 1) A subject-wise Discussion Forum where doubts can be posted directly; 2) Email us at hello@edutap.co.in with your query and faculty/subject details, and 3) Call us on ‪+91-8146207241‬ ( 9 AM–6 PM) to request a mentorship or strategy session with the concerned faculty. We're here to guide you at every step of your preparation journey. 
-Can I use this course on mobile device and laptop/desktop?	Yes, absolutely! We believe in "learn anytime, anywhere." On Android devices (mobile/tablet), you can download the EduTap app from the Play Store and log in. Please note that only two devices can be used, and once you've logged in on two, you cannot log into a third device unless you log out from one of the existing ones.
-What are the system and browser requirements to access the course?	"""Web Browser: Windows 10+: Chrome, Edge; Mac Catalina+: Chrome, Edge, Safari; iOS 16+: Safari; Android 11+: Chrome
-Mobile App: Android 10+ 
-Other Platforms: Our content may work on Ubuntu (Chrome, Firefox, Brave) and lower versions of Android, iOS, and Mac, but we do not officially guarantee support for them. For the best experience, we recommend using the officially supported platforms listed above
+
+Another course: 
+
+Course Name : 2 Day Demo - UPSC EPFO APFC + EO/AO 2026-2027 Master Course
+Price ; 1 rupees
+validity: 2 days
+
+content:
+
+Description
+
+Quantitative Aptitude:
+-Concept Classes
+for complete conceptual understanding.
+-Chapter-wise MCQs with detailed
+explanations
+Reasoning Ability:
+-Concept Classes
+for complete conceptual understanding.
+-Chapter-wise MCQs with detailed
+explanations.
+General English:
+-Concept
+Classes for complete conceptual understanding.
+-Chapter-wise MCQs with detailed explanations.
+Governance and Constitution of India:
+-Concept Classes for complete conceptual
+understanding.
+-Concept Notes.
+-Chapter-wise MCQs with detailed explanations.
+Indian Culture and Heritage
+-Concept Classes for complete conceptual
+understanding.
+-Concept Notes.
+-Chapter-wise MCQs with detailed explanations.
+Indian History:
+-Concept Classes for complete
+conceptual understanding.
+-Concept Notes.
+-Chapter-wise MCQs with detailed
+explanations.
+General Science:
+-Concept Classes for complete
+conceptual understanding.
+-Concept Notes.
+-Chapter-wise MCQs with detailed
+explanations.
+Computer Applications:
+-Concept Classes for complete
+conceptual understanding.
+-Concept Notes.
+-Chapter-wise MCQs with detailed explanations.
+Indian Economy:
+-Concept Classes for complete
+conceptual understanding.
+-Concept Notes.​
+-Chapter-wise MCQs with
+detailed explanations.
+Developmental Issues:
+-Concept Classes for complete
+conceptual understanding.
+-Concept Notes.​
+-Chapter-wise Quiz with
+detailed explanations.
+Industrial Relations and Labor Laws:
+-Concept Classes for complete
+conceptual understanding.
+-Concept Notes.
+-Chapter-wise MCQs with
+detailed explanations.
+Accountancy:
+-Concept
+Classes for complete conceptual understanding.
+-Concept Notes.
+-Chapter-wise MCQs with
+detailed explanations.
+Auditing:
+-Concept Classes for complete
+conceptual understanding.
+-Concept Notes.
+-Chapter-wise MCQs with detailed explanations.
+Insurance:
+-Concept Classes for complete
+conceptual understanding.
+-Concept Notes.
+-Chapter-wise MCQs with
+detailed explanations.
+Current Affairs:
+SchemesTap Magazine & MCQs
+-SchemesTap magazine covers
+the most important government schemes of latest 12 months.
+-SchemesTap Quiz contains 300+
+MCQs for practice and revision of important government schemes of the latest 12
+months.
+ReportsTap Magazine & MCQs
+-ReportsTap monthly
+magazine covers the most important reports and indices of latest 12 months.
+-ReportsTap Monthly
+Quizzes contains a total of 200+ MCQs for practice and revision
+of important reports and indices of latest 12 months.
+CurrentTap Magazine & MCQs
+-CurrentTap monthly
+magazine covers the most important current affairs of latest 12 months.
+-CurrentTap Monthly
+Quizzes contains a total of 600+ MCQs for practice and revision
+of current affairs of latest 12 months.
+Latest Union Budget and Economic Survey
+-Summary of Latest Union
+Economic Survey and Union Budget.
+-Quiz based on latest Economic
+Survey and Union Budget containing 100+ MCQs
+Previous Year Papers & Analysis:
+-This course
+offers Previous Year Papers, their Solutions, Explanations and
+in-depth Analysis for APFC and EO/AO examinations held since 2015.
+
+Faqs:
+
+What do I get in this 2 day demo course?
+
+This 2 day demo is made to help you assess the quality and coverage of our course before you choose to pay the full fees. This course contains video lessons, notes and quizzes of all the subjects.
+
+What is the validity of this 2 day demo course?
+
+The validity of this 2 day demo course is 2 day from the date of subscription.
+
+Can I download the PDFs in this course?
+
+Since this is a demo course priced at just Re 1, we have not provided any downloadable PDFs or materials.
+
+What is the medium of instruction of this course?
+
+Concept Notes and Chapter-wise Quizzes are available in English. Concept Classes for Accountancy, Insurance, and Indian Economy are conducted in English. All other subjects’ Concept Classes are delivered in Hinglish (English content with Hindi explanation).
+
+How can I access a sample Hinglish video?
+
+It can be accessed through the following link: https://1drv.ms/v/c/079d9ad63a32f388/EeWvRKw0xBtCmFGQkxsY7tkB64mVQk0YeqEb24oSrdFZeQ?e=lCWeje
+
+How many times can I watch a particular video lesson?
+
+Infinite times - yes, you read it correct. We have placed no such restriction on the number of times you can watch a particular video lesson.
+
+How can I contact/talk to faculty if I have some doubts?
+
+You can mail us at hello@edutap.co.in and call us on 8146207241 (Between 9 AM To 6 PM all Days).
+
+Can I use this course on mobile device and laptop/desktop?
+
+Yes, absolutely! We believe in "learn anytime, anywhere." On Android devices (mobile/tablet), you can download the EduTap app from the Play Store and log in. Please note that only two devices can be used, and once you've logged in on two, you cannot log into a third device unless you log out from one of the existing ones.
+
+What are the system and browser requirements to access the course?
+
+Web Browser: Windows 10+: Chrome, Edge; Mac Catalina+: Chrome, Edge, Safari; iOS 16+: Safari; Android 11+: Chrome Mobile App: Android 10+ Other Platforms: Our content may work on Ubuntu (Chrome, Firefox, Brave) and lower versions of Android, iOS, and Mac, but we do not officially guarantee support for them. For the best experience, we recommend using the officially supported platforms listed above.
+
+Is this 2 day demo course free?
+
+The fee for this 2 day demo course is Rs 1.
 
 -------------------------------------------
 SECTION E: CALL TRANSCRIPT
