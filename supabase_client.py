@@ -670,6 +670,23 @@ def fetch_batch(batch_id: str) -> Dict[str, Any] | None:
     return rows[0] if rows else None
 
 
+def fetch_unsent_completed_batches(limit: int = 50) -> List[Dict[str, Any]]:
+    """Batches that finished (completed / completed_with_errors / failed) but never
+    successfully sent their report/cost/error email, e.g. because SMTP auth failed
+    after the batch status was already updated. Lets the worker retry just the
+    email step without re-touching OpenAI."""
+    client = get_client()
+    response = (
+        client.table("call_processing_batches")
+        .select("*")
+        .in_("status", ["completed", "completed_with_errors", "failed"])
+        .or_("report_sent.is.false,report_sent.is.null,cost_report_sent.is.false,cost_report_sent.is.null,error_email_sent.is.false,error_email_sent.is.null")
+        .limit(limit)
+        .execute()
+    )
+    return response.data or []
+
+
 def _date_only(value: Any) -> str:
     if value is None:
         return ""

@@ -20,6 +20,7 @@ from supabase_client import (
     fetch_jobs_for_batch,
     fetch_openai_batches_to_check,
     fetch_pending_jobs,
+    fetch_unsent_completed_batches,
     mark_batch_openai_submitted,
     mark_job_completed,
     mark_job_failed,
@@ -223,8 +224,12 @@ def finalize_batch(batch_id: str) -> None:
             cost_items.append(enriched_cost)
 
     if completed_rows and not report_sent:
-        send_report(completed_rows, batch_label=str(date.today()))
-        updates["report_sent"] = True
+        try:
+            send_report(completed_rows, batch_label=str(date.today()))
+            updates["report_sent"] = True
+        except Exception as exc:
+            updates["last_error"] = f"Report email failed: {str(exc)[:3800]}"
+            print(f"Report email failed: {exc}", flush=True)
 
     if cost_items and not cost_report_sent:
         try:
@@ -245,8 +250,12 @@ def finalize_batch(batch_id: str) -> None:
                     "technical_error": job.get("error_message", "Not available"),
                 }
             )
-        send_error_report(error_items, batch_label=str(date.today()))
-        updates["error_email_sent"] = True
+        try:
+            send_error_report(error_items, batch_label=str(date.today()))
+            updates["error_email_sent"] = True
+        except Exception as exc:
+            updates["last_error"] = f"Error report email failed: {str(exc)[:3800]}"
+            print(f"Error report email failed: {exc}", flush=True)
 
     update_batch(batch_id, updates)
 
@@ -450,6 +459,16 @@ def main() -> None:
     print(f"MAX_PARALLEL_CALLS={max_parallel_calls}", flush=True)
 
     all_touched_batch_ids: Set[str] = set()
+
+    # Retry any already-finished batches whose report/cost/error email failed to
+    # send earlier (e.g. SMTP auth error) so they don't get stuck forever.
+    try:
+        for stuck_batch in fetch_unsent_completed_batches():
+            stuck_id = str(stuck_batch.get("batch_id"))
+            if stuck_id:
+                all_touched_batch_ids.add(stuck_id)
+    except Exception as exc:
+        print(f"Error checking for batches with unsent emails: {exc}", flush=True)
 
     # Always poll first. This lets scheduled runs complete old OpenAI Batch API jobs.
     all_touched_batch_ids.update(poll_openai_batches())
