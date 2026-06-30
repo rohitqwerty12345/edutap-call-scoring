@@ -335,100 +335,324 @@ Score 7–9: Asked which of the possible reasons was actually stopping the stude
 Score 10: Surfaced a fear the student had not even fully articulated. Student felt understood, not handled.
 
 -------------------------------------------
-SECTION C: TRIAL COURSE INFORMATION
+COURSE INFORMATION
 -------------------------------------------
 
-Course Name: UPSC EPFO APFC & EO/AO 2026-2027 — 2 Day Demo Master Course
-Platform: EduTap (learnyst)
-Price: Rs 1
-Validity: 2 days from date of subscription
-Total: 18 courses bundled together
+Course Full Name: EPFO APFC & EO/AO 2026-2027 Master Course
+Platform: EduTap (Learnyst)
+Base Price: Rs 11500
+Current Offer: Rs 5405 with coupon EPFO53 (53% off)
+Validity: 12 months
 
-What is included:
-- How to Start Your Preparation (6 lessons)
-- Quantitative Aptitude (170 lessons)
-- Logical Reasoning (61 lessons)
-- General English (187 lessons)
-- Current Affairs (26 lessons)
-- Governance and Constitution of India (43 lessons)
-- Indian Culture and Heritage (32 lessons)
-- Indian History (36 lessons)
-- Indian Economy (71 lessons)
-- General Science (42 lessons)
-- Developmental Issues (8 lessons)
-- Industrial Relations and Labor Laws (100 lessons)
-- Auditing (50 lessons)
-- Insurance (6 lessons)
-- Accountancy (130 lessons)
-- Statistics (20 lessons)
-- Basics of Computer Applications (35 lessons)
-- Previous Year Questions (6 lessons)
+Content (Currently Available):
 
-Content type per subject: Concept classes (video lessons) + Concept notes + Chapter-wise quizzes where applicable.
+For Quantitative Aptitude:
+130+ Concept Classes for complete conceptual understanding starting from the basics to the advanced level.
+1750+ Chapter-wise MCQs with detailed explanations based on the latest pattern for assessment of concepts.
+For Reasoning Ability:
+32+ Concept Classes for complete conceptual understanding starting from the basics to the advanced level.
+400+ Chapter-wise MCQs with detailed explanations based on the latest pattern for assessment of concepts.
+For General English:
+100+ Concept Classes for complete conceptual understanding starting from the basics to the advanced level.
+800+ Chapter-wise MCQs with detailed explanations based on the latest pattern of for assessment of concepts.
+For Governance and Constitution of India:
+20+ Concept Classes for complete conceptual understanding starting from the basics to the advanced level
+10 Concept Notes for comprehensively covering syllabus chapter-wise as per latest exam syllabus
+500+ Chapter-wise Quiz with detailed explanations based on the latest pattern for assessment of concepts
 
-Medium: Concept Classes for Accountancy, Insurance, and Indian Economy are in English. All other subjects are in Hinglish (English content explained in Hindi). Concept Notes and Chapter-wise Quizzes are in English.
 
-Access: Web browser or Android app. Cannot download PDFs in the demo course.
+For Indian Culture and Heritage
+5+ Concept Classes for complete conceptual understanding starting from the basics to the advanced level
+10+ Concept Notes for comprehensively covering syllabus chapter-wise as per latest exam syllabus
+150+ Chapter-wise Quiz with detailed explanations based on the latest pattern for assessment of concepts
 
-Purpose: To help students assess the quality, structure, and coverage of the full Master Course before paying full fees. This is NOT the complete course — it is a demo to evaluate before investing.
 
-Support: hello@edutap.co.in | 8146207241 (9 AM to 6 PM all days)
+For Indian History:
+10+ Concept Classes for complete conceptual understanding starting from the basics to the advanced level
+15+ Concept Notes for comprehensively covering syllabus chapter-wise as per latest exam syllabus
+250+ Chapter-wise Quiz with detailed explanations based on the latest pattern for assessment of concepts
 
--------------------------------------------
-SECTION D: COURSE CATALOGUE
--------------------------------------------
 
-EduTap currently offers 4 courses for UPSC EPFO APFC and EO/AO preparation:
+For General Science:
+35+ Concept Classes for complete conceptual understanding starting from the basics to the advanced level
+5+ Concept Notes for comprehensively covering syllabus chapter-wise as per latest exam syllabus
+300+ Chapter-wise Quiz with detailed explanations based on the latest pattern for assessment of concepts
+For Computer Applications:
+10+ Concept Classes for complete conceptual understanding starting from the basics to the advanced level
+10+ Concept Notes for comprehensively covering syllabus chapter-wise as per latest exam syllabus
+100+ Chapter-wise Quiz with detailed explanations based on the latest pattern for assessment of concepts
+For Indian Economy:
+50+Concept Classes for complete conceptual understanding starting from the basics to the advanced level
+10+Concept Notes for comprehensively covering syllabus chapter-wise as per latest exam syllabus
+​350+ Chapter-wise Quiz with detailed explanations based on the latest pattern for assessment of concepts
 
-COURSE 1: MASTER COURSE
-Full name: EPFO APFC and EO/AO 2026-2027 Master Course
-Price: Rs 11,500 | Current offer: Rs 5,520 with coupon SUPER52 (52% off)
-Validity: 12 months (18 months option also available)
-Covers all exam subjects:
-- QRE group: Quantitative Aptitude, Logical Reasoning, General English
-- GS group: Governance and Constitution, Indian Culture and Heritage, Indian History, Indian Economy, General Science, Developmental Issues, Social Security
-- Special Subjects group: Industrial Relations and Labour Laws, Auditing, Insurance, Accountancy, Statistics, Computer Applications
-- Current Affairs: monthly magazines (schemes, reports, current events), Union Budget and Economic Survey summary
-- Additional: Full Length Mock Tests, Previous Year Questions (APFC from 2015 onwards, EO/AO from 2017 onwards), Weekly Mentor Talk, Study Plans
-After notification: Live lecture classes for all subjects except Current Affairs will be added to this course.
+For Developmental Issues:
+2+ Concept Classes for complete conceptual understanding starting from the basics to the advanced level
+2 Concept Notes for comprehensively covering syllabus chapter-wise as per latest exam syllabus
+​100+ Chapter-wise Quiz with detailed explanations based on the latest pattern for assessment of concepts
+For Social Security:
+10+ Concept Classes for complete conceptual understanding starting from the basics to the advanced level
+5+ Concept Notes for comprehensively covering syllabus chapter-wise as per latest exam syllabus
+100+ Chapter-wise Quiz with detailed explanations based on the latest pattern for assessment of concepts
+For Industrial Relations and Labor Laws:
+90 Concept Classes for complete conceptual understanding starting from the basics to the advanced level
+30 Concept Notes for comprehensively covering syllabus chapter-wise as per latest exam syllabus
+500+ Chapter-wise Quiz with detailed explanations based on the latest pattern for assessment of concepts
+For Accountancy:
+70+ Concept Classes for complete conceptual understanding starting from the basics to the advanced level
+20+ Concept Notes for comprehensively covering syllabus chapter-wise as per latest exam syllabus
+600+ Chapter-wise Quiz with detailed explanations based on the latest pattern for assessment of concepts
+For Auditing:
+15+ Concept Classes for complete conceptual understanding starting from the basics to the advanced level
+8+ Concept Notes for comprehensively covering syllabus chapter-wise as per latest exam syllabus
+150+ Chapter-wise Quiz with detailed explanations based on the latest pattern for assessment of concepts
+For Insurance:
+1 Concept Classes for complete conceptual understanding starting from the basics to the advanced level
+1 Concept Notes for comprehensively covering syllabus chapter-wise as per latest exam syllabus
+100+ Chapter-wise Quiz with detailed explanations based on the latest pattern for assessment of concepts
+For Current Affairs:
+SchemesTap Magazine & MCQs
+SchemesTap magazine covers the most important government schemes of latest 12 months
+SchemesTap Quiz contains 300+ MCQs for practice and revision of important government schemes of the latest 12 months.
+SchemesTap Booster Magazine contains crisp compilation of latest 6 months important government schemes for last minute revision after release of notification
+ReportsTap Magazine & MCQs
+ReportsTap monthly magazine covers the most important reports and indices of latest 12 months.
+ReportsTap Monthly Quizzes contains a total of 200+ MCQs for practice and revision of important reports and indices of latest 12 months
+ReportsTap Booster Magazine containing crisp compilation of latest 6 months important reports and indices for last minute revision after release of notification
+CurrentTap Magazine & MCQs
+CurrentTap monthly magazine covers the most important current affairs of latest 12 months
+CurrentTap Monthly Quizzes contains a total of 600+ MCQs for practice and revision of current affairs of latest 12 months
+CurrentTap Booster Magazine containing crisp compilation of latest 6 months current affairs for last minute revision after release of notification
+Latest Union Budget and Economic Survey
+Summary of Latest Union Economic Survey and Union Budget
+Quiz based on latest Economic Survey and Union Budget containing 100+ MCQs
+Full-Length Mocks Tests
+10 Full Length Mock Tests based on latest exam pattern for assessment your preparation.
+Weekly Mentor Talk:
+Weekly Mentor talks to provide personalized mentorship to help you crack your exam.
+Previous Year Papers & Analysis:
+This course offers Previous Year Papers, their Solutions, Explanations and in-depth Analysis for APFC and EO/AO examinations held since 2015.
+Interview Guidance Program:
+For Interview, we have an expert panel of retired IAS/IPS/EPFO officers. All recruitment test cleared students are trained for the interview stage through mentorship and mock interviews with this panel
+This course will be added to your subscription after your recruitment test is cleared.
 
-COURSE 2: SPECIAL SUBJECTS COURSE
-Full name: UPSC EPFO APFC + EO/AO Special Subjects Course 2026-2027
-Price: Rs 9,600 | Current offer: Rs 4,608 with coupon SUPER52 (52% off)
-Validity: 12 months (18 months option also available)
-Covers: Special Subjects group + General English only.
-For students who have already prepared QRE and GS subjects and only need special subjects coverage.
-This is a real, currently available product. Student partners are allowed to mention and pitch it.
+FAQs
 
-COURSE 3: 2 DAY DEMO
-Price: Rs 1 | Validity: 2 days from purchase
-Trial access to the Master Course content. Same structure, limited access per subject.
+Does this course cover the complete syllabus for UPSC EPFO APFC & EO/AO exam?	Yes, this course provides a comprehensive preparation for the UPSC EPFO APFC and EO/AO exam preparation.
+Can I download all the PDFs and Quizzes in this course?	Chapter-wise quizzes are not downloadable and are meant only for practice. However, you can download the Concept Notes and Full-Length Mock Tests. The full-length mock tests are downloadable to help you experience the look and feel of the actual exam.
+What is Weekly Mentor Talk?	Weekly Mentor Talk is an Interactive Live Session that aims to motivate, guide, and empower aspirants to reach their full potential, follow appropriate strategy, and navigate their preparation journey. For those who are unable to attend the live sessions, recorded versions are made available.
+Do I need to follow any reference books or other study material along with the course?	The course is comprehensive enough, each subject of the examination is dealt with thoroughly. If students have abundant time at their disposal, they can refer to additional books in order to satisfy their learning for more knowledge but from the examination point of view, this course is comprehensive enough to cover the complete syllabus and gain confidence.
+What is the medium of instruction of this course?	"Concept Notes, Chapter-wise Quizzes, and Full-Length Mocks are available in English.
+Concept Classes for Accountancy, Insurance, and Indian Economy are conducted in English. All other subjects’ Concept Classes are delivered in Hinglish (English content with Hindi explanation)."
+How can I access a sample Hinglish video?	"""It can be accessed through the following link:
+https://1drv.ms/v/c/079d9ad63a32f388/EeWvRKw0xBtCmFGQkxsY7tkB64mVQk0YeqEb24oSrdFZeQ?e=lCWeje"""
+How many times can I watch a particular video lesson?	Infinite times - yes, you read it correct. We have placed no such restriction on the number of times you can watch a particular video lesson.
+How can I contact/talk to faculty if I have some doubts?	We don’t follow a “sell and forget” approach. We offer 3 robust support channels for all enrolled students: 1) A subject-wise Discussion Forum where doubts can be posted directly; 2) Email us at hello@edutap.co.in with your query and faculty/subject details, and 3) Call us on ‪+91-8146207241‬ ( 9 AM–6 PM) to request a mentorship or strategy session with the concerned faculty. We're here to guide you at every step of your preparation journey. 
+Can I use this course on mobile device and laptop/desktop?	Yes, absolutely! We believe in "learn anytime, anywhere." On Android devices (mobile/tablet), you can download the EduTap app from the Play Store and log in. Please note that only two devices can be used, and once you've logged in on two, you cannot log into a third device unless you log out from one of the existing ones.
+What are the system and browser requirements to access the course?	"""Web Browser: Windows 10+: Chrome, Edge; Mac Catalina+: Chrome, Edge, Safari; iOS 16+: Safari; Android 11+: Chrome
+Mobile App: Android 10+ 
+Other Platforms: Our content may work on Ubuntu (Chrome, Firefox, Brave) and lower versions of Android, iOS, and Mac, but we do not officially guarantee support for them. For the best experience, we recommend using the officially supported platforms listed above."""
+What is the validity of this course?	The course expiry is mentioned next to the course thumbnail on the check-out page. Please check there.
 
-COURSE 4: ALL ABOUT UPSC EPFO EXAM (Free)
-Price: Rs 0
-An introductory exam information course only. Not a preparation course. Covers basic exam orientation.
+Content (Upcoming - Added Later):
 
-KEY FACTS FOR TONE + TRUTH CHECKING:
-- Content types in Master and Special Subjects courses: Concept Classes (video), Concept Notes, Chapter-wise Quizzes, Current Affairs Magazines, Full Length Mock Tests, PYQs.
-- Quant and Reasoning: videos and quizzes only, no downloadable notes.
-- Current Affairs: magazines only, no videos.
-- Medium of instruction: Accountancy, Insurance, Indian Economy classes are in English. All other subject classes are in Hinglish. Notes, quizzes, and mocks are in English.
-- Weekly Mentor Talk: live Q&A session every Wednesday at 3 PM, not a structured lecture class. A partner saying there are no live lecture classes is correct and is NOT a Truth failure. Lecture classes will be added after notification.
-- Device access: Android app (max 2 devices) and web browser. iOS 16+ supported via Safari. Two device login limit applies.
-- Selection guarantee: EduTap never promises selection. Any partner who guarantees selection is an automatic Tone + Truth FAIL.
-- Interview guidance: Added to the course only after the recruitment test is cleared. Not available at the time of purchase.
-- Course covers 85% of exam requirement. 66 out of 85 theoretical questions from the 2025 paper could be answered using Master Course content.
-- Support: hello@edutap.co.in | helpline 8146207241 (9 AM to 6 PM all days)
+  Live Classes:
+  - Live Classes, Hinglish [Available: After Notification Released]
+  - Full Length Mock Tests (10, English) [Available: After Notification Released]
 
-FACULTY:
-- Accountancy, Insurance: CA Satish Surekha
-- Indian Economy, Agriculture: Veena Ma'am
-- Polity, History, Science: Deepak Thakur Sir, Kuldeep Sir
-- Logical Reasoning: Meghna Ma'am
-- Computer Applications: Ekta Ma'am
-- Current Affairs, Economics: Kritika Ma'am, Gurkirat Sir
-- Quantitative Aptitude: Vishnu Dutt (VD Sir)
-- General English: Narveer Sir
+Related Courses (Currently Available):
+
+  Course 1: EPFO APFC & EO/AO 2026-2027 Special Subject Course
+  Base Price: Rs 9600
+  Current Offer: Rs 4512 with coupon EPFO53
+  Validity: 12 months
+  Current Content:
+
+For Quantitative Aptitude:
+=> 1750+ Chapter-wise MCQs with detailed explanations based on the latest pattern for assessment of concepts.
+For Reasoning Ability:
+=> 400+ Chapter-wise MCQs with detailed explanations based on the latest pattern for assessment of concepts.
+For General English:
+=> 100+ Concept Classes for complete conceptual understanding starting from the basics to the advanced level.
+=> 800+ Chapter-wise MCQs with detailed explanations based on the latest pattern of for assessment of concepts.
+For Governance and Constitution of India:
+=> 500+ Chapter-wise Quiz with detailed explanations based on the latest pattern for assessment of concepts
+For Indian Culture and Heritage
+=> 150+ Chapter-wise Quiz with detailed explanations based on the latest pattern for assessment of concepts
+For Indian History:
+=> 250+ Chapter-wise Quiz with detailed explanations based on the latest pattern for assessment of concepts
+
+
+For General Science:
+=> 300+ Chapter-wise Quiz with detailed explanations based on the latest pattern for assessment of concepts
+
+
+For Computer Applications:
+=> 10+ Concept Classes for complete conceptual understanding starting from the basics to the advanced level
+=> 10+ Concept Notes for comprehensively covering syllabus chapter-wise as per latest exam syllabus
+=> 100+ Chapter-wise Quiz with detailed explanations based on the latest pattern for assessment of concepts
+
+
+For Indian Economy:
+=> 350+ Chapter-wise Quiz with detailed explanations based on the latest pattern for assessment of concepts
+For Developmental Issues:
+=> 100+ Chapter-wise Quiz with detailed explanations based on the latest pattern for assessment of concepts
+
+
+For Social Security:
+=> 10+ Concept Classes for complete conceptual understanding starting from the basics to the advanced level
+=> 5+ Concept Notes for comprehensively covering syllabus chapter-wise as per latest exam syllabus
+=> 100+ Chapter-wise Quiz with detailed explanations based on the latest pattern for assessment of concepts
+
+
+For Industrial Relations and Labor Laws:
+=> 90 Concept Classes for complete conceptual understanding starting from the basics to the advanced level
+=> 30 Concept Notes for comprehensively covering syllabus chapter-wise as per latest exam syllabus
+=> 500+ Chapter-wise Quiz with detailed explanations based on the latest pattern for assessment of concepts
+For Accountancy:
+=> 70+ Concept Classes for complete conceptual understanding starting from the basics to the advanced level
+=> 20+ Concept Notes for comprehensively covering syllabus chapter-wise as per latest exam syllabus
+=> 600+ Chapter-wise Quiz with detailed explanations based on the latest pattern for assessment of concepts
+For Auditing:
+=> 15+ Concept Classes for complete conceptual understanding starting from the basics to the advanced level
+=> 8+ Concept Notes for comprehensively covering syllabus chapter-wise as per latest exam syllabus
+=> 150+ Chapter-wise Quiz with detailed explanations based on the latest pattern for assessment of concepts
+
+
+For Insurance:
+=> 1 Concept Classes for complete conceptual understanding starting from the basics to the advanced level
+=> 1 Concept Notes for comprehensively covering syllabus chapter-wise as per latest exam syllabus
+=> 100+ Chapter-wise Quiz with detailed explanations based on the latest pattern for assessment of concepts
+
+
+For Current Affairs:
+
+
+SchemesTap Magazine & MCQs
+=> SchemesTap magazine covers the most important government schemes of latest 12 months
+=> SchemesTap Quiz contains 300+ MCQs for practice and revision of important government schemes of the latest 12 months.
+SchemesTap Booster Magazine contains crisp compilation of latest 6 months important government schemes for last minute revision after release of notification
+
+ReportsTap Magazine & MCQs
+=> ReportsTap monthly magazine covers the most important reports and indices of latest 12 months.
+=> ReportsTap Monthly Quizzes contains a total of 200+ MCQs for practice and revision of important reports and indices of latest 12 months
+=> ReportsTap Booster Magazine containing crisp compilation of latest 6 months important reports and indices for last minute revision after release of notification
+
+CurrentTap Magazine & MCQs
+=> CurrentTap monthly magazine covers the most important current affairs of latest 12 months
+=> CurrentTap Monthly Quizzes contains a total of 600+ MCQs for practice and revision of current affairs of latest 12 months
+=> CurrentTap Booster Magazine containing crisp compilation of latest 6 months current affairs for last minute revision after release of notification
+Latest Union Budget and Economic Survey
+=> Summary of Latest Union Economic Survey and Union Budget
+=> Quiz based on latest Economic Survey and Union Budget containing 100+ MCQs
+Full-Length Mocks Tests
+=> 10 Full Length Mock Tests based on latest exam pattern for assessment your preparation.
+Weekly Mentor Talk:
+=> Weekly Mentor talks to provide personalized mentorship to help you crack your exam.
+Previous Year Papers & Analysis:
+=> This course offers Previous Year Papers, their Solutions, Explanations and in-depth Analysis for APFC and EO/AO examinations held since 2015.
+Interview Guidance Program:
+=> For Interview, we have an expert panel of retired IAS/IPS/EPFO officers. All recruitment test cleared students are trained for the interview stage through mentorship and mock interviews with this panel
+=> This course will be added to your subscription after your recruitment test is cleared.
+
+FAQs
+
+What all subjects and their deliverables will be provided under Special Subjects as per this Course.	Concept classes, Concept notes and Chapter wise MCQs for  IR&LL, Accountancy, Auditing, Insurance, Social Securities, Statistics, General English and computer applications will be there in this course. Apart from this Chapter wise MCQs for History, Culture, General Science, Quants, Reasoning , developmental issues and Governance & Constitution of India will also be provided. 10 full length mock tests will be provided after release of the official notifications.
+How do we cover Current affairs in this course ?	Current affairs will be covered through monthly magazines and Quizzes.
+Can I download all the PDFs and Quizzes in this course?	Chapter-wise quizzes are not downloadable and are meant only for practice. However, you can download the Concept Notes and Full-Length Mock Tests. The full-length mock tests are downloadable to help you experience the look and feel of the actual exam.
+What is Weekly Mentor Talk?	Weekly Mentor Talk is an Interactive Live Session that aims to motivate, guide, and empower aspirants to reach their full potential, follow appropriate strategy, and navigate their preparation journey. For those who are unable to attend the live sessions, recorded versions are made available.
+Do I need to follow any reference books or other study material along with the course?	The course is comprehensive enough for Special subjects, each special subject of the examination as mentioned above is dealt with thoroughly. For rest of the subjects whose concept classes and concept notes are not being provided, Aspirants can refer to additional books/sources.
+What is the medium of instruction of this course?	"Concept Notes, Chapter-wise Quizzes, and Full-Length Mocks are available in English.
+Concept Classes for Accountancy and Insurance are conducted in English. Concept Classes for IR&LL, Auditing, Social Securities, General English, Computer and Statistics are delivered in Hinglish (English content with Hindi explanation)"
+How can I access a sample Hinglish video?	"""It can be accessed through the following link:
+https://1drv.ms/v/c/079d9ad63a32f388/EeWvRKw0xBtCmFGQkxsY7tkB64mVQk0YeqEb24oSrdFZeQ?e=lCWeje"""
+How many times can I watch a particular video lesson?	Infinite times - yes, you read it correct. We have placed no such restriction on the number of times you can watch a particular video lesson.
+What is the validity of this course?	The course expiry is mentioned next to the course thumbnail on the check-out page. Please check there.
+How can I contact/talk to faculty if I have some doubts?	We don’t follow a “sell and forget” approach. We offer 3 robust support channels for all enrolled students: 1) A subject-wise Discussion Forum where doubts can be posted directly; 2) Email us at hello@edutap.co.in with your query and faculty/subject details, and 3) Call us on ‪+91-8146207241‬ ( 9 AM–6 PM) to request a mentorship or strategy session with the concerned faculty. We're here to guide you at every step of your preparation journey. 
+Can I use this course on mobile device and laptop/desktop?	Yes, absolutely! We believe in "learn anytime, anywhere." On Android devices (mobile/tablet), you can download the EduTap app from the Play Store and log in. Please note that only two devices can be used, and once you've logged in on two, you cannot log into a third device unless you log out from one of the existing ones.
+What are the system and browser requirements to access the course?	"""Web Browser: Windows 10+: Chrome, Edge; Mac Catalina+: Chrome, Edge, Safari; iOS 16+: Safari; Android 11+: Chrome
+Mobile App: Android 10+ 
+Other Platforms: Our content may work on Ubuntu (Chrome, Firefox, Brave) and lower versions of Android, iOS, and Mac, but we do not officially guarantee support for them. For the best experience, we recommend using the officially supported platforms listed above.
+
+  Upcoming Content:
+  Live Classes:
+    - Live Classes, Hinglish [Trigger: After Notification Released]
+    - Full Length Mock Tests (10, English) [Trigger: After Notification Released]
+
+  Course 2: EPFO APFC & EO/AO 2026-2027 Test Series
+  Base Price: Rs 6500
+  Current Offer: Rs 3250 with coupon EPFO50
+  Current Content:
+
+For Quantitative Aptitude:
+=> 1750+ Chapter-wise MCQs with detailed explanations based on the latest pattern for assessment of concepts.
+For Reasoning Ability:
+=> 400+ Chapter-wise MCQs with detailed explanations based on the latest pattern for assessment of concepts.
+For General English:
+=> 800+ Chapter-wise MCQs with detailed explanations based on the latest pattern of for assessment of concepts.
+For Governance and Constitution of India:
+=> 500+ Chapter-wise MCQs with detailed explanations based on the latest pattern for assessment of concepts
+For Indian Culture and Heritage
+=> 150+ Chapter-wise MCQs with detailed explanations based on the latest pattern for assessment of concepts
+For Indian History:
+=> 250+ Chapter-wise MCQs with detailed explanations based on the latest pattern for assessment of concepts
+For General Science:
+=> 300+ Chapter-wise MCQs with detailed explanations based on the latest pattern for assessment of concepts
+For Computer Applications:
+=> 100+ Chapter-wise MCQs with detailed explanations based on the latest pattern for assessment of concepts
+For Indian Economy:
+=> 350+ Chapter-wise MCQs with detailed explanations based on the latest pattern for assessment of concepts
+For Developmental Issues:
+=> 100+ Chapter-wise MCQs with detailed explanations based on the latest pattern for assessment of concepts
+For Social Security:
+=> 100+ Chapter-wise MCQs with detailed explanations based on the latest pattern for assessment of concepts
+For Industrial Relations and Labor Laws:
+=> 500+ Chapter-wise MCQs with detailed explanations based on the latest pattern for assessment of concepts
+For Accountancy:
+=> 600+ Chapter-wise MCQs with detailed explanations based on the latest pattern for assessment of concepts
+For Auditing:
+=> 150+ Chapter-wise MCQs with detailed explanations based on the latest pattern for assessment of concepts
+For Insurance:
+=> 100+ Chapter-wise MCQs with detailed explanations based on the latest pattern for assessment of concepts
+For Current Affairs:
+SchemesTap Magazine & MCQs
+=> SchemesTap magazine covers the most important government schemes of latest 12 months
+=> SchemesTap Quiz contains 300+ MCQs for practice and revision of important government schemes of the latest 12 months.
+SchemesTap Booster Magazine contains crisp compilation of latest 6 months important government schemes for last minute revision after release of notification
+ReportsTap Magazine & MCQs
+=> ReportsTap monthly magazine covers the most important reports and indices of latest 12 months.
+=> ReportsTap Monthly Quizzes contains a total of 200+ MCQs for practice and revision of important reports and indices of latest 12 months
+=> ReportsTap Booster Magazine containing crisp compilation of latest 6 months important reports and indices for last minute revision after release of notification
+CurrentTap Magazine & MCQs
+=> CurrentTap monthly magazine covers the most important current affairs of latest 12 months
+=> CurrentTap Monthly Quizzes contains a total of 600+ MCQs for practice and revision of current affairs of latest 12 months
+=> CurrentTap Booster Magazine containing crisp compilation of latest 6 months current affairs for last minute revision after release of notification
+Latest Union Budget and Economic Survey
+=> Summary of Latest Union Economic Survey and Union Budget
+=> Quiz based on latest Economic Survey and Union Budget containing 100+ MCQs
+Full-Length Mocks Tests
+=> 10 Full Length Mock Tests based on latest exam pattern for assessment your preparation.
+Weekly Mentor Talk:
+=> Weekly Mentor talks to provide personalized mentorship to help you crack your exam.
+Previous Year Papers & Analysis:
+=> This course offers Previous Year Papers, their Solutions, Explanations and in-depth Analysis for APFC and EO/AO examinations held since 2015.
+Interview Guidance Program:
+=> For Interview, we have an expert panel of retired IAS/IPS/EPFO officers. All recruitment test cleared students are trained for the interview stage through mentorship and mock interviews with this panel
+=> This course will be added to your subscription after your recruitment test is cleared.
+FAQs
+What all subjects and their deliverables will be provided  as per this Course.	Chapter wise MCQs for  IR&LL, Accountancy, Auditing, Insurance, Social Securities, Statistics, General English , Computer, History, Culture, General Science, Quants, Reasoning , developmental issues and Governance & Constitution of India will be there in this course. Additionally 10 full length mock tests will be provided after release of the official notifications.
+How do we cover Current affairs in this course ?	Current affairs will be covered through monthly magazines and Quizzes.
+Can I download all the PDFs and Quizzes in this course?	Chapter-wise quizzes are not downloadable and are meant only for practice. However, you can download the Full-Length Mock Tests. The full-length mock tests are downloadable to help you experience the look and feel of the actual exam.
+How many questions are there in total in this test series?	This test series has 300+ Mini Mocks and 10 Full Length Mocks containing 15000+ most important questions with detailed explanations for APFC & EO/AO examination.
+What is Weekly Mentor Talk?	Weekly Mentor Talk is an Interactive Live Session that aims to motivate, guide, and empower aspirants to reach their full potential, follow appropriate strategy, and navigate their preparation journey. For those who are unable to attend the live sessions, recorded versions are made available.
+What is the medium of instruction of this course?	"Chapter-wise Quizzes, Current Affairs Magazines and Full-Length Mocks are available in English.
+"
+What is the validity of this course?	The course expiry is mentioned next to the course thumbnail on the check-out page. Please check there.
+How can I contact/talk to faculty if I have some doubts?	We don’t follow a “sell and forget” approach. We offer 3 robust support channels for all enrolled students: 1) A subject-wise Discussion Forum where doubts can be posted directly; 2) Email us at hello@edutap.co.in with your query and faculty/subject details, and 3) Call us on ‪+91-8146207241‬ ( 9 AM–6 PM) to request a mentorship or strategy session with the concerned faculty. We're here to guide you at every step of your preparation journey. 
+Can I use this course on mobile device and laptop/desktop?	Yes, absolutely! We believe in "learn anytime, anywhere." On Android devices (mobile/tablet), you can download the EduTap app from the Play Store and log in. Please note that only two devices can be used, and once you've logged in on two, you cannot log into a third device unless you log out from one of the existing ones.
+What are the system and browser requirements to access the course?	"""Web Browser: Windows 10+: Chrome, Edge; Mac Catalina+: Chrome, Edge, Safari; iOS 16+: Safari; Android 11+: Chrome
+Mobile App: Android 10+ 
+Other Platforms: Our content may work on Ubuntu (Chrome, Firefox, Brave) and lower versions of Android, iOS, and Mac, but we do not officially guarantee support for them. For the best experience, we recommend using the officially supported platforms listed above
 
 -------------------------------------------
 SECTION E: CALL TRANSCRIPT
