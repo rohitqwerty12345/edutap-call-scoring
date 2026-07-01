@@ -152,13 +152,27 @@ def score_transcript_debug(transcript: str) -> dict:
     }
 
 
+def build_chat_completions_body(transcript: str) -> Dict[str, Any]:
+    """Build a /v1/chat/completions body for batch requests.
+    OpenAI Batch API only supports /v1/chat/completions and /v1/embeddings,
+    NOT /v1/responses, so batch requests must use this format."""
+    return {
+        "model": current_openai_model(),
+        "messages": [
+            {"role": "system", "content": SCORING_PROMPT},
+            {"role": "user", "content": build_openai_input(transcript or "")},
+        ],
+    }
+
+
 def build_batch_request(custom_id: str, transcript: str) -> Dict[str, Any]:
-    """One JSONL line for OpenAI Batch API using the Responses API endpoint."""
+    """One JSONL line for OpenAI Batch API using /v1/chat/completions.
+    OpenAI Batch API does NOT support /v1/responses — only chat/completions works."""
     return {
         "custom_id": str(custom_id),
         "method": "POST",
-        "url": "/v1/responses",
-        "body": build_responses_body(transcript),
+        "url": "/v1/chat/completions",
+        "body": build_chat_completions_body(transcript),
     }
 
 
@@ -181,7 +195,7 @@ def create_openai_batch(requests: Iterable[Dict[str, Any]], description: str = "
 
         batch = client.batches.create(
             input_file_id=input_file.id,
-            endpoint="/v1/responses",
+            endpoint="/v1/chat/completions",
             completion_window="24h",
             metadata={"description": description},
         )
@@ -260,7 +274,14 @@ def parse_batch_output_text(output_text: str) -> List[Dict[str, Any]]:
                 )
                 continue
 
-            raw_output = _get_response_text(body)
+            # Chat completions format: body has choices[0].message.content
+            # Responses API format: body has output_text or output[].content[].text
+            # Try chat completions first (batch mode), fall back to responses format.
+            choices = body.get('choices') if isinstance(body, dict) else None
+            if choices and isinstance(choices, list) and choices:
+                raw_output = str((choices[0].get('message') or {}).get('content') or '')
+            else:
+                raw_output = _get_response_text(body)
             parsed_output = _parse_model_output(raw_output)
             model = str(body.get("model") or "") if isinstance(body, dict) else ""
             usage = extract_openai_usage(body)
